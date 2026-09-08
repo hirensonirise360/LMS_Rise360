@@ -51,67 +51,6 @@
     </style>
   </div>
 
-  <!-- ── QUICK STATS ── -->
-  {% with active_pp=part_progress|get_item:active_part %}
-  <div class="row g-2 mb-3">
-    <div class="col-12 col-md-4">
-      <div class="ec-card p-3 d-flex align-items-center justify-content-between h-100">
-        <div>
-          <div class="text-muted small fw-bold text-uppercase mb-1">Questions Attempted</div>
-          <div class="h3 fw-800 mb-0">{{ active_pp.attempted|default:0 }}</div>
-        </div>
-        <div class="d-flex flex-column align-items-end justify-content-center">
-          <div style="width:48px;height:48px;border-radius:14px;background:rgba(59,130,246,0.1);display:flex;align-items:center;justify-content:center;">
-            <i class="fas fa-list-check" style="font-size:1.4rem;color:#3B82F6;"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-12 col-md-4">
-      <div class="ec-card p-3 d-flex align-items-center justify-content-between h-100">
-        <div>
-          <div class="text-muted small fw-bold text-uppercase mb-1">Overall Accuracy</div>
-          <div class="h3 fw-800 mb-0">{{ active_pp.accuracy|default:0 }}%</div>
-        </div>
-        <div class="d-flex flex-column align-items-end justify-content-center gap-2">
-          <div style="width:48px;height:48px;border-radius:14px;background:rgba(16,185,129,0.1);display:flex;align-items:center;justify-content:center;">
-            <i class="fas fa-bullseye" style="font-size:1.4rem;color:#10B981;"></i>
-          </div>
-            {% if active_pp.accuracy|default:0 >= 75 %}
-            <div class="ec-badge-trend high mb-0">
-              <i class="fas fa-check me-1"></i> High
-            </div>
-            {% elif active_pp.accuracy|default:0 >= 50 %}
-            <div class="ec-badge-trend mb-0" style="background-color: var(--ec-amber-light, #FEF3C7); color: #B45309;">
-              <i class="fas fa-minus me-1"></i> Average
-            </div>
-            {% else %}
-            <div class="ec-badge-trend mb-0" style="background-color: #FEE2E2; color: #EF4444;">
-              <i class="fas fa-arrow-down me-1"></i> Low
-            </div>
-            {% endif %}
-        </div>
-      </div>
-    </div>
-    <div class="col-12 col-md-4">
-      <div class="ec-card p-3 d-flex align-items-center justify-content-between h-100">
-        <div>
-          <div class="text-muted small fw-bold text-uppercase mb-1">Attempted / Total Practice</div>
-          <div class="h3 fw-800 mb-0">{{ active_pp.attempted|default:0 }} / {{ active_pp.total_q|default:0 }}</div>
-        </div>
-        <div class="d-flex flex-column align-items-end justify-content-center gap-2">
-          <div style="width:48px;height:48px;border-radius:14px;background:rgba(245,158,11,0.1);display:flex;align-items:center;justify-content:center;">
-            <i class="fas fa-chart-pie" style="font-size:1.4rem;color:#F59E0B;"></i>
-          </div>
-          <div class="ec-badge-trend info mb-0" style="background-color: var(--ec-sky-light); color: var(--ec-sky);">
-            <i class="fas fa-percentage me-1"></i> {{ active_pp.attempted_pct|floatformat:1|default:"0.0" }}%
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  {% endwith %}
-
   <!-- ── DYNAMIC LEARNING TOPICS / MODULES ── -->
   <div class="d-flex justify-content-between align-items-end mb-3">
     <div>
@@ -186,17 +125,7 @@
   </div>
 
   <div class="row g-3 pb-3">
-    <div class="col-md-4">
-      <div class="focus-card h-100">
-        <div class="focus-icon" style="color: #F89B29; background: rgba(248, 155, 41, 0.1);">
-          <i class="fas fa-pencil-alt"></i>
-        </div>
-        <div class="focus-title">Practice Questions</div>
-        <div class="focus-desc">Practice questions tailored to your active learning topic and domain areas.</div>
-        <a href="{% url 'start_practice' active_part %}" class="focus-btn">Start Practice</a>
-      </div>
-    </div>
-    <div class="col-md-4">
+    <div class="col-md-6 col-lg-4">
       <div class="focus-card h-100">
         <div class="focus-icon" style="color: #3B82F6; background: rgba(59, 130, 246, 0.1);">
           <i class="fas fa-book-reader"></i>
@@ -204,16 +133,6 @@
         <div class="focus-title">Flashcards &amp; Notes</div>
         <div class="focus-desc">Review study cards and lesson notes for faster concept retention.</div>
         <a href="{% url 'flashcard_home' %}" class="focus-btn focus-btn-filled">Open Flashcards</a>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="focus-card h-100">
-        <div class="focus-icon" style="color: #10B981; background: rgba(16, 185, 129, 0.1);">
-          <i class="fas fa-clock"></i>
-        </div>
-        <div class="focus-title">Topic Assessment</div>
-        <div class="focus-desc">Take a timed topic assessment to test your knowledge retention.</div>
-        <a href="{% url 'start_exam_simulation' active_part %}" class="focus-btn focus-btn-outline-green">Start Assessment</a>
       </div>
     </div>
   </div>

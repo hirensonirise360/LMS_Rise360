@@ -58,7 +58,6 @@ urlpatterns += i18n_patterns(
     path("payments/", include("payments.urls")),
     # EA Exam Prep
     path("ea/", include("ea_exam.urls")),
-    path("ea/analytics/", include("ea_analytics.urls")),
     path("ea/content/", include("ea_content.urls")),
 )
 

@@ -14,18 +14,12 @@
   <!-- Main Nav -->
   <div class="ec-nav">
     {% url 'ea_home' as ea_url %}
-    {% url 'ea_analytics_dashboard' as analytics_url %}
     {% url 'ebook_library' as ebook_url %}
     {% url 'edit_profile' as edit_profile_url %}
 
     <a href="{{ ea_url }}" class="ec-nav-item {% if request.path == ea_url or '/ea/portal/' in request.path %}active{% endif %}">
       <i class="fas fa-th-large"></i>
       <span class="ec-nav-label">Dashboard</span>
-    </a>
-
-    <a href="{{ analytics_url }}" class="ec-nav-item {% if request.path == analytics_url or '/ea/analytics/' in request.path %}active{% endif %}">
-      <i class="fas fa-chart-line"></i>
-      <span class="ec-nav-label">Progress</span>
     </a>
 
     <a href="{{ ebook_url }}" class="ec-nav-item {% if request.path == ebook_url or '/ea/content/' in request.path %}active{% endif %}">
