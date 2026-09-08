@@ -36,22 +36,22 @@
     </span>
     {% endif %}
 
-    <!-- E-Book Chip -->
+    <!-- Question Chip -->
     {% if topic.supabase_pdf_path %}
       <div style="cursor:pointer;" 
            class="ec-chip {% if chip_state == 'done' %}done{% elif chip_state == 'in-progress' %}in-progress{% else %}not-started{% endif %}"
            data-bs-toggle="modal" data-bs-target="#pdfViewerModal"
            data-pdf-url="{% url 'serve_ebook_pdf' topic.id %}" data-pdf-title="{{ topic.name }}">
-        <i class="fas fa-book"></i> E-Book
+        <i class="fas fa-file-alt"></i> Question
       </div>
     {% elif topic.pdf_file or topic.ebook_external_url %}
       <a href="{% if topic.pdf_file %}{{ topic.pdf_file.url }}{% else %}{{ topic.ebook_external_url }}{% endif %}"
          target="_blank"
          class="ec-chip {% if chip_state == 'done' %}done{% elif chip_state == 'in-progress' %}in-progress{% else %}not-started{% endif %}">
-        <i class="fas fa-book"></i> E-Book
+        <i class="fas fa-file-alt"></i> Question
       </a>
     {% else %}
-      <span class="ec-chip not-started disabled"><i class="fas fa-book"></i> E-Book</span>
+      <span class="ec-chip not-started disabled"><i class="fas fa-file-alt"></i> Question</span>
     {% endif %}
 
     <!-- Video Chip -->
@@ -75,10 +75,10 @@
       <span class="ec-chip not-started disabled"><i class="fas fa-video"></i> Video</span>
     {% endif %}
 
-    <!-- MCQ Chip — primary action -->
-    <div class="ec-chip primary-action" 
-         onclick="MCQModal.launch('topic', {{ topic.id }}, '{{ topic.name|escapejs }}')">
-      <i class="fas fa-rocket"></i> MCQ
+    <!-- Upload Answer (Excel) Chip -->
+    <div class="ec-chip primary-action" style="background: #10B981; border-color: #10B981; color: white; cursor: pointer;" 
+         onclick="openAnswerUploadModal({{ topic.id }}, '{{ topic.name|escapejs }}')">
+      <i class="fas fa-file-excel me-1"></i> Upload Answer (Excel)
     </div>
   </div>
 </div>

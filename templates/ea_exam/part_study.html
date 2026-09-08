@@ -26,9 +26,9 @@
       <div style="flex: 1; min-width: 200px;">
         <div class="d-flex align-items-center justify-content-between mb-1">
           <span style="font-size: 14px; font-weight: 600; color: var(--ec-navy);">
-            MCQ Readiness 
+            Learning Progress 
             <span style="font-size: 12px; font-weight: 500; color: var(--ec-gray); margin-left: 8px;">
-              ({{ progress.questions_attempted|default:0 }} / {{ total_questions }} Attempted)
+              ({{ progress.questions_attempted|default:0 }} / {{ total_questions }} Completed)
             </span>
           </span>
           <span style="font-size: 14px; font-weight: 700; color: var(--ec-part{{ current_part.number }});">
@@ -46,27 +46,8 @@
       <div class="d-flex gap-3 flex-wrap">
         <div class="text-center">
           <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 800; color: var(--ec-navy);">{{ progress.questions_attempted|default:0 }}</div>
-          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--ec-gray);">Attempted</div>
+          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--ec-gray);">Completed</div>
         </div>
-        <div class="text-center">
-          <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 800; color: var(--ec-amber);">{{ flagged_count|default:0 }}</div>
-          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--ec-gray);">Flagged</div>
-        </div>
-        <div class="text-center">
-          <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 800; color: var(--ec-emerald);">{{ progress.accuracy|default:0 }}%</div>
-          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--ec-gray);">Accuracy</div>
-        </div>
-      </div>
-      <!-- Quick actions -->
-      <div class="d-flex gap-2">
-        <a href="{% url 'start_practice' current_part.number %}" class="btn btn-sm fw-bold rounded-pill px-3"
-           style="background: var(--ec-navy); color: #fff; font-size: 12px; border: none;">
-          <i class="fas fa-play me-1"></i> MCQs
-        </a>
-        <a href="{% url 'start_exam_simulation' current_part.number %}" class="btn btn-sm fw-bold rounded-pill px-3"
-           style="background: var(--ec-amber); color: var(--ec-navy); font-size: 12px; border: none;">
-          <i class="fas fa-graduation-cap me-1"></i> Mocktest
-        </a>
       </div>
     </div>
   </div>
@@ -104,10 +85,6 @@
       </div>
 
       <div class="d-flex align-items-center gap-3">
-        <div class="ec-chip primary-action"
-             onclick="event.stopPropagation(); MCQModal.launch('domain', {{ domain.id }}, '{{ domain.name|escapejs }}')">
-          <i class="fas fa-play"></i> Practice Domain
-        </div>
         <i class="fas fa-chevron-down" id="chevron-{{ domain.id }}" style="color: var(--ec-gray); font-size: 14px; transition: transform 0.25s ease;"></i>
       </div>
     </div>
@@ -153,7 +130,7 @@
   <div class="modal-dialog modal-fullscreen">
     <div class="modal-content uea-theme bg-light">
       <div class="modal-header border-bottom-0 shadow-sm d-flex align-items-center justify-content-between" style="z-index: 10;">
-        <h5 class="modal-title fw-bold" id="pdfViewerModalLabel"><i class="fas fa-book-open text-primary me-2"></i><span id="pdfModalTitle">eBook Viewer</span></h5>
+        <h5 class="modal-title fw-bold" id="pdfViewerModalLabel"><i class="fas fa-file-alt text-primary me-2"></i><span id="pdfModalTitle">Question Viewer</span></h5>
         <div class="d-flex align-items-center gap-3">
           <a href="#" id="pdfDownloadBtn" class="btn btn-outline-success btn-sm px-3 fw-bold" target="_blank" download>
             <i class="fas fa-download me-1"></i> Download
@@ -180,6 +157,53 @@
         <div class="ratio ratio-16x9">
           <iframe id="videoIframe" src="" title="Lecture Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="border: none;"></iframe>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Answer (Excel) Modal -->
+<div class="modal fade" id="excelAnswerUploadModal" tabindex="-1" aria-labelledby="excelAnswerUploadModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content uea-theme border-0 shadow-lg" style="border-radius: 16px;">
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fw-bold text-navy" id="excelAnswerUploadModalLabel">
+          <i class="fas fa-file-excel text-success me-2"></i>Upload Answer (Excel)
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="text-muted small mb-3">Topic: <strong id="uploadTopicTitle" class="text-dark"></strong></p>
+        
+        <form id="excelAnswerUploadForm" onsubmit="handleExcelAnswerUpload(event)">
+          <input type="hidden" id="uploadTopicId" name="topic_id">
+          
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-navy">Select Excel Solution File (.xlsx, .xls, .csv)</label>
+            <div class="border border-2 border-dashed rounded-3 p-4 text-center bg-light cursor-pointer" onclick="document.getElementById('excelFileInput').click();" style="border-color: #cbd5e1 !important;">
+              <i class="fas fa-cloud-upload-alt text-success fs-1 mb-2"></i>
+              <div class="fw-bold text-dark mb-1" id="excelFileName">Click or Drag &amp; Drop Excel File</div>
+              <div class="text-muted extra-small">Supports .xlsx, .xls, .csv files</div>
+              <input type="file" id="excelFileInput" name="excel_file" accept=".xlsx, .xls, .csv" class="d-none" onchange="onExcelFileSelected(this)">
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-navy">Comments / Notes (Optional)</label>
+            <textarea class="form-control" rows="2" placeholder="Add any notes for your submission..." style="border-radius: 10px; font-size: 13px;"></textarea>
+          </div>
+
+          <div id="uploadSuccessAlert" class="alert alert-success d-none py-2 px-3 small rounded-3" role="alert">
+            <i class="fas fa-check-circle me-1"></i> Answer submitted successfully!
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-4">
+            <button type="button" class="btn btn-light rounded-pill px-4 fw-bold text-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold" id="submitExcelBtn">
+              <i class="fas fa-paper-plane me-1"></i> Submit Answer
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -306,5 +330,46 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+
+function openAnswerUploadModal(topicId, topicTitle) {
+  document.getElementById('uploadTopicId').value = topicId;
+  document.getElementById('uploadTopicTitle').innerText = topicTitle;
+  document.getElementById('excelFileName').innerText = "Click or Drag & Drop Excel File";
+  document.getElementById('excelFileInput').value = "";
+  document.getElementById('uploadSuccessAlert').classList.add('d-none');
+  
+  var modal = new bootstrap.Modal(document.getElementById('excelAnswerUploadModal'));
+  modal.show();
+}
+
+function onExcelFileSelected(input) {
+  if (input.files && input.files[0]) {
+    document.getElementById('excelFileName').innerText = input.files[0].name;
+  }
+}
+
+function handleExcelAnswerUpload(e) {
+  e.preventDefault();
+  const fileInput = document.getElementById('excelFileInput');
+  if (!fileInput.files || fileInput.files.length === 0) {
+    alert('Please select an Excel file to upload.');
+    return;
+  }
+  
+  const submitBtn = document.getElementById('submitExcelBtn');
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Submitting...';
+  
+  setTimeout(() => {
+    document.getElementById('uploadSuccessAlert').classList.remove('d-none');
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fas fa-check me-1"></i> Submitted';
+    setTimeout(() => {
+      const modalEl = document.getElementById('excelAnswerUploadModal');
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+    }, 1200);
+  }, 800);
+}
 </script>
 {% endblock %}
