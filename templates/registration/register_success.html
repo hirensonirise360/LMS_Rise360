@@ -1,0 +1,137 @@
+{% extends 'registration/registration_base.html' %}
+{% load i18n static %}
+{% block title %}{% trans 'Registration Successful - RISE360 Institute' %}{% endblock title %}
+
+{% block header %}
+<style>
+    /* Full screen override specifically for the registration page */
+    #main { margin-left: 0 !important; padding: 0 !important; }
+    #top-navbar, .ec-sidebar, #side-nav { display: none !important; }
+    body.sidebar-collapsed #main { margin-left: 0 !important; }
+    .container-fluid#main-content { padding: 0 !important; }
+    body { background-color: #fff !important; min-height: 100vh; overflow-x: hidden; }
+    .login-wrapper { min-height: 100vh; overflow-x: hidden; display: flex; flex-direction: column; }
+    .institute-sidebar { padding: 3rem !important; }
+    @media (max-height: 800px) {
+        .display-5 { font-size: 2.2rem; }
+        .feature-icon { width: 32px; height: 32px; font-size: 0.9rem; }
+        .mb-5 { margin-bottom: 2rem !important; }
+        .mb-4 { margin-bottom: 1.5rem !important; }
+        .auth-form-container { padding-top: 2rem !important; }
+    }
+</style>
+{% endblock header %}
+
+{% block sidebar %}{% endblock sidebar %}
+{% block topbar %}{% endblock topbar %}
+
+{% block content %}
+<div class="login-wrapper">
+    <div class="row g-0 min-vh-100">
+        
+        <!-- ── LEFT SIDE: BRANDING/INSTITUTE SHOWCASE ── -->
+        <div class="col-lg-5 d-none d-lg-flex flex-column justify-content-between position-relative overflow-hidden institute-sidebar" 
+             style="background: linear-gradient(145deg, #0A1128 0%, #1a2952 100%);">
+            
+            <div class="position-absolute" style="width: 800px; height: 800px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.05); top: -200px; left: -200px;"></div>
+            <div class="position-absolute" style="width: 600px; height: 600px; border-radius: 50%; border: 1px dashed rgba(255,255,255,0.03); top: -100px; left: -100px;"></div>
+            <div class="position-absolute" style="width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(245,166,35,0.08) 0%, rgba(0,0,0,0) 70%); top: 10%; right: -10%;"></div>
+            
+            <div class="position-relative z-index-1 p-5 d-flex flex-column h-100 text-white">
+                <div class="mb-4 d-flex justify-content-center" style="margin-left: -1.5rem; margin-right: -1.5rem;">
+                    <img src="{% static 'img/rise360-logo.png' %}" alt="RISE360 Institute" 
+                         style="width: 100%; max-width: 180px; height: auto;">
+                </div>
+
+                <div class="mb-auto mt-4">
+                    <h1 class="display-5 fw-bold mb-4 pe-4" style="font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -1px; line-height: 1.2;">
+                        Master the <span class="text-warning">Enrolled Agent</span> Exam.
+                    </h1>
+                    <p class="lead mb-5" style="color: rgba(255,255,255,0.75); font-size: 1.1rem; line-height: 1.7; max-width: 420px;">
+                        Access your exclusive learner dashboard, track your module readiness, and experience our industry-leading practice simulations.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── RIGHT SIDE: SUCCESS MESSAGE ── -->
+        <div class="col-12 col-lg-7 d-flex flex-column align-items-center justify-content-start bg-white position-relative py-5 pt-lg-5">
+            
+            <div class="d-lg-none w-100 p-3 border-bottom d-flex align-items-center justify-content-center bg-white position-absolute top-0">
+                <img src="{% static 'img/rise360-logo.png' %}" alt="RISE360 Institute" style="height: 50px; width: auto;">
+            </div>
+            
+            <div class="w-100 px-4 px-sm-5 mt-5 mt-lg-5 auth-form-container text-center pb-5" style="max-width: 500px;">
+                
+                <div class="success-icon-wrapper mb-4 mx-auto shadow-sm" style="width: 90px; height: 90px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-user-clock" style="font-size: 3.5rem; color: #f59e0b; animation: scaleIn 0.5s ease-out forwards;"></i>
+                </div>
+                
+                <h2 class="fw-bold mb-2 animate-fade-in-up" style="font-family: 'Plus Jakarta Sans', sans-serif; color: #0A1128;">Registration Submitted!</h2>
+                <p class="text-muted mb-4 animate-fade-in-up" style="font-size: 1.05rem; animation-delay: 0.1s;">Your account is pending administrator approval.</p>
+                
+                <div class="p-4 mb-5 rounded-3 border bg-light text-start animate-fade-in-up" style="animation-delay: 0.2s; border-left: 4px solid #f59e0b !important;">
+                    <p class="text-dark mb-2 fw-bold" style="font-size: 0.95rem;">What happens next?</p>
+                    <p class="text-muted mb-0" style="font-size: 0.9rem; line-height: 1.6;">
+                        An administrator will review your registration details. Once your account is approved, you will be able to log in to your learner portal using your registered email and password.
+                    </p>
+                </div>
+
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg w-100 py-3 shadow-none border-0 auth-submit-btn animate-fade-in-up" style="animation-delay: 0.3s;">
+                    <span>Go to Login Page</span>
+                    <i class="fas fa-arrow-right ms-2 transition-transform"></i>
+                </a>
+
+            </div>
+            
+            <div class="position-absolute bottom-0 w-100 pb-3 mt-4 text-center d-none d-md-block" style="border-top: 1px solid #f1f5f9; background: #fff;">
+                <div class="d-flex justify-content-center gap-4 pt-3 small fw-semibold text-muted">
+                    <span><i class="fas fa-shield-alt text-success me-1"></i> SSL Secured</span>
+                    <span>&copy; 2026 RISE360 Institute</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body { background-color: #fff; font-family: 'Inter', sans-serif; }
+    
+    .tracking-wider { letter-spacing: 0.05em; }
+    .text-white-75 { color: rgba(255,255,255,0.75); }
+
+    .institute-crest {
+        width: 56px; height: 56px; background: rgba(245,158,11,0.15);
+        border: 1px solid rgba(245,158,11,0.3); border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 24px; box-shadow: 0 4px 12px rgba(245,158,11,0.2);
+    }
+    
+    .auth-submit-btn {
+        background: #0A1128; border-radius: 12px; font-weight: 700;
+        font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 0.02em;
+        color: #fff; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex; justify-content: center; align-items: center;
+    }
+    .auth-submit-btn:hover {
+        background: #16213E; transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(10, 17, 40, 0.3) !important;
+        color: #fff;
+    }
+    .auth-submit-btn:hover .transition-transform { transform: translateX(5px); }
+    
+    @keyframes scaleIn {
+        0% { transform: scale(0); opacity: 0; }
+        60% { transform: scale(1.1); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes fadeInUp {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up {
+        opacity: 0;
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+</style>
+{% endblock content %}

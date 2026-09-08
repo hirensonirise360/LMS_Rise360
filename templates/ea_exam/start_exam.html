@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Mock Test — {{ part.name }} | RISE360 Institute{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 700px;">
+  <div class="card shadow border-0" style="border-radius:12px;">
+    <div class="card-header text-white py-3" style="background: linear-gradient(135deg, #dc3545, #991f2c);">
+      <h4 class="mb-0"><i class="fas fa-stopwatch me-2"></i>Mock Test — {{ part.name }}</h4>
+    </div>
+    <div class="card-body p-4">
+      <div class="alert alert-warning">
+        <h6 class="fw-bold"><i class="fas fa-exclamation-triangle me-1"></i>Read before starting:</h6>
+        <ul class="mb-0 small">
+          <li>This simulates a full timed test environment.</li>
+          <li>You will have <strong>{{ part.time_limit_minutes }} minutes ({{ part.time_limit_minutes|floatformat:0|add:0 }} min)</strong> for up to 100 questions.</li>
+          <li>No answers or explanations are shown during the exam.</li>
+          <li>You can flag questions for review, but cannot skip without flagging.</li>
+          <li>The timer continues even if you switch tabs.</li>
+          <li>Copy, paste, and right-click are disabled.</li>
+        </ul>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-4 text-center">
+          <div class="bg-light rounded p-3">
+            <div class="fs-3 fw-bold text-danger">100</div>
+            <small class="text-muted">Questions</small>
+          </div>
+        </div>
+        <div class="col-4 text-center">
+          <div class="bg-light rounded p-3">
+            <div class="fs-3 fw-bold text-danger">3.5 hr</div>
+            <small class="text-muted">Time Limit</small>
+          </div>
+        </div>
+        <div class="col-4 text-center">
+          <div class="bg-light rounded p-3">
+            <div class="fs-3 fw-bold text-danger">~70%</div>
+            <small class="text-muted">Pass Mark</small>
+          </div>
+        </div>
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-danger btn-lg">
+            <i class="fas fa-play me-2"></i>Begin Exam Simulation
+          </button>
+          <a href="{% url 'ea_home' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

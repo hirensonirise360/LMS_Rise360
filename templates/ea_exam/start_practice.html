@@ -1,0 +1,667 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Practice – {{ part.name }} | RISE360 Institute{% endblock %}
+
+{% block content %}
+<div class="ps-wrap">
+
+  <!-- HEADER -->
+  <div class="ps-header">
+    <div class="ps-header-icon"><i class="fas fa-rocket"></i></div>
+    <div>
+      <h1 class="ps-title">Practice Setup</h1>
+      <p class="ps-sub">{{ part.name }}</p>
+    </div>
+  </div>
+
+  <!-- CARD -->
+  <div class="ps-card">
+    <form method="post" id="practice-form">
+      {% csrf_token %}
+      <input type="hidden" id="part-id" value="{{ part.id }}">
+
+      <!-- ROW 1: Domain + MCQ Filter -->
+      <div class="ps-row-2col">
+
+        <!-- ① Domain Multi-Select -->
+        <div class="ps-field">
+          <label class="ps-label"><i class="fas fa-sitemap"></i> Domain Area</label>
+          <div class="cdd-wrap" id="domain-dd">
+            <button type="button" class="cdd-trigger" id="domain-trigger"
+                    onclick="toggleDD('domain-dd')">
+              <span id="domain-trigger-text">All Domains</span>
+              <i class="fas fa-chevron-down cdd-arrow"></i>
+            </button>
+            <div class="cdd-panel" id="domain-panel">
+              <div class="cdd-panel-inner">
+                <label class="cdd-item cdd-item-all">
+                  <input type="checkbox" id="domain-all-cb" class="cdd-cb"
+                         onchange="domainAllChanged(this)">
+                  <span class="cdd-check"><i class="fas fa-check"></i></span>
+                  <span class="cdd-text fw-bold">All Domains</span>
+                  <span class="cdd-badge">{{ part.domains.count }}</span>
+                </label>
+                <div class="cdd-divider"></div>
+                {% for domain in domains %}
+                <label class="cdd-item" data-domain-id="{{ domain.id }}">
+                  <input type="checkbox" name="domain_id" value="{{ domain.id }}"
+                         class="cdd-cb domain-cb" onchange="domainCbChanged()">
+                  <span class="cdd-check"><i class="fas fa-check"></i></span>
+                  <span class="cdd-text">{{ domain.name }}</span>
+                </label>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ② MCQ Filter Single-Select -->
+        <div class="ps-field">
+          <label class="ps-label"><i class="fas fa-filter"></i> Select MCQs</label>
+          <div class="cdd-wrap" id="mcq-dd">
+            <button type="button" class="cdd-trigger" id="mcq-trigger"
+                    onclick="toggleDD('mcq-dd')">
+              <span class="mcq-trig-ico" id="mcq-trig-ico"><i class="fas fa-layer-group" style="color:#6366f1"></i></span>
+              <span id="mcq-trigger-text">All Questions</span>
+              <span class="cdd-count-badge" id="mcq-count-badge">…</span>
+              <i class="fas fa-chevron-down cdd-arrow"></i>
+            </button>
+            <div class="cdd-panel" id="mcq-panel">
+              <div class="cdd-panel-inner">
+                <label class="cdd-item mcq-item active" id="mcq-item-all"
+                       onclick="chooseMCQ('all','fa-layer-group','All Questions','#6366f1')">
+                  <input type="radio" name="select_type" value="all" class="cdd-cb filter-radio" checked>
+                  <span class="cdd-check round"><i class="fas fa-check"></i></span>
+                  <span class="mcq-ico" style="background:#eef2ff;color:#6366f1"><i class="fas fa-layer-group"></i></span>
+                  <span class="cdd-text">All Questions</span>
+                  <span class="mcq-cnt" id="count-all">…</span>
+                </label>
+                <label class="cdd-item mcq-item" id="mcq-item-unattempted"
+                       onclick="chooseMCQ('unattempted','fa-circle','Unattempted','#64748b')">
+                  <input type="radio" name="select_type" value="unattempted" class="cdd-cb filter-radio">
+                  <span class="cdd-check round"><i class="fas fa-check"></i></span>
+                  <span class="mcq-ico" style="background:#f1f5f9;color:#64748b"><i class="fas fa-circle"></i></span>
+                  <span class="cdd-text">Unattempted</span>
+                  <span class="mcq-cnt" id="count-unattempted">…</span>
+                </label>
+                <label class="cdd-item mcq-item" id="mcq-item-incorrect"
+                       onclick="chooseMCQ('incorrect','fa-times-circle','Incorrectly Answered','#ef4444')">
+                  <input type="radio" name="select_type" value="incorrect" class="cdd-cb filter-radio">
+                  <span class="cdd-check round"><i class="fas fa-check"></i></span>
+                  <span class="mcq-ico" style="background:#fef2f2;color:#ef4444"><i class="fas fa-times-circle"></i></span>
+                  <span class="cdd-text">Incorrectly Answered</span>
+                  <span class="mcq-cnt" id="count-incorrect">…</span>
+                </label>
+                <label class="cdd-item mcq-item" id="mcq-item-flagged"
+                       onclick="chooseMCQ('flagged','fa-flag','Flagged Questions','#f59e0b')">
+                  <input type="radio" name="select_type" value="flagged" class="cdd-cb filter-radio">
+                  <span class="cdd-check round"><i class="fas fa-check"></i></span>
+                  <span class="mcq-ico" style="background:#fffbeb;color:#f59e0b"><i class="fas fa-flag"></i></span>
+                  <span class="cdd-text">Flagged Questions</span>
+                  <span class="mcq-cnt" id="count-flagged">…</span>
+                </label>
+                <label class="cdd-item mcq-item" id="mcq-item-attempted"
+                       onclick="chooseMCQ('attempted','fa-check-circle','Attempted Questions','#22c55e')">
+                  <input type="radio" name="select_type" value="attempted" class="cdd-cb filter-radio">
+                  <span class="cdd-check round"><i class="fas fa-check"></i></span>
+                  <span class="mcq-ico" style="background:#f0fdf4;color:#22c55e"><i class="fas fa-check-circle"></i></span>
+                  <span class="cdd-text">Attempted Questions</span>
+                  <span class="mcq-cnt" id="count-attempted">…</span>
+                </label>
+                <label class="cdd-item mcq-item" id="mcq-item-notes"
+                       onclick="chooseMCQ('notes','fa-sticky-note','Notes Questions','#a855f7')">
+                  <input type="radio" name="select_type" value="notes" class="cdd-cb filter-radio">
+                  <span class="cdd-check round"><i class="fas fa-check"></i></span>
+                  <span class="mcq-ico" style="background:#faf5ff;color:#a855f7"><i class="fas fa-sticky-note"></i></span>
+                  <span class="cdd-text">Notes Questions</span>
+                  <span class="mcq-cnt" id="count-notes">…</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /.ps-row-2col -->
+
+      <!-- ROW 2: Topics (shown when domain selected) -->
+      <div class="ps-row-full" id="topic-row" style="display:none;">
+        <div class="ps-field">
+          <label class="ps-label"><i class="fas fa-bookmark"></i> Focus Topics <span class="ps-label-hint">(select multiple to combine)</span></label>
+          <div class="cdd-wrap" id="topic-dd">
+            <button type="button" class="cdd-trigger" id="topic-trigger"
+                    onclick="toggleDD('topic-dd')">
+              <span id="topic-trigger-text">Loading topics…</span>
+              <i class="fas fa-chevron-down cdd-arrow"></i>
+            </button>
+            <div class="cdd-panel" id="topic-panel">
+              <div class="cdd-panel-inner" id="topic-options">
+                <div class="cdd-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 3: Mode Selector -->
+      <div class="ps-row-full" style="margin-bottom:12px;">
+        <div class="ps-field">
+          <label class="ps-label"><i class="fas fa-sliders-h"></i> Mode</label>
+          <input type="hidden" name="practice_mode" id="mode-input" value="practice">
+          <div class="cdd-wrap" id="mode-dd">
+            <button type="button" class="cdd-trigger" id="mode-trigger"
+                    onclick="toggleDD('mode-dd')">
+              <span class="mode-trig-ico" id="mode-trig-ico"><i class="fas fa-graduation-cap" style="color:#6366f1"></i></span>
+              <span id="mode-trigger-text">Practice</span>
+              <i class="fas fa-chevron-down cdd-arrow"></i>
+            </button>
+            <div class="cdd-panel" id="mode-panel">
+              <div class="cdd-panel-inner">
+
+                <!-- Mode: Practice -->
+                <label class="cdd-item mode-item active" id="mode-item-practice"
+                       onclick="chooseMode('practice','fa-graduation-cap','Practice','#6366f1')">
+                  <span class="cdd-check round"><i class="fas fa-check"></i></span>
+                  <span class="mcq-ico" style="background:#eef2ff;color:#6366f1"><i class="fas fa-graduation-cap"></i></span>
+                  <span class="cdd-text">
+                    <span style="font-weight:700;display:block;">Practice</span>
+                    <span style="font-size:.75rem;color:#94a3b8;font-weight:400;">Instant feedback — see correct answer after each question</span>
+                  </span>
+                </label>
+
+                <!-- Mode: Practice (Exam View) -->
+                <label class="cdd-item mode-item" id="mode-item-practice_exam_view"
+                       onclick="chooseMode('practice_exam_view','fa-file-alt','Practice (Exam View)','#0ea5e9')">
+                  <span class="cdd-check round"><i class="fas fa-check"></i></span>
+                  <span class="mcq-ico" style="background:#e0f2fe;color:#0ea5e9"><i class="fas fa-file-alt"></i></span>
+                  <span class="cdd-text">
+                    <span style="font-weight:700;display:block;">Practice (Exam View)</span>
+                    <span style="font-size:.75rem;color:#94a3b8;font-weight:400;">All questions on one page — answers revealed only at end</span>
+                  </span>
+                </label>
+
+                <!-- Mode: Exam View -->
+                <label class="cdd-item mode-item" id="mode-item-exam_view"
+                       onclick="chooseMode('exam_view','fa-shield-alt','Exam View','#f59e0b')">
+                  <span class="cdd-check round"><i class="fas fa-check"></i></span>
+                  <span class="mcq-ico" style="background:#fffbeb;color:#f59e0b"><i class="fas fa-shield-alt"></i></span>
+                  <span class="cdd-text">
+                    <span style="font-weight:700;display:block;">Exam View</span>
+                    <span style="font-size:.75rem;color:#94a3b8;font-weight:400;">One question at a time — no feedback until submission</span>
+                  </span>
+                </label>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 4: Count + Launch -->
+      <div class="ps-launch-row">
+        <div class="ps-qty-wrap">
+          <label class="ps-label"><i class="fas fa-list-ol"></i> Questions</label>
+          <div class="ps-qty-box">
+            <button type="button" class="ps-qty-btn" onclick="stepQty(-1)">−</button>
+            <input type="number" name="num_questions" id="num_questions"
+                   class="ps-qty-input" value="10" min="1" max="100">
+            <button type="button" class="ps-qty-btn" onclick="stepQty(1)">+</button>
+          </div>
+          <span class="ps-qty-max" id="max-questions-label">of … available</span>
+        </div>
+
+        <div class="ps-launch-box">
+          <div class="ps-avail">
+            <span class="ps-avail-label">Available</span>
+            <span class="ps-avail-count" id="available-count">
+              <span class="spinner-border spinner-border-sm text-warning" style="width:1.1rem;height:1.1rem;"></span>
+            </span>
+          </div>
+          <button type="submit" class="ps-start-btn" id="start-btn">
+            <i class="fas fa-play"></i> Start Practice
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<style>
+/* ── Page shell ── */
+.ps-wrap { max-width: 840px; margin: 0 auto; padding: 18px 16px 14px; }
+.ps-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.ps-header-icon {
+  width: 42px; height: 42px; background: #fff8ed; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; color: #f59e0b; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(245,158,11,.18);
+}
+.ps-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.25rem; font-weight:800; color:#0A1128; margin:0 0 2px; }
+.ps-sub { font-size:.81rem; color:#64748b; margin:0; }
+
+/* ── Card ── */
+.ps-card { background:#fff; border-radius:18px; box-shadow:0 2px 20px rgba(10,17,40,.08); padding:20px 22px 18px; }
+
+/* ── Labels ── */
+.ps-label { display:block; font-size:.67rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#94a3b8; margin-bottom:6px; }
+.ps-label i { margin-right:4px; }
+.ps-label-hint { font-weight:500; text-transform:none; letter-spacing:0; color:#b0bec5; }
+
+/* ── Rows ── */
+.ps-row-2col { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:12px; }
+.ps-row-full { margin-bottom:12px; }
+.ps-field { position:relative; }
+
+/* ════════════════════════════════
+   CUSTOM DROPDOWN
+════════════════════════════════ */
+.cdd-wrap { position:relative; }
+
+.cdd-trigger {
+  width:100%; display:flex; align-items:center; gap:8px;
+  padding:10px 13px; border:2px solid #e2e8f0; border-radius:11px;
+  background:#f8fafc; cursor:pointer; font-size:.88rem;
+  font-weight:600; color:#1e293b; transition:all .18s; text-align:left;
+}
+.cdd-trigger:hover { border-color:#94a3b8; background:#f1f5f9; }
+.cdd-wrap.open .cdd-trigger { border-color:#3B82F6; background:#fff; box-shadow:0 0 0 3px rgba(59,130,246,.12); }
+.cdd-arrow { margin-left:auto; font-size:.72rem; color:#94a3b8; transition:transform .2s; flex-shrink:0; }
+.cdd-wrap.open .cdd-arrow { transform:rotate(180deg); }
+
+.cdd-panel {
+  position:absolute; top:calc(100% + 5px); left:0; right:0;
+  background:#fff; border:2px solid #e8edf2; border-radius:13px;
+  box-shadow:0 8px 28px rgba(10,17,40,.11); z-index:1000;
+  display:none; overflow:hidden;
+}
+.cdd-wrap.open .cdd-panel { display:block; }
+.cdd-panel-inner { max-height:220px; overflow-y:auto; padding:5px; }
+.cdd-panel-inner::-webkit-scrollbar { width:4px; }
+.cdd-panel-inner::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
+
+.cdd-divider { height:1px; background:#f1f5f9; margin:3px 6px; }
+.cdd-loading { padding:12px 10px; color:#94a3b8; font-size:.82rem; text-align:center; }
+
+/* Rows */
+.cdd-item {
+  display:flex; align-items:center; gap:9px;
+  padding:8px 9px; border-radius:9px; cursor:pointer;
+  transition:background .15s; user-select:none;
+}
+.cdd-item:hover { background:#f8fafc; }
+.cdd-item.active { background:#eff6ff; }
+.cdd-cb { display:none; }
+
+/* Custom checkbox */
+.cdd-check {
+  width:17px; height:17px; border:2px solid #cbd5e1; border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; font-size:.6rem; color:transparent; transition:all .15s;
+}
+.cdd-check.round { border-radius:50%; }
+.cdd-item:has(.cdd-cb:checked) .cdd-check,
+.cdd-item.active .cdd-check { background:#3B82F6; border-color:#3B82F6; color:#fff; }
+
+.cdd-text { flex:1; font-size:.855rem; font-weight:500; color:#1e293b; }
+.cdd-item.active .cdd-text { color:#1d4ed8; font-weight:600; }
+.cdd-badge { font-size:.7rem; font-weight:700; color:#64748b; background:#f1f5f9; border-radius:5px; padding:1px 7px; }
+
+/* MCQ specific */
+.mcq-ico {
+  width:26px; height:26px; border-radius:7px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.72rem; flex-shrink:0;
+}
+.mcq-cnt {
+  font-size:.72rem; font-weight:800; color:#64748b;
+  background:#f1f5f9; border-radius:20px; padding:2px 7px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+.mcq-item.active .mcq-cnt { background:#dbeafe; color:#1d4ed8; }
+
+/* MCQ trigger extras */
+.mcq-trig-ico { font-size:.85rem; flex-shrink:0; }
+.cdd-count-badge {
+  font-size:.7rem; font-weight:800; background:#e0e7ff;
+  color:#4338ca; border-radius:20px; padding:2px 8px; margin-left:2px;
+}
+
+/* ── Launch row ── */
+.ps-launch-row { display:flex; align-items:flex-end; gap:13px; padding-top:2px; }
+
+.ps-qty-wrap { flex-shrink:0; }
+.ps-qty-box {
+  display:flex; align-items:center; border:2px solid #e2e8f0;
+  border-radius:11px; overflow:hidden; background:#fff;
+}
+.ps-qty-btn {
+  width:34px; height:42px; border:none; background:#f8fafc;
+  font-size:1.05rem; font-weight:700; color:#475569; cursor:pointer; transition:background .15s;
+}
+.ps-qty-btn:hover { background:#e2e8f0; }
+.ps-qty-input {
+  width:60px; border:none; outline:none; font-size:1.15rem;
+  font-weight:800; color:#0A1128; text-align:center; background:#fff; height:42px; padding:0;
+}
+.ps-qty-input::-webkit-outer-spin-button,
+.ps-qty-input::-webkit-inner-spin-button { -webkit-appearance:none; }
+.ps-qty-input[type=number] { -moz-appearance:textfield; }
+.ps-qty-max { font-size:.7rem; font-weight:600; color:#94a3b8; margin-top:4px; display:block; white-space:nowrap; }
+
+.ps-launch-box {
+  flex:1; display:flex; align-items:center; justify-content:space-between;
+  background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-radius:13px; padding:12px 18px;
+}
+.ps-avail { display:flex; flex-direction:column; }
+.ps-avail-label { font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.4); margin-bottom:2px; }
+.ps-avail-count { font-size:1.7rem; font-weight:800; color:#fff; line-height:1; font-family:'Plus Jakarta Sans',sans-serif; }
+.ps-avail-count span { color:#f59e0b; }
+
+.ps-start-btn {
+  display:flex; align-items:center; gap:7px;
+  background:#f59e0b; color:#0A1128; border:none; border-radius:10px;
+  padding:11px 24px; font-size:.92rem; font-weight:800; cursor:pointer;
+  box-shadow:0 5px 14px rgba(245,158,11,.28); transition:all .2s; white-space:nowrap;
+}
+.ps-start-btn:hover { background:#fbbf24; transform:translateY(-2px); box-shadow:0 8px 20px rgba(245,158,11,.38); }
+.ps-start-btn:disabled { background:#334155; color:#64748b; box-shadow:none; transform:none; cursor:not-allowed; }
+
+/* Mode selector */
+.mode-trig-ico { font-size:.85rem; flex-shrink:0; }
+.mode-item { align-items: flex-start; }
+.mode-item .mcq-ico { margin-top:2px; flex-shrink:0; }
+.mode-item.active { background:#eff6ff; }
+.mode-item.active .cdd-text span:first-child { color:#1d4ed8; }
+</style>
+
+{% block js %}
+<script>
+const PART_ID      = document.getElementById('part-id').value;
+const numInput     = document.getElementById('num_questions');
+const maxLabel     = document.getElementById('max-questions-label');
+const countDisplay = document.getElementById('available-count');
+const startBtn     = document.getElementById('start-btn');
+const topicRow     = document.getElementById('topic-row');
+const ALL_TYPES    = ['all','unattempted','incorrect','flagged','attempted','notes'];
+
+/* ─────────────────────────────────────────
+   DROPDOWN HELPERS
+───────────────────────────────────────── */
+function toggleDD(id) {
+  const wrap   = document.getElementById(id);
+  const wasOpen = wrap.classList.contains('open');
+  document.querySelectorAll('.cdd-wrap.open').forEach(w => w.classList.remove('open'));
+  if (!wasOpen) wrap.classList.add('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.cdd-wrap')) {
+    document.querySelectorAll('.cdd-wrap.open').forEach(w => w.classList.remove('open'));
+  }
+});
+
+/* ─────────────────────────────────────────
+   DOMAIN MULTI-SELECT
+───────────────────────────────────────── */
+function domainAllChanged(cb) {
+  document.querySelectorAll('.domain-cb').forEach(c => c.checked = false);
+  updateDomainLabel();
+  onDomainChange();
+}
+
+function domainCbChanged() {
+  document.getElementById('domain-all-cb').checked = false;
+  updateDomainLabel();
+  onDomainChange();
+}
+
+function getSelectedDomainIds() {
+  return [...document.querySelectorAll('.domain-cb:checked')].map(c => c.value);
+}
+
+function updateDomainLabel() {
+  const checked = [...document.querySelectorAll('.domain-cb:checked')];
+  const el = document.getElementById('domain-trigger-text');
+  if (checked.length === 0) {
+    el.textContent = 'All Domains';
+  } else if (checked.length === 1) {
+    el.textContent = checked[0].closest('.cdd-item').querySelector('.cdd-text').textContent.trim();
+  } else {
+    el.textContent = `${checked.length} Domains selected`;
+  }
+}
+
+function onDomainChange() {
+  const domainIds = getSelectedDomainIds();
+  if (domainIds.length === 0) {
+    // No specific domain — hide topics
+    topicRow.style.display = 'none';
+    resetTopics();
+    fetchAllCounts();
+    return;
+  }
+  // Show topic row and load topics for selected domains
+  topicRow.style.display = 'block';
+  loadTopics(domainIds);
+  fetchAllCounts();
+}
+
+/* ─────────────────────────────────────────
+   TOPICS MULTI-SELECT
+───────────────────────────────────────── */
+function resetTopics() {
+  document.getElementById('topic-options').innerHTML = '<div class="cdd-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+  document.getElementById('topic-trigger-text').textContent = 'All Topics';
+}
+
+function loadTopics(domainIds) {
+  const opts = document.getElementById('topic-options');
+  const trig = document.getElementById('topic-trigger-text');
+  opts.innerHTML = '<div class="cdd-loading"><i class="fas fa-spinner fa-spin"></i> Loading topics…</div>';
+  trig.textContent = 'Loading…';
+
+  let url = '{% url "get_topics_for_domains" %}?';
+  url += domainIds.map(id => `domain_id=${id}`).join('&');
+
+  fetch(url)
+    .then(r => r.json())
+    .then(data => {
+      if (!data.topics || data.topics.length === 0) {
+        opts.innerHTML = '<div class="cdd-loading">No topics found.</div>';
+        trig.textContent = 'No topics';
+        return;
+      }
+      let html = `
+        <label class="cdd-item" id="topic-all-label">
+          <input type="checkbox" id="topic-all-cb" class="cdd-cb" onchange="topicAllChanged(this)">
+          <span class="cdd-check"><i class="fas fa-check"></i></span>
+          <span class="cdd-text fw-bold">All Topics</span>
+          <span class="cdd-badge">${data.topics.length}</span>
+        </label>
+        <div class="cdd-divider"></div>
+      `;
+      data.topics.forEach(t => {
+        html += `
+          <label class="cdd-item">
+            <input type="checkbox" name="topic_id" value="${t.id}" class="cdd-cb topic-cb"
+                   onchange="topicCbChanged()">
+            <span class="cdd-check"><i class="fas fa-check"></i></span>
+            <span class="cdd-text">${t.name}</span>
+          </label>
+        `;
+      });
+      opts.innerHTML = html;
+      trig.textContent = 'All Topics';
+      fetchAllCounts();
+    })
+    .catch(() => {
+      opts.innerHTML = '<div class="cdd-loading text-danger">Error loading topics.</div>';
+    });
+}
+
+function topicAllChanged(cb) {
+  document.querySelectorAll('.topic-cb').forEach(c => c.checked = false);
+  updateTopicLabel();
+  fetchAllCounts();
+}
+
+function topicCbChanged() {
+  const allCb = document.getElementById('topic-all-cb');
+  if (allCb) allCb.checked = false;
+  updateTopicLabel();
+  fetchAllCounts();
+}
+
+function getSelectedTopicIds() {
+  return [...document.querySelectorAll('.topic-cb:checked')].map(c => c.value);
+}
+
+function updateTopicLabel() {
+  const checked = [...document.querySelectorAll('.topic-cb:checked')];
+  const el = document.getElementById('topic-trigger-text');
+  if (!el) return;
+  if (checked.length === 0) {
+    el.textContent = 'All Topics';
+  } else if (checked.length === 1) {
+    el.textContent = checked[0].closest('.cdd-item').querySelector('.cdd-text').textContent.trim();
+  } else {
+    el.textContent = `${checked.length} Topics selected`;
+  }
+}
+
+/* ─────────────────────────────────────────
+   MCQ FILTER SINGLE-SELECT
+───────────────────────────────────────── */
+function chooseMCQ(value, icon, label, color) {
+  document.querySelectorAll('.filter-radio').forEach(r => r.checked = r.value === value);
+  document.querySelectorAll('.mcq-item').forEach(item => item.classList.remove('active'));
+  const active = document.getElementById(`mcq-item-${value}`);
+  if (active) active.classList.add('active');
+  document.getElementById('mcq-trigger-text').textContent = label;
+  document.getElementById('mcq-trig-ico').innerHTML = `<i class="fas ${icon}" style="color:${color};font-size:.85rem;"></i>`;
+  document.getElementById('mcq-dd').classList.remove('open');
+  updateSelectedCount();  // instant local update
+}
+
+function getFilterType() {
+  const r = document.querySelector('.filter-radio:checked');
+  return r ? r.value : 'all';
+}
+
+/* ─────────────────────────────────────────
+   QUESTION STEP BUTTONS
+───────────────────────────────────────── */
+function stepQty(d) {
+  const max = parseInt(numInput.max) || 0;
+  let v = (parseInt(numInput.value) || 0) + d;
+  v = Math.max(1, Math.min(max, v));
+  numInput.value = v;
+}
+numInput.addEventListener('change', function() {
+  const max = parseInt(this.max) || 0;
+  let v = parseInt(this.value);
+  if (isNaN(v) || v < 1) v = 1;
+  if (v > max) v = max;
+  if (max === 0) v = 0;
+  this.value = v;
+});
+
+/* ─────────────────────────────────────────
+   COUNT FETCHING
+───────────────────────────────────────── */
+function buildBase() {
+  const domainIds = getSelectedDomainIds();
+  const topicIds  = getSelectedTopicIds();
+  let url = `{% url "practice_available_count" %}?part_id=${PART_ID}`;
+  domainIds.forEach(id => { url += `&domain_id=${id}`; });
+  topicIds.forEach(id  => { url += `&topic_id[]=${id}`; });
+  return url;
+}
+
+function fetchAllCounts() {
+  const base = buildBase();
+  ALL_TYPES.forEach(t => {
+    const el = document.getElementById(`count-${t}`);
+    if (el) el.textContent = '…';
+  });
+  countDisplay.innerHTML = '<span class="spinner-border spinner-border-sm text-warning" style="width:1.1rem;height:1.1rem"></span>';
+
+  fetch(`${base}&select_type=bulk`)
+    .then(r => r.json())
+    .then(data => {
+      const counts = data.counts || {};
+      ALL_TYPES.forEach(t => {
+        const el = document.getElementById(`count-${t}`);
+        if (el) el.textContent = counts[t] !== undefined ? counts[t] : 0;
+      });
+      // Refresh MCQ trigger badge
+      const cur   = getFilterType();
+      const curEl = document.getElementById(`count-${cur}`);
+      if (curEl) document.getElementById('mcq-count-badge').textContent = curEl.textContent;
+      updateSelectedCount();
+    })
+    .catch(() => { countDisplay.textContent = 'Error'; });
+}
+
+
+function updateSelectedCount() {
+  const type  = getFilterType();
+  const el    = document.getElementById(`count-${type}`);
+  const count = el ? (parseInt(el.textContent) || 0) : 0;
+
+  // Also keep MCQ trigger badge in sync
+  const badge = document.getElementById('mcq-count-badge');
+  if (badge) badge.textContent = el ? el.textContent : '…';
+
+  countDisplay.innerHTML = `<span>${count}</span>`;
+  maxLabel.textContent   = `of ${count} available`;
+  numInput.max = count;
+
+  const cur = parseInt(numInput.value);
+  if (count === 0) {
+    numInput.value = 0;
+    startBtn.disabled = true;
+    startBtn.innerHTML = '<i class="fas fa-ban"></i> No Questions';
+  } else {
+    if (cur === 0 || isNaN(cur))  numInput.value = Math.min(10, count);
+    else if (cur > count)          numInput.value = count;
+    startBtn.disabled = false;
+    updateStartBtnLabel();
+  }
+}
+
+/* ─────────────────────────────────────────
+   MODE SELECTOR
+───────────────────────────────────────── */
+const modeInput = document.getElementById('mode-input');
+
+function chooseMode(value, icon, label, color) {
+  modeInput.value = value;
+  document.querySelectorAll('.mode-item').forEach(item => item.classList.remove('active'));
+  const active = document.getElementById(`mode-item-${value}`);
+  if (active) active.classList.add('active');
+  document.getElementById('mode-trigger-text').textContent = label;
+  document.getElementById('mode-trig-ico').innerHTML = `<i class="fas ${icon}" style="color:${color};font-size:.85rem;"></i>`;
+  document.getElementById('mode-dd').classList.remove('open');
+  updateStartBtnLabel();
+}
+
+function updateStartBtnLabel() {
+  const mode = modeInput ? modeInput.value : 'practice';
+  const count = parseInt(numInput.value) || 0;
+  if (count === 0) return;
+  if (mode === 'exam_view') {
+    startBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Start Exam View';
+  } else if (mode === 'practice_exam_view') {
+    startBtn.innerHTML = '<i class="fas fa-file-alt"></i> Start Practice (Exam View)';
+  } else {
+    startBtn.innerHTML = '<i class="fas fa-play"></i> Start Practice';
+  }
+}
+
+// Initial boot
+fetchAllCounts();
+</script>
+{% endblock js %}
+{% endblock content %}

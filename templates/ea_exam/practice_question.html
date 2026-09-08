@@ -1,0 +1,787 @@
+{% extends "base.html" %}
+{% load i18n ea_extras %}
+
+{% block title %}Practice - {{ session.part.name }} | RISE360 Institute{% endblock %}
+
+{% block content %}
+<div class="py-4" style="background-color: #f0f2f5; min-height: 100vh;">
+  <div class="container" style="max-width:900px;">
+    
+    <!-- Sticky Header -->
+    <div class="sticky-top bg-white border-bottom shadow-sm mb-4 p-3 d-flex justify-content-between align-items-center" style="z-index: 1020; margin-top: -1.5rem; margin-left: -1rem; margin-right: -1rem; border-radius: 0 0 12px 12px;">
+      <div class="d-flex align-items-center gap-3">
+          <a href="{% url 'part_study' session.part.number %}" class="btn btn-outline-secondary btn-sm" title="Back to Study"><i class="fas fa-arrow-left"></i></a>
+          <h5 class="mb-0 fw-bold text-dark" style="font-size: 1.1rem;">{{ session.part.name }}</h5>
+          {% if view_pref == 'exam' %}
+          <span class="badge" style="background:#e0f2fe;color:#0369a1;font-size:.72rem;padding:5px 10px;border-radius:20px;font-weight:600;">
+            <i class="fas fa-file-alt me-1"></i>Practice (Exam View)
+          </span>
+          {% elif view_pref == 'exam_view_single' %}
+          <span class="badge" style="background:#fffbeb;color:#b45309;font-size:.72rem;padding:5px 10px;border-radius:20px;font-weight:600;">
+            <i class="fas fa-shield-alt me-1"></i>Exam View
+          </span>
+          {% endif %}
+      </div>
+      <div class="d-flex align-items-center gap-3">
+          <span class="text-muted small fw-semibold">Progress: <span id="answered-count" class="text-primary">{{ answered_count }}</span>/{{ total }}</span>
+          <button class="btn btn-primary btn-sm px-4 fw-bold" style="background:#0056b3; border:none; border-radius: 6px;" onclick="showFinishModal()">Finish Session</button>
+      </div>
+    </div>
+
+    <div class="questions-list mt-2">
+      {% for question in questions %}
+      <div class="card mb-4 border-0 shadow-sm question-card {% if answered|get_item:question.id %}answered{% endif %}" id="q-{{ question.id }}" style="border-radius: 8px; overflow: hidden; position: relative;">
+          
+          <!-- Question Header (Matching Screenshot) -->
+          <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-2 px-3">
+              <div class="d-flex align-items-center gap-3">
+                  <span class="fw-bold text-muted" style="font-size: 14px;">{{ forloop.counter }}</span>
+                  <i class="fas fa-bookmark cursor-pointer flag-icon {% if question.id in flagged %}flagged{% endif %}" 
+                     onclick="toggleFlag({{ question.id }}, this)" 
+                     style="font-size: 20px; cursor:pointer;" title="Flag for Review"></i>
+              </div>
+              <div class="text-dark fw-bold text-uppercase" style="letter-spacing: 0.5px; font-size: 14px; color: #444 !important;">
+                  REG{{ question.id|stringformat:"06d" }}
+              </div>
+              <div class="d-flex gap-3 text-muted align-items-center" style="font-size: 16px;">
+                  <i class="far fa-lightbulb cursor-pointer" title="Hint" style="opacity: 0.6;"></i>
+                  <i class="far fa-sticky-note cursor-pointer note-toggle-icon {% if user_notes|get_item:question.id %}has-note{% endif %}" 
+                     title="Personal Note {% if user_notes|get_item:question.id %}(Saved){% endif %}" 
+                     id="note-icon-{{ question.id }}"
+                     onclick="toggleNotePopup({{ question.id }}, this)"
+                     style="transition: all 0.2s;"></i>
+              </div>
+
+              <!-- Personal Note Overlay Modal -->
+              <div class="note-modal-overlay d-none" id="note-modal-{{ question.id }}">
+                  <div class="note-modal-content p-4">
+                      <!-- Header -->
+                      <div class="d-flex justify-content-between align-items-start mb-3">
+                          <div class="d-flex align-items-center">
+                              <i class="far fa-sticky-note me-2" style="color: #1a73e8; font-size: 1.1rem;"></i>
+                              <span style="color: #1a73e8; font-size: 1.1rem; font-weight: 500;">Personal Note - REG{{ question.id|stringformat:"06d" }}</span>
+                          </div>
+                          <div class="close-icon-circle" onclick="toggleNotePopup({{ question.id }}, document.getElementById('note-icon-{{ question.id }}'))">
+                              <i class="fas fa-times"></i>
+                          </div>
+                      </div>
+                      
+                      <div class="mb-4">
+                          <textarea id="note-input-{{ question.id }}" 
+                                    class="note-modal-textarea form-control bg-light" 
+                                    placeholder="Enter your detailed personal notes for this question here...">{{ user_notes|get_item:question.id }}</textarea>
+                      </div>
+
+                      <div class="d-flex justify-content-end gap-3">
+                          <button class="btn btn-light fw-bold px-4 py-2" style="border-radius: 8px; background: #f8f9fa; color: #444;" onclick="toggleNotePopup({{ question.id }}, document.getElementById('note-icon-{{ question.id }}'))">Cancel</button>
+                          <button class="btn fw-bold px-4 py-2 text-white" 
+                                  id="save-note-btn-{{ question.id }}" 
+                                  onclick="saveNote({{ question.id }})"
+                                  style="border-radius: 8px; background: #1a73e8; min-width: 130px;">
+                              <i class="fas fa-save me-2"></i> Save Note
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="card-body p-4 pt-3">
+              <!-- Question Text -->
+              <p class="mb-4" style="font-size: 16px; color: #333; line-height: 1.6; font-weight: 500;">{{ question.question_text }}</p>
+
+              <!-- Choices -->
+              <div class="choices-container d-flex flex-column gap-2" id="choices-{{ question.id }}">
+                  {% with user_choice=answered|get_item:question.id %}
+                  {% for choice in question.get_choices %}
+                  <div class="choice-row p-3 border rounded d-flex align-items-center gap-3 transition-all 
+                              {% if user_choice %}
+                                  {% if view_pref == 'exam' or view_pref == 'exam_view_single' %}
+                                      {% if user_choice|stringformat:'s' == choice.id|stringformat:'s' %}bg-primary-subtle border-primary{% endif %}
+                                  {% else %}
+                                      {% if choice.is_correct %}border-success bg-success bg-opacity-10
+                                      {% elif user_choice|stringformat:'s' == choice.id|stringformat:'s' %}border-danger bg-danger bg-opacity-10
+                                      {% endif %}
+                                  {% endif %}
+                                  disabled-choice
+                              {% else %}
+                                  hover-choice cursor-pointer
+                              {% endif %}"
+                       onclick="submitAnswer({{ question.id }}, '{{ choice.id }}', this)"
+                       data-choice-id="{{ choice.id }}"
+                       data-is-correct="{{ choice.is_correct|yesno:'true,false' }}">
+                       
+                       <div class="custom-radio rounded-circle border d-flex align-items-center justify-content-center flex-shrink-0"
+                            style="width: 26px; height: 26px; font-size: 14px; font-weight: 700; transition: all 0.2s;
+                                   {% if user_choice %}
+                                       {% if view_pref == 'exam' or view_pref == 'exam_view_single' %}
+                                           {% if user_choice|stringformat:'s' == choice.id|stringformat:'s' %}background: #0056b3; border-color: #0056b3; color: white;
+                                           {% else %}background: white; border-color: #dee2e6; color: transparent;
+                                           {% endif %}
+                                       {% else %}
+                                           {% if choice.is_correct %}background: #16a34a; border-color: #16a34a; color: white;
+                                           {% elif user_choice|stringformat:'s' == choice.id|stringformat:'s' %}background: #dc2626; border-color: #dc2626; color: white;
+                                           {% else %}background: white; border-color: #dee2e6; color: transparent;
+                                           {% endif %}
+                                       {% endif %}
+                                   {% else %}background: white; border-color: #dee2e6;
+                                   {% endif %}">
+                           {% if user_choice %}
+                               {% if view_pref == 'exam' or view_pref == 'exam_view_single' %}
+                                   {% if user_choice|stringformat:'s' == choice.id|stringformat:'s' %}
+                                       <div style="width: 10px; height: 10px; background: white; border-radius: 50%;"></div>
+                                   {% endif %}
+                               {% else %}
+                                   {% if choice.is_correct %}
+                                       ✓
+                                   {% elif user_choice|stringformat:'s' == choice.id|stringformat:'s' %}
+                                       ✕
+                                   {% endif %}
+                               {% endif %}
+                           {% endif %}
+                       </div>
+                       <span class="choice-text-content" style="font-size: 15px; color: #444;">{{ choice.choice_text }}</span>
+                   </div>
+                   {% endfor %}
+                  {% endwith %}
+              </div>
+
+              <!-- Feedback (Hidden by default, shown if answered in practice mode) -->
+              <div class="feedback-area mt-4 {% if not answered|get_item:question.id or view_pref == 'exam' or view_pref == 'exam_view_single' %}d-none{% endif %}" id="feedback-{{ question.id }}">
+                  <div class="rounded p-4" style="background: #f8f9fa; border-left: 4px solid #0056b3;">
+                      <h6 class="fw-bold mb-2 text-primary text-uppercase" style="font-size: 12px; letter-spacing: 1px;">Explanation</h6>
+                      <div class="explanation-text" style="font-size: 14px; color: #555; line-height: 1.6;">
+                          {{ question.explanation|default:""|safe }}
+                      </div>
+                  </div>
+              </div>
+
+
+          </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Bottom Action (hidden in exam_view_single, shown in practice/practice_exam_view) -->
+    <div class="text-center py-4" id="bottom-action-bar">
+        <button class="btn btn-lg btn-primary px-5 shadow-sm" style="background:#0056b3; border:none; border-radius: 8px;" onclick="showFinishModal()">
+            Finish Practice &amp; View Results
+        </button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         EXAM VIEW (one-question-at-a-time) — hidden by default
+         shown via JS when VIEW_PREF === 'exam_view_single'
+    ═══════════════════════════════════════════════════════ -->
+    <div id="exam-view-panel" style="display:none;">
+
+      <!-- Progress bar -->
+      <div style="background:#e2e8f0;border-radius:8px;height:6px;margin-bottom:20px;overflow:hidden;">
+        <div id="ev-progress-bar" style="height:100%;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:8px;transition:width .3s ease;width:0%;"></div>
+      </div>
+
+      <!-- Single question card -->
+      <div class="card border-0 shadow-sm" style="border-radius:12px;overflow:hidden;" id="ev-question-card">
+        <!-- Question header -->
+        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-2 px-3">
+          <div class="d-flex align-items-center gap-3">
+            <span class="fw-bold" style="font-size:13px;color:#64748b;">Question <span id="ev-q-num">1</span> of {{ total }}</span>
+            <i class="fas fa-bookmark cursor-pointer ev-flag-icon" id="ev-flag-icon"
+               onclick="evToggleFlag()" style="font-size:18px;cursor:pointer;color:#ccc;" title="Flag for Review"></i>
+          </div>
+          <div class="text-dark fw-bold text-uppercase" style="letter-spacing:0.5px;font-size:13px;color:#444 !important;" id="ev-q-id">REG000000</div>
+          <div style="font-size:13px;">
+            <i class="far fa-sticky-note" style="opacity:0.5;cursor:pointer;" title="Notes" onclick="evOpenNote()"></i>
+          </div>
+        </div>
+        <!-- Question body -->
+        <div class="card-body p-4 pt-3">
+          <p id="ev-q-text" style="font-size:16px;color:#333;line-height:1.6;font-weight:500;"></p>
+          <div class="d-flex flex-column gap-2" id="ev-choices"></div>
+          <!-- No feedback area in exam_view_single -->
+        </div>
+      </div>
+
+      <!-- Navigation controls -->
+      <div class="d-flex align-items-center justify-content-between mt-4">
+        <button class="btn btn-outline-secondary fw-semibold px-4" id="ev-prev-btn" onclick="evNavigate(-1)" disabled>
+          <i class="fas fa-chevron-left me-1"></i> Previous
+        </button>
+        <div class="d-flex gap-2 align-items-center">
+          <span style="font-size:.8rem;color:#94a3b8;font-weight:600;">Answered: <span id="ev-answered-label" class="text-primary fw-bold">{{ answered_count }}</span> / {{ total }}</span>
+        </div>
+        <button class="btn fw-semibold px-4" id="ev-next-btn" onclick="evNavigate(1)"
+                style="background:#0056b3;color:white;border:none;border-radius:8px;">
+          Next <i class="fas fa-chevron-right ms-1"></i>
+        </button>
+      </div>
+      <!-- Finish button for exam view -->
+      <div class="text-center mt-4 mb-2">
+        <button class="btn btn-lg px-5 fw-bold" onclick="showFinishModal()"
+                style="background:#0056b3;color:white;border:none;border-radius:10px;box-shadow:0 4px 14px rgba(0,86,179,.3);">
+          <i class="fas fa-flag-checkered me-2"></i>Submit &amp; View Results
+        </button>
+      </div>
+
+    </div><!-- /#exam-view-panel -->
+
+    <!-- Custom Finish Confirmation Modal -->
+    <div id="finish-confirm-modal" class="custom-modal-overlay d-none" onclick="if(event.target === this) closeFinishModal()">
+        <div class="custom-modal-card p-4 text-center">
+            <div class="modal-icon mb-3">
+                <i class="fas fa-exclamation-circle text-primary" style="font-size: 48px;"></i>
+            </div>
+            <h4 class="fw-bold mb-2 text-dark">Finish Session?</h4>
+            <p class="text-muted mb-4" style="font-size: 15px; line-height: 1.5;">
+                Are you sure you want to complete your practice session? You will be redirected to view your final score and detailed feedback.
+            </p>
+            
+            <!-- Progress stats inside modal -->
+            <div class="p-3 mb-4 rounded bg-light d-flex justify-content-around">
+                <div>
+                    <span class="d-block text-muted small text-uppercase" style="font-size:11px; letter-spacing: 0.5px;">Answered</span>
+                    <span class="fw-bold text-dark fs-5" id="modal-answered-count">{{ answered_count }}</span>
+                </div>
+                <div style="border-right: 1px solid #dee2e6;"></div>
+                <div>
+                    <span class="d-block text-muted small text-uppercase" style="font-size:11px; letter-spacing: 0.5px;">Total Questions</span>
+                    <span class="fw-bold text-dark fs-5">{{ total }}</span>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-center">
+                <button class="btn px-4 py-2 fw-semibold" style="background:#e5e7eb; color:#4b5563; border-radius:8px; border:none;" onclick="closeFinishModal()">Cancel</button>
+                <a href="{% url 'practice_question' session.id %}?finish=1" class="btn px-4 py-2 fw-semibold text-white" style="background:#0056b3; border-radius:8px; border:none; text-decoration: none;">Yes, Finish</a>
+            </div>
+        </div>
+    </div>    <div class="mt-3">
+             <a href="{% url 'ea_home' %}" class="text-muted text-decoration-none small"><i class="fas fa-times me-1"></i> Exit Session</a>
+        </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+    .question-card.answered { box-shadow: 0 0 0 2px #0056b3 !important; }
+    .cursor-pointer { cursor: pointer; }
+    .transition-all { transition: all 0.2s ease; }
+    .hover-choice:hover { background-color: #f8f9fa; border-color: #0056b3; }
+    .disabled-choice { cursor: default !important; pointer-events: none; }
+    
+    .flag-icon { color: #ccc; transition: color 0.2s; }
+    .flag-icon.flagged { color: #dc3545 !important; }
+    .flag-icon:not(.flagged):hover { color: #999; }
+    
+    .custom-radio { border: 2px solid #ced4da; }
+    .choice-row.border-success .custom-radio { border-color: #198754; background-color: #198754; }
+    .choice-row.border-danger .custom-radio { border-color: #dc3545; background-color: #dc3545; }
+    
+    .choice-row.border-success { border-width: 2px !important; }
+    .choice-row.border-danger { border-width: 2px !important; }
+
+    /* Sticky header adjustment */
+    .sticky-top { top: 0; }
+
+    /* Custom Finish Modal styles */
+    .custom-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        animation: modalFadeIn 0.2s ease-out;
+    }
+    .custom-modal-card {
+        background: white;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 420px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        transform: scale(0.95);
+        animation: modalScaleUp 0.18s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes modalFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes modalScaleUp {
+        to { transform: scale(1); }
+    }
+
+    /* Personal Note Modal Overlay */
+    .note-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.5);
+        z-index: 1050; /* Above sticky header */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(2px);
+    }
+    .note-modal-content {
+        background: #fff;
+        width: 100%;
+        max-width: 600px;
+        border-radius: 8px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        animation: modalPopIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .note-modal-textarea {
+        height: 220px;
+        resize: none;
+        font-size: 15px;
+        border: 3px solid #b8d4f4 !important;
+        border-radius: 8px;
+        padding: 16px;
+    }
+    .note-modal-textarea:focus {
+        box-shadow: none;
+        border-color: #8ab4f8 !important;
+    }
+    .close-icon-circle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        color: #495057;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .close-icon-circle:hover {
+        background-color: #dee2e6;
+    }
+    @keyframes modalPopIn {
+        from { opacity: 0; transform: translateY(20px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .note-toggle-icon { opacity: 0.6; }
+    .note-toggle-icon:hover { opacity: 0.8 !important; }
+    .note-toggle-icon.active { color: #0056b3 !important; opacity: 1 !important; transform: scale(1.1); }
+    .note-toggle-icon.has-note { color: #ffab00; opacity: 1 !important; } /* Highlight if note exists */
+</style>
+
+{% endblock %}
+
+{% block js %}
+<script>
+    const SUBMIT_URL = "{% url 'practice_submit_answer' session.id %}";
+    const FLAG_URL = "{% url 'exam_toggle_flag' session.id %}";
+    const SAVE_NOTE_URL = "{% url 'add_question_note' %}";
+    const CSRF_TOKEN = "{{ csrf_token }}";
+    const VIEW_PREF = "{{ view_pref }}";
+    const SESSION_ID = {{ session.id }};
+
+    // ─────────────────────────────────────────────────
+    // PRACTICE / PRACTICE (EXAM VIEW) — submit handler
+    // ─────────────────────────────────────────────────
+    function submitAnswer(questionId, choiceId, element) {
+        if (element.classList.contains('disabled-choice')) return;
+
+        // 1. Instantly disable all choices for this question
+        const container = document.getElementById('choices-' + questionId);
+        const rows = container.querySelectorAll('.choice-row');
+        rows.forEach(row => {
+            row.classList.add('disabled-choice');
+            row.classList.remove('hover-choice', 'cursor-pointer');
+        });
+
+        // 2. Instantly update the UI based on view preference (0ms latency feedback)
+        if (VIEW_PREF === 'exam' || VIEW_PREF === 'exam_view_single') {
+            // Exam / Exam View: just highlight selected, no correct/incorrect
+            rows.forEach(row => {
+                const cid = row.dataset.choiceId;
+                const radioEl = row.querySelector('.custom-radio');
+                if (cid === choiceId) {
+                    row.classList.add('bg-primary-subtle', 'border-primary');
+                    radioEl.style.cssText = 'width:26px;height:26px;flex-shrink:0;background:#0056b3;border-radius:50%;border:2px solid #0056b3;display:flex;align-items:center;justify-content:center;';
+                    radioEl.innerHTML = '<div style="width:10px;height:10px;background:white;border-radius:50%;"></div>';
+                } else {
+                    radioEl.style.cssText = 'width:26px;height:26px;flex-shrink:0;background:white;border-radius:50%;border:2px solid #dee2e6;display:flex;align-items:center;justify-content:center;';
+                    radioEl.innerHTML = '';
+                }
+            });
+        } else {
+            // Practice/Tutor view: show correct/incorrect instantly
+            let correctChoiceId = null;
+            let isCorrect = false;
+            rows.forEach(row => {
+                if (row.dataset.isCorrect === 'true') correctChoiceId = row.dataset.choiceId;
+                if (row.dataset.choiceId === choiceId) isCorrect = row.dataset.isCorrect === 'true';
+            });
+
+            rows.forEach(row => {
+                const cid = row.dataset.choiceId;
+                const radioEl = row.querySelector('.custom-radio');
+                if (cid === correctChoiceId) {
+                    row.classList.add('border-success', 'bg-success', 'bg-opacity-10');
+                    radioEl.style.cssText = 'width:26px;height:26px;flex-shrink:0;font-size:14px;font-weight:700;transition:all 0.2s;background:#16a34a;border-color:#16a34a;color:white;border-radius:50%;border:2px solid #16a34a;display:flex;align-items:center;justify-content:center;';
+                    radioEl.innerHTML = '✓';
+                } else if (cid === choiceId && !isCorrect) {
+                    row.classList.add('border-danger', 'bg-danger', 'bg-opacity-10');
+                    radioEl.style.cssText = 'width:26px;height:26px;flex-shrink:0;font-size:14px;font-weight:700;transition:all 0.2s;background:#dc2626;border-color:#dc2626;color:white;border-radius:50%;border:2px solid #dc2626;display:flex;align-items:center;justify-content:center;';
+                    radioEl.innerHTML = '✕';
+                } else {
+                    radioEl.style.cssText = 'width:26px;height:26px;flex-shrink:0;background:white;border-radius:50%;border:2px solid #dee2e6;display:flex;align-items:center;justify-content:center;';
+                    radioEl.innerHTML = '';
+                }
+            });
+
+            const feedback = document.getElementById('feedback-' + questionId);
+            if (feedback) feedback.classList.remove('d-none');
+        }
+
+        const card = document.getElementById('q-' + questionId);
+        if (card) card.classList.add('answered');
+        incrementProgress();
+
+        // 3. Submit to server in the background (fire-and-forget)
+        const fd = new FormData();
+        fd.append('question_id', questionId);
+        fd.append('choice_id', choiceId);
+        fd.append('csrfmiddlewaretoken', CSRF_TOKEN);
+        fetch(SUBMIT_URL, { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(data => { if (data.status !== 'ok') console.error("Failed to record answer:", data); })
+            .catch(err => console.error("Network error:", err));
+    }
+
+    // ─────────────────────────────────────────────────
+    // EXAM VIEW SINGLE — one question at a time
+    // ─────────────────────────────────────────────────
+    {% if view_pref == 'exam_view_single' %}
+    // Build a flat ordered list of questions from the rendered DOM
+    const EV_QUESTIONS = [];
+    document.querySelectorAll('.question-card').forEach((card, idx) => {
+        const qid = card.id.replace('q-', '');
+        const qText = card.querySelector('.card-body p').textContent.trim();
+        const choices = [];
+        card.querySelectorAll('.choice-row').forEach(row => {
+            choices.push({
+                id:       row.dataset.choiceId,
+                text:     (row.querySelector('.choice-text-content') || row.querySelector('span')).textContent.trim(),
+                isCorrect: row.dataset.isCorrect === 'true'
+            });
+        });
+        const alreadyAnswered = card.classList.contains('answered');
+        // Track which choice was selected (from DOM class)
+        let selectedChoice = null;
+        if (alreadyAnswered) {
+            card.querySelectorAll('.choice-row').forEach(row => {
+                if (row.classList.contains('border-success') || row.classList.contains('border-primary') || row.classList.contains('bg-primary-subtle')) {
+                    selectedChoice = row.dataset.choiceId;
+                }
+            });
+        }
+        EV_QUESTIONS.push({ qid, qText, choices, alreadyAnswered, selectedChoice });
+    });
+
+    // Initial answered count (from server)
+    let EV_ANSWERED = {{ answered_count }};
+    let EV_CURRENT  = 0;
+    // Pre-populated answers tracking (answered qids)
+    const EV_ANSWERED_SET = new Set();
+    document.querySelectorAll('.question-card.answered').forEach(c => EV_ANSWERED_SET.add(c.id.replace('q-', '')));
+
+    // Flagged from server
+    const EV_FLAGGED = new Set([{% for qid in flagged %}{{ qid }},{% endfor %}]);
+
+    function evInit() {
+        // Hide the vertical list and bottom bar, show exam view panel
+        document.querySelector('.questions-list').style.display = 'none';
+        document.getElementById('bottom-action-bar').style.display = 'none';
+        document.getElementById('exam-view-panel').style.display = 'block';
+        evRender(0);
+    }
+
+    function evRender(idx) {
+        EV_CURRENT = idx;
+        const q = EV_QUESTIONS[idx];
+        if (!q) return;
+
+        // Update counter and progress bar
+        document.getElementById('ev-q-num').textContent = idx + 1;
+        document.getElementById('ev-q-id').textContent  = 'REG' + String(q.qid).padStart(6, '0');
+        document.getElementById('ev-q-text').textContent = q.qText;
+        document.getElementById('ev-progress-bar').style.width = (((idx + 1) / EV_QUESTIONS.length) * 100) + '%';
+
+        // Flag state
+        const flagIcon = document.getElementById('ev-flag-icon');
+        if (EV_FLAGGED.has(parseInt(q.qid))) {
+            flagIcon.style.color = '#dc3545';
+        } else {
+            flagIcon.style.color = '#ccc';
+        }
+
+        // Render choices
+        const choicesEl = document.getElementById('ev-choices');
+        choicesEl.innerHTML = '';
+        const isAnswered = EV_ANSWERED_SET.has(q.qid);
+        // Find what was selected (from the original DOM card)
+        let selectedId = null;
+        const origCard = document.getElementById('q-' + q.qid);
+        if (origCard) {
+            origCard.querySelectorAll('.choice-row').forEach(row => {
+                if (row.classList.contains('bg-primary-subtle') || row.classList.contains('border-primary')) {
+                    selectedId = row.dataset.choiceId;
+                }
+            });
+        }
+
+        q.choices.forEach(c => {
+            const div = document.createElement('div');
+            div.className = 'choice-row p-3 border rounded d-flex align-items-center gap-3 transition-all' +
+                (isAnswered ? ' disabled-choice' : ' hover-choice cursor-pointer');
+            div.style.cssText = 'border-radius:8px;transition:all .15s;' + (isAnswered && c.id === selectedId ? 'background:#eff6ff;border-color:#0056b3 !important;' : '');
+            div.onclick = isAnswered ? null : () => evSubmitAnswer(q.qid, c.id, div);
+
+            const radio = document.createElement('div');
+            radio.className = 'custom-radio rounded-circle border d-flex align-items-center justify-content-center flex-shrink-0';
+            if (isAnswered && c.id === selectedId) {
+                radio.style.cssText = 'width:26px;height:26px;background:#0056b3;border-radius:50%;border:2px solid #0056b3;display:flex;align-items:center;justify-content:center;';
+                radio.innerHTML = '<div style="width:10px;height:10px;background:white;border-radius:50%;"></div>';
+            } else {
+                radio.style.cssText = 'width:26px;height:26px;background:white;border-radius:50%;border:2px solid #dee2e6;display:flex;align-items:center;justify-content:center;';
+            }
+
+            const label = document.createElement('span');
+            label.style.cssText = 'font-size:15px;color:#444;';
+            label.textContent = c.text;
+
+            div.appendChild(radio);
+            div.appendChild(label);
+            choicesEl.appendChild(div);
+        });
+
+        // Prev / Next buttons
+        document.getElementById('ev-prev-btn').disabled = (idx === 0);
+        const nextBtn = document.getElementById('ev-next-btn');
+        if (idx === EV_QUESTIONS.length - 1) {
+            nextBtn.textContent = '';
+            nextBtn.innerHTML = '<i class="fas fa-flag-checkered me-1"></i> Finish';
+            nextBtn.onclick = () => showFinishModal();
+        } else {
+            nextBtn.innerHTML = 'Next <i class="fas fa-chevron-right ms-1"></i>';
+            nextBtn.onclick = () => evNavigate(1);
+        }
+    }
+
+    function evSubmitAnswer(qid, choiceId, clickedDiv) {
+        if (EV_ANSWERED_SET.has(String(qid))) return;
+        EV_ANSWERED_SET.add(String(qid));
+        EV_ANSWERED++;
+
+        // Update answered counters in both header and exam view
+        document.getElementById('answered-count').textContent = EV_ANSWERED;
+        document.getElementById('ev-answered-label').textContent = EV_ANSWERED;
+
+        // Update choices UI — neutral blue for selected, locked
+        const choicesEl = document.getElementById('ev-choices');
+        choicesEl.querySelectorAll('.choice-row').forEach(row => {
+            row.classList.add('disabled-choice');
+            row.classList.remove('hover-choice', 'cursor-pointer');
+            row.onclick = null;
+        });
+        // Highlight selected
+        const allRows = choicesEl.querySelectorAll('.choice-row');
+        // Find selected by matching choiceId via index
+        const q = EV_QUESTIONS[EV_CURRENT];
+        q.choices.forEach((c, i) => {
+            if (c.id === choiceId) {
+                allRows[i].style.cssText = 'border-radius:8px;background:#eff6ff;border-color:#0056b3 !important;';
+                allRows[i].querySelector('.custom-radio').style.cssText = 'width:26px;height:26px;background:#0056b3;border-radius:50%;border:2px solid #0056b3;display:flex;align-items:center;justify-content:center;';
+                allRows[i].querySelector('.custom-radio').innerHTML = '<div style="width:10px;height:10px;background:white;border-radius:50%;"></div>';
+            }
+        });
+
+        // Also mark in the hidden DOM card so state is preserved when navigating back
+        const origCard = document.getElementById('q-' + qid);
+        if (origCard) {
+            origCard.classList.add('answered');
+            origCard.querySelectorAll('.choice-row').forEach(row => {
+                if (row.dataset.choiceId === choiceId) {
+                    row.classList.add('bg-primary-subtle', 'border-primary');
+                }
+            });
+        }
+
+        // Fire-and-forget server submit
+        const fd = new FormData();
+        fd.append('question_id', qid);
+        fd.append('choice_id', choiceId);
+        fd.append('csrfmiddlewaretoken', CSRF_TOKEN);
+        fetch(SUBMIT_URL, { method: 'POST', body: fd })
+            .then(r => r.json())
+            .catch(err => console.error("Network error:", err));
+    }
+
+    function evNavigate(dir) {
+        const next = EV_CURRENT + dir;
+        if (next < 0 || next >= EV_QUESTIONS.length) return;
+        evRender(next);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function evToggleFlag() {
+        const q = EV_QUESTIONS[EV_CURRENT];
+        const qid = parseInt(q.qid);
+        const fd = new FormData();
+        fd.append('question_id', qid);
+        fd.append('csrfmiddlewaretoken', CSRF_TOKEN);
+        fetch(FLAG_URL, { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(data => {
+                const icon = document.getElementById('ev-flag-icon');
+                if (data.flagged.includes(qid)) {
+                    EV_FLAGGED.add(qid);
+                    icon.style.color = '#dc3545';
+                } else {
+                    EV_FLAGGED.delete(qid);
+                    icon.style.color = '#ccc';
+                }
+            });
+    }
+
+    function evOpenNote() {
+        // Proxy: open the note popup for current question from the hidden list
+        const q = EV_QUESTIONS[EV_CURRENT];
+        const icon = document.getElementById('note-icon-' + q.qid);
+        if (icon) toggleNotePopup(q.qid, icon);
+    }
+
+    // Boot exam view
+    document.addEventListener('DOMContentLoaded', evInit);
+    {% endif %}
+
+    // ─────────────────────────────────────────────────
+    // SHARED HELPERS
+    // ─────────────────────────────────────────────────
+
+    // Toggle per-question personal note popup
+    function toggleNotePopup(questionId, iconEl) {
+        const modal = document.getElementById('note-modal-' + questionId);
+        if (!modal) return;
+        const isHidden = modal.classList.contains('d-none');
+
+        document.querySelectorAll('.note-modal-overlay').forEach(p => {
+            if (p.id !== 'note-modal-' + questionId) p.classList.add('d-none');
+        });
+        document.querySelectorAll('.note-toggle-icon').forEach(i => {
+            if (i.id !== 'note-icon-' + questionId) { i.classList.remove('active'); i.style.opacity = '0.6'; }
+        });
+
+        if (isHidden) {
+            modal.classList.remove('d-none');
+            if (iconEl) { iconEl.classList.add('active'); iconEl.style.opacity = '1'; }
+            setTimeout(() => { const ta = document.getElementById('note-input-' + questionId); if(ta) ta.focus(); }, 100);
+            document.body.style.overflow = 'hidden';
+            modal.onclick = function(e) { if(e.target === modal) toggleNotePopup(questionId, iconEl); };
+        } else {
+            modal.classList.add('d-none');
+            if (iconEl) { iconEl.classList.remove('active'); iconEl.style.opacity = '0.6'; }
+            document.body.style.overflow = '';
+        }
+    }
+
+    function saveNote(questionId) {
+        const content = document.getElementById('note-input-' + questionId).value;
+        const btn = document.getElementById('save-note-btn-' + questionId);
+
+        const fd = new FormData();
+        fd.append('question_id', questionId);
+        fd.append('content', content);
+        fd.append('csrfmiddlewaretoken', CSRF_TOKEN);
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        fetch(SAVE_NOTE_URL, { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    btn.innerHTML = '<i class="fas fa-check me-2"></i> Saved';
+                    btn.style.background = '#28a745';
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-save me-2"></i> Save Note';
+                        btn.style.background = '#1a73e8';
+                        btn.style.border = 'none';
+                        const toggleIcon = document.getElementById('note-icon-' + questionId);
+                        if (toggleIcon) {
+                            if (content.trim().length > 0) { toggleIcon.classList.add('has-note'); toggleIcon.title = "Personal Note (Saved)"; }
+                            else { toggleIcon.classList.remove('has-note'); toggleIcon.title = "Personal Note"; }
+                            toggleNotePopup(questionId, toggleIcon);
+                        }
+                    }, 800);
+                }
+            })
+            .catch(err => { console.error(err); btn.disabled = false; btn.innerHTML = 'Error'; });
+    }
+
+    function toggleFlag(questionId, icon) {
+        const fd = new FormData();
+        fd.append('question_id', questionId);
+        fd.append('csrfmiddlewaretoken', CSRF_TOKEN);
+        fetch(FLAG_URL, { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(data => {
+                if (data.flagged.includes(questionId)) icon.classList.add('flagged');
+                else icon.classList.remove('flagged');
+            })
+            .catch(err => console.error(err));
+    }
+
+    function incrementProgress() {
+        const span = document.getElementById('answered-count');
+        let count = parseInt(span.innerText);
+        span.innerText = count + 1;
+        // Sync exam view answered label too
+        const evLabel = document.getElementById('ev-answered-label');
+        if (evLabel) evLabel.textContent = count + 1;
+    }
+
+    function showFinishModal() {
+        const modal = document.getElementById('finish-confirm-modal');
+        const span = document.getElementById('answered-count');
+        const modalSpan = document.getElementById('modal-answered-count');
+        if (span && modalSpan) modalSpan.innerText = span.innerText;
+        modal.classList.remove('d-none');
+    }
+
+    function closeFinishModal() {
+        const modal = document.getElementById('finish-confirm-modal');
+        if (modal) modal.classList.add('d-none');
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") {
+            document.querySelectorAll('.note-modal-overlay:not(.d-none)').forEach(modal => {
+                const qId = modal.id.split('-').pop();
+                const icon = document.getElementById('note-icon-' + qId);
+                toggleNotePopup(qId, icon);
+            });
+            closeFinishModal();
+        }
+        {% if view_pref == 'exam_view_single' %}
+        if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+            evNavigate(event.key === 'ArrowRight' ? 1 : -1);
+        }
+        {% endif %}
+    });
+</script>
+{% endblock %}
+
+

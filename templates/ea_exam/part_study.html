@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load ea_extras %}
+
+{% block title %}{{ current_part.name }} | RISE360 Institute{% endblock %}
+
+{% block content %}
+<div class="uea-theme" style="padding-bottom: 48px;">
+
+  <!-- ── HEADER ── -->
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3 ec-animate">
+    <div>
+      <div style="font-size: 12px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; color: var(--ec-gray); margin-bottom: 4px;">
+        Learning Module
+      </div>
+      <h1 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 800; color: var(--ec-navy); margin: 0;">
+        {{ current_part.name }}
+      </h1>
+    </div>
+  </div>
+
+
+  <!-- ── PART PROGRESS BAR ── -->
+  <div class="ec-card mb-4 ec-animate ec-animate-1" style="padding: 16px 24px;">
+    <div class="d-flex align-items-center justify-content-between gap-4 flex-wrap">
+      <div style="flex: 1; min-width: 200px;">
+        <div class="d-flex align-items-center justify-content-between mb-1">
+          <span style="font-size: 14px; font-weight: 600; color: var(--ec-navy);">
+            MCQ Readiness 
+            <span style="font-size: 12px; font-weight: 500; color: var(--ec-gray); margin-left: 8px;">
+              ({{ progress.questions_attempted|default:0 }} / {{ total_questions }} Attempted)
+            </span>
+          </span>
+          <span style="font-size: 14px; font-weight: 700; color: var(--ec-part{{ current_part.number }});">
+            {% if total_questions > 0 %}
+              {% widthratio progress.questions_attempted|default:0 total_questions 100 %}.0%
+            {% else %}
+              0.0%
+            {% endif %}
+          </span>
+        </div>
+        <div class="progress" style="height: 8px; border-radius: 4px; background: var(--ec-gray-light);">
+          <div class="progress-bar" style="width: {% if total_questions > 0 %}{% widthratio progress.questions_attempted|default:0 total_questions 100 %}{% else %}0{% endif %}%; background: var(--ec-part{{ current_part.number }}); border-radius: 4px; transition: width 1s ease;"></div>
+        </div>
+      </div>
+      <div class="d-flex gap-3 flex-wrap">
+        <div class="text-center">
+          <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 800; color: var(--ec-navy);">{{ progress.questions_attempted|default:0 }}</div>
+          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--ec-gray);">Attempted</div>
+        </div>
+        <div class="text-center">
+          <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 800; color: var(--ec-amber);">{{ flagged_count|default:0 }}</div>
+          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--ec-gray);">Flagged</div>
+        </div>
+        <div class="text-center">
+          <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 800; color: var(--ec-emerald);">{{ progress.accuracy|default:0 }}%</div>
+          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--ec-gray);">Accuracy</div>
+        </div>
+      </div>
+      <!-- Quick actions -->
+      <div class="d-flex gap-2">
+        <a href="{% url 'start_practice' current_part.number %}" class="btn btn-sm fw-bold rounded-pill px-3"
+           style="background: var(--ec-navy); color: #fff; font-size: 12px; border: none;">
+          <i class="fas fa-play me-1"></i> MCQs
+        </a>
+        <a href="{% url 'start_exam_simulation' current_part.number %}" class="btn btn-sm fw-bold rounded-pill px-3"
+           style="background: var(--ec-amber); color: var(--ec-navy); font-size: 12px; border: none;">
+          <i class="fas fa-graduation-cap me-1"></i> Mocktest
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DOMAIN CARDS ── -->
+  {% for domain in domains %}
+  <div class="ec-domain-card part-{% if current_part.number == 2 %}2{% elif current_part.number == 3 %}3{% else %}1{% endif %} ec-animate ec-animate-{{ forloop.counter }}" style="margin-bottom: 16px;">
+
+    <!-- Domain Header (clickable accordion) -->
+    <div class="ec-domain-header" onclick="toggleDomain({{ domain.id }})">
+      <div class="d-flex align-items-center gap-3" style="flex: 1;">
+        <!-- Radial progress ring for domain -->
+        {% with d_topics=domain.topics.count %}
+        {% with stats=topic_stats|get_item:None %}
+
+        <!-- compute domain completion roughly -->
+        {% with domain_attempted=0 %}
+        <div class="ec-ring" style="
+          width: 56px; height: 56px;
+          --ring-color: {% if current_part.number == 2 %}var(--ec-part2){% elif current_part.number == 3 %}var(--ec-part3){% else %}var(--ec-part1){% endif %};
+          --ring-pct: 0%;
+          font-size: 11px;" id="ring-domain-{{ domain.id }}">
+          <span class="ec-ring-label" id="ring-label-{{ domain.id }}" style="font-size: 11px;">
+            0%
+          </span>
+        </div>
+        {% endwith %}
+        {% endwith %}
+        {% endwith %}
+
+        <div>
+          <div class="ec-domain-title">{{ forloop.counter }}. {{ domain.name }}</div>
+          <div style="font-size: 12px; color: var(--ec-gray);">{{ domain.topics.count }} topics</div>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-3">
+        <div class="ec-chip primary-action"
+             onclick="event.stopPropagation(); MCQModal.launch('domain', {{ domain.id }}, '{{ domain.name|escapejs }}')">
+          <i class="fas fa-play"></i> Practice Domain
+        </div>
+        <i class="fas fa-chevron-down" id="chevron-{{ domain.id }}" style="color: var(--ec-gray); font-size: 14px; transition: transform 0.25s ease;"></i>
+      </div>
+    </div>
+
+    <!-- Topic Rows (body) -->
+    <div id="domain-body-{{ domain.id }}" style="display: {% if forloop.first %}block{% else %}none{% endif %};">
+      {% for topic in domain.topics.all %}
+      {% with stats=topic_stats|get_item:topic.id %}
+
+      <!-- Determine chip state based on stats -->
+      {% if stats %}
+        {% if stats.accuracy >= 75 %}
+          {% with chip_state="done" %}
+          {% include "ea_exam/partials/topic_row.html" %}
+          {% endwith %}
+        {% else %}
+          {% with chip_state="in-progress" %}
+          {% include "ea_exam/partials/topic_row.html" %}
+          {% endwith %}
+        {% endif %}
+      {% else %}
+        {% with chip_state="not-started" %}
+        {% include "ea_exam/partials/topic_row.html" %}
+        {% endwith %}
+      {% endif %}
+
+      {% endwith %}
+      {% endfor %}
+    </div>
+
+  </div>
+  {% empty %}
+  <div class="ec-card text-center py-5 ec-text-gray">
+    <i class="fas fa-book-open fa-2x mb-3"></i>
+    <p>No domains found for this Module.</p>
+  </div>
+  {% endfor %}
+
+  {% include "ea_exam/snippets/create_session_modal.html" %}
+  
+  <!-- Secure PDF Viewer Modal -->
+<div class="modal fade" id="pdfViewerModal" tabindex="-1" aria-labelledby="pdfViewerModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content uea-theme bg-light">
+      <div class="modal-header border-bottom-0 shadow-sm d-flex align-items-center justify-content-between" style="z-index: 10;">
+        <h5 class="modal-title fw-bold" id="pdfViewerModalLabel"><i class="fas fa-book-open text-primary me-2"></i><span id="pdfModalTitle">eBook Viewer</span></h5>
+        <div class="d-flex align-items-center gap-3">
+          <a href="#" id="pdfDownloadBtn" class="btn btn-outline-success btn-sm px-3 fw-bold" target="_blank" download>
+            <i class="fas fa-download me-1"></i> Download
+          </a>
+          <button type="button" class="btn-close m-0" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+      </div>
+      <div class="modal-body p-0 position-relative" style="background-color: #525659;" id="pdfContainer">
+         <iframe id="pdfIframe" src="" width="100%" height="100%" style="border: none;" allowfullscreen webkitallowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Video Player Modal -->
+<div class="modal fade" id="videoPlayerModal" tabindex="-1" aria-labelledby="videoPlayerModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content uea-theme bg-dark text-white border-0" style="border-radius: 16px; overflow: hidden;">
+      <div class="modal-header border-bottom-0" style="background-color: #0A1128;">
+        <h5 class="modal-title fw-bold text-white" id="videoPlayerModalLabel"><i class="fas fa-video text-warning me-2"></i><span id="videoModalTitle">Lecture Video</span></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0 bg-black">
+        <div class="ratio ratio-16x9">
+          <iframe id="videoIframe" src="" title="Lecture Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="border: none;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+function toggleDomain(domainId) {
+  var body = document.getElementById('domain-body-' + domainId);
+  var chevron = document.getElementById('chevron-' + domainId);
+  if (body.style.display === 'none') {
+    body.style.display = 'block';
+    chevron.style.transform = 'rotate(180deg)';
+  } else {
+    body.style.display = 'none';
+    chevron.style.transform = 'rotate(0deg)';
+  }
+}
+
+function toggleReadStatus(topicId, iconEl) {
+  const isRead = iconEl.classList.contains('far'); // if far, we are marking as read
+  
+  const formData = new FormData();
+  formData.append('topic_id', topicId);
+  formData.append('is_read', isRead);
+  formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+  fetch('{% url "toggle_topic_read_status" %}', {
+    method: 'POST',
+    body: formData,
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.status === 'ok') {
+      const topicName = document.getElementById('topic-name-' + topicId);
+      if (data.is_read) {
+        iconEl.classList.remove('far', 'text-muted');
+        iconEl.classList.add('fas', 'text-primary');
+        if (topicName) topicName.classList.add('text-decoration-line-through', 'opacity-50');
+      } else {
+        iconEl.classList.remove('fas', 'text-primary');
+        iconEl.classList.add('far', 'text-muted');
+        if (topicName) topicName.classList.remove('text-decoration-line-through', 'opacity-50');
+      }
+    }
+  });
+}
+
+// Set chevron for first domain (already open)
+document.addEventListener('DOMContentLoaded', function() {
+  var firstChevron = document.querySelector('[id^="chevron-"]');
+  if (firstChevron) firstChevron.style.transform = 'rotate(180deg)';
+});
+
+// PDF & Video Modals JS
+document.addEventListener("DOMContentLoaded", function() {
+    var pdfModal = document.getElementById('pdfViewerModal');
+    var pdfIframe = document.getElementById('pdfIframe');
+    var pdfTitle = document.getElementById('pdfModalTitle');
+
+    if (pdfModal) {
+        pdfModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var url = button.getAttribute('data-pdf-url');
+            var title = button.getAttribute('data-pdf-title');
+            if(pdfTitle) pdfTitle.textContent = title;
+            if(pdfIframe) pdfIframe.src = url + "#toolbar=0&navpanes=0&scrollbar=0";
+            
+            // Update download button link
+            var downloadUrl = url;
+            if (url.indexOf('/view/') !== -1) {
+                downloadUrl = url + (url.indexOf('?') !== -1 ? '&' : '?') + 'download=1';
+            }
+            var downloadBtn = document.getElementById('pdfDownloadBtn');
+            if (downloadBtn) downloadBtn.href = downloadUrl;
+        });
+        pdfModal.addEventListener('hidden.bs.modal', function () {
+            if(pdfIframe) pdfIframe.src = "about:blank";
+        });
+        document.getElementById('pdfContainer').addEventListener('contextmenu', event => event.preventDefault());
+        window.addEventListener("keydown", function(e) {
+            if (e.ctrlKey && (e.key === 'p' || e.key === 'P' || e.key === 's' || e.key === 'S')) {
+                e.preventDefault();
+            }
+        });
+    }
+
+    // Video modal handling
+    var videoModal = document.getElementById('videoPlayerModal');
+    var videoIframe = document.getElementById('videoIframe');
+    var videoTitle = document.getElementById('videoModalTitle');
+
+    if (videoModal) {
+        videoModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var rawUrl = button.getAttribute('data-video-url');
+            var title = button.getAttribute('data-video-title');
+            if (videoTitle) videoTitle.textContent = title;
+            
+            // Helper to parse youtube URLs to embed format
+            let embedUrl = rawUrl;
+            if (rawUrl) {
+                let videoId = '';
+                if (rawUrl.indexOf('watch?v=') !== -1) {
+                    videoId = rawUrl.split('v=')[1].split('&')[0];
+                } else if (rawUrl.indexOf('youtu.be/') !== -1) {
+                    videoId = rawUrl.split('youtu.be/')[1].split('?')[0];
+                } else if (rawUrl.indexOf('youtube.com/embed/') !== -1) {
+                    videoId = rawUrl.split('youtube.com/embed/')[1].split('?')[0];
+                }
+                
+                if (videoId) {
+                    embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&enablejsapi=1&rel=0&modestbranding=1';
+                }
+            }
+            if (videoIframe) videoIframe.src = embedUrl;
+        });
+        videoModal.addEventListener('hidden.bs.modal', function () {
+            if (videoIframe) videoIframe.src = "about:blank";
+        });
+    }
+});
+</script>
+{% endblock %}

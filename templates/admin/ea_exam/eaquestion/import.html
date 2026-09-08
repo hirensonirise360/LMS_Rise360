@@ -1,0 +1,22 @@
+{% extends "admin/import_export/import.html" %}
+{% load i18n %}
+
+{% block content %}
+    <div id="content-main">
+        <div class="module" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 20px; margin-bottom: 20px; border-radius: 8px;">
+            <h3 style="margin-top: 0; color: #007bff;"><i class="fas fa-magic"></i> Unified MCQ Bulk Import</h3>
+            <p>You can now import <strong>Questions and their 4 Choices</strong> in a single file! Use the template below to ensure correct mapping.</p>
+            
+            <div style="margin-top: 15px;">
+                <a href="{% url 'admin:ea_question_template' %}" class="button" style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; font-weight: bold; border-radius: 4px;">
+                    <i class="fas fa-download"></i> Download CSV Template
+                </a>
+            </div>
+            
+            <p style="margin-top: 15px; font-size: 0.9em; color: #6c757d;">
+                <strong>Note:</strong> Columns <code>choice1_correct</code> to <code>choice4_correct</code> accept <code>1</code> for correct and <code>0</code> for incorrect.
+            </p>
+        </div>
+        {{ block.super }}
+    </div>
+{% endblock %}

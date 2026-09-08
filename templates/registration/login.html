@@ -1,0 +1,307 @@
+{% extends 'registration/registration_base.html' %}
+{% load i18n static %}
+{% block title %}{% trans 'Learning Portal Access - RISE360 Institute' %}{% endblock title %}
+
+{% block header %}
+<style>
+    /* Full screen override specifically for the login page */
+    #main { margin-left: 0 !important; padding: 0 !important; }
+    #top-navbar, .ec-sidebar, #side-nav { display: none !important; }
+    body.sidebar-collapsed #main { margin-left: 0 !important; }
+    .container-fluid#main-content { padding: 0 !important; }
+    body { background-color: #fff !important; min-height: 100vh; overflow-x: hidden; }
+    .login-wrapper { min-height: 100vh; overflow-x: hidden; display: flex; flex-direction: column; }
+    .institute-sidebar { padding: 3rem !important; }
+    @media (max-height: 800px) {
+        .display-5 { font-size: 2.2rem; }
+        .feature-icon { width: 32px; height: 32px; font-size: 0.9rem; }
+        .mb-5 { margin-bottom: 2rem !important; }
+        .mb-4 { margin-bottom: 1.5rem !important; }
+        .auth-form-container { padding-top: 2rem !important; }
+    }
+</style>
+{% endblock header %}
+
+{% block sidebar %}{% endblock sidebar %}
+{% block topbar %}{% endblock topbar %}
+
+{% block content %}
+<div class="login-wrapper">
+    <div class="row g-0 min-vh-100">
+        
+        <!-- ── LEFT SIDE: BRANDING/INSTITUTE SHOWCASE ── -->
+        <div class="col-lg-5 d-none d-lg-flex flex-column justify-content-between position-relative overflow-hidden institute-sidebar" 
+             style="background: linear-gradient(145deg, #0A1128 0%, #1a2952 100%);">
+            
+            <!-- Decorative abstract background meshes -->
+            <div class="position-absolute" style="width: 800px; height: 800px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.05); top: -200px; left: -200px;"></div>
+            <div class="position-absolute" style="width: 600px; height: 600px; border-radius: 50%; border: 1px dashed rgba(255,255,255,0.03); top: -100px; left: -100px;"></div>
+            <div class="position-absolute" style="width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(245,166,35,0.08) 0%, rgba(0,0,0,0) 70%); top: 10%; right: -10%;"></div>
+            
+            <div class="position-relative z-index-1 p-5 d-flex flex-column h-100 text-white">
+                
+                <!-- Institute Crest/Logo -->
+                <div class="mb-4 d-flex justify-content-center" style="margin-left: -1.5rem; margin-right: -1.5rem;">
+                    <img src="{% static 'img/rise360-logo.png' %}" alt="RISE360 Institute" 
+                         style="width: 100%; max-width: 180px; height: auto;">
+                </div>
+
+                <!-- Main Value Proposition -->
+                <div class="mb-auto mt-4">
+                    <h1 class="display-5 fw-bold mb-3 pe-4" style="font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -1px; line-height: 1.2;">
+                        Master the <span class="text-warning">Enrolled Agent</span> Exam.
+                    </h1>
+                    <p class="mb-4" style="color: rgba(255,255,255,0.75); font-size: 1rem; line-height: 1.6; max-width: 420px;">
+                        Access your exclusive learner dashboard, track your readiness, and experience our industry-leading simulations.
+                    </p>
+                    
+                    <!-- Trust Badges Grid -->
+                    <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr; max-width: 400px;">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="feature-icon"><i class="fas fa-chart-line text-success"></i></div>
+                            <div>
+                                <h6 class="fw-bold mb-0">98%</h6>
+                                <p class="small text-white-50 mb-0">Pass Rate</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="feature-icon"><i class="fas fa-globe-americas text-info"></i></div>
+                            <div>
+                                <h6 class="fw-bold mb-0">2,500+</h6>
+                                <p class="small text-white-50 mb-0">Tax Pros</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="feature-icon"><i class="fas fa-layer-group text-purple" style="color:#a855f7;"></i></div>
+                            <div>
+                                <h6 class="fw-bold mb-0">8+ Topics</h6>
+                                <p class="small text-white-50 mb-0">Modules</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="feature-icon"><i class="fas fa-laptop-code text-warning"></i></div>
+                            <div>
+                                <h6 class="fw-bold mb-0">24/7</h6>
+                                <p class="small text-white-50 mb-0">Practice</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Removed Testimonial/Accreditation block -->
+
+            </div>
+        </div>
+
+        <!-- ── RIGHT SIDE: AUTHENTICATION FORM ── -->
+        <div class="col-12 col-lg-7 d-flex align-items-start justify-content-center bg-white position-relative pt-lg-5">
+            
+            <!-- Mobile header -->
+            <div class="d-lg-none w-100 p-3 border-bottom d-flex align-items-center justify-content-center bg-white position-absolute top-0">
+                <img src="{% static 'img/rise360-logo.png' %}" alt="RISE360 Institute" style="height: 50px; width: auto;">
+            </div>
+            
+            <div class="w-100 p-4 p-sm-5 auth-form-container" style="max-width: 460px; margin-top: 5vh;">
+                
+                <!-- Avatar & Welcome -->
+                <div class="text-center mb-3">
+                    <div class="auth-avatar shadow-sm mx-auto mb-2" style="width: 72px; height: 72px;">
+                        <svg viewBox="0 0 100 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="display: block;">
+                            <circle cx="50" cy="38" r="22" fill="#cbd5e1"/>
+                            <path d="M50 65 C 20 65, 10 95, 10 100 L 90 100 C 90 95, 80 65, 50 65 Z" fill="#cbd5e1"/>
+                        </svg>
+                    </div>
+                    <h2 class="fw-bold mb-1" style="font-family: 'Plus Jakarta Sans', sans-serif; color: #0A1128;">Learning Portal Access</h2>
+                    <p class="text-muted small">For Enrolled Agent Candidates & Alumni</p>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show border-0 rounded-3 shadow-sm mb-3" role="alert" style="background-color: #fef2f2; border-left: 4px solid #ef4444 !important; color: #991b1b; padding: 0.75rem 1rem;">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <small class="fw-medium">{{ message }}</small>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding: 0.8rem;"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form action="{% url 'login' %}" method="POST" id="login-form">{% csrf_token %}
+                    
+                    <!-- Email -->
+                    <div class="form-group mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase tracking-wider" for="email">
+                            Email
+                        </label>
+                        <div class="input-group input-group-lg login-input-group">
+                            <span class="input-group-text bg-transparent border-end-0 text-muted ps-4">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" name="email" id="email" class="form-control border-start-0 ps-2" 
+                                   placeholder="learner@rise360institute.com" required>
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label text-muted small fw-bold text-uppercase tracking-wider mb-0" for="password">
+                                Password
+                            </label>
+                            <a href="{% url 'password_reset' %}" class="small text-decoration-none fw-semibold" style="color: #3B82F6;">
+                                Forgot password ?
+                            </a>
+                        </div>
+                        <div class="input-group input-group-lg login-input-group">
+                            <span class="input-group-text bg-transparent border-end-0 text-muted ps-4">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" name="password" id="password" class="form-control border-start-0 border-end-0 ps-2" 
+                                   placeholder="••••••••" required>
+                            <span class="input-group-text bg-transparent border-start-0 text-muted pe-4" 
+                                  style="cursor: pointer;" onclick="togglePassword()">
+                                <i class="far fa-eye" id="toggleIcon"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-3 mt-1">
+                        <input class="form-check-input custom-checkbox" type="checkbox" id="rememberMe" style="cursor: pointer; width: 1.1em; height: 1.1em;">
+                        <label class="form-check-label text-muted ms-2" for="rememberMe" style="cursor: pointer; font-size: 0.9rem;">
+                            Stay signed in on this device
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 py-3 shadow-none border-0 mb-3 auth-submit-btn" id="login-btn">
+                        <span>Access Portal</span>
+                        <i class="fas fa-arrow-right ms-2 transition-transform"></i>
+                    </button>
+
+                    <div class="text-center">
+                        <p class="text-muted mb-0 small">
+                            Not enrolled yet? 
+                            <a href="{% url 'register' %}" class="fw-bold text-decoration-none ms-1" style="color: #3b82f6;">
+                                Apply for Admission (Free)
+                            </a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Professional Footer -->
+            <div class="position-absolute bottom-0 w-100 pb-3 mt-4 text-center d-none d-md-block" style="border-top: 1px solid #f1f5f9; background: #fff;">
+                <div class="d-flex justify-content-center gap-4 pt-3 small fw-semibold text-muted">
+                    <span><i class="fas fa-shield-alt text-success me-1"></i> SSL Secured</span>
+                    <span><i class="far fa-copyright me-1"></i> 2026 RISE360 Institute</span>
+                    <a href="#" class="text-muted text-decoration-none hover-underline"><i class="fas fa-headset me-1"></i>Help Desk</a>
+                    <a href="#" class="text-muted text-decoration-none hover-underline"><i class="fas fa-file-shield me-1"></i>Privacy Policy</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body { background-color: #fff; font-family: 'Inter', sans-serif; }
+    
+    .tracking-wider { letter-spacing: 0.05em; }
+    .backdrop-blur { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .text-white-75 { color: rgba(255,255,255,0.75); }
+    .hover-underline:hover { text-decoration: underline !important; color: #0A1128 !important; }
+
+    /* Left Sidebar Custom Elements */
+    .institute-crest {
+        width: 56px; height: 56px; background: rgba(245,158,11,0.15);
+        border: 1px solid rgba(245,158,11,0.3); border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 24px; box-shadow: 0 4px 12px rgba(245,158,11,0.2);
+    }
+    .feature-icon {
+        width: 36px; height: 36px; background: rgba(255,255,255,0.1);
+        border-radius: 10px; display: flex; align-items: center; justify-content: center;
+        font-size: 14px; flex-shrink: 0;
+    }
+
+    /* Avatar & Auth Form */
+    .auth-avatar {
+        border-radius: 50%; overflow: hidden;
+        border: 3px solid #f8fafc; background-color: #f1f5f9;
+        display: flex; align-items: flex-end; justify-content: center;
+    }
+    .sso-btn {
+        border-radius: 12px; font-weight: 600; padding: 12px 16px;
+        background: #f8fafc; border-color: #e2e8f0; color: #475569;
+        transition: all 0.2s;
+    }
+    .sso-btn:hover { background: #f1f5f9; border-color: #cbd5e1; color: #0f172a; }
+    
+    .auth-divider {
+        display: flex; align-items: center; text-align: center; color: #94a3b8; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .auth-divider::before, .auth-divider::after {
+        content: ''; flex: 1; border-bottom: 1px solid #e2e8f0;
+    }
+    .auth-divider::before { margin-right: .5em; }
+    .auth-divider::after { margin-left: .5em; }
+
+    /* Inputs */
+    .login-input-group .form-control,
+    .login-input-group .input-group-text {
+        border-color: #e2e8f0; border-width: 2px;
+        transition: all 0.2s ease-in-out; background-color: #f8fafc;
+        border-radius: 12px; font-size: 0.95rem; font-weight: 500;
+    }
+    .login-input-group .input-group-text:first-child { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+    .login-input-group .form-control { border-radius: 0; }
+    .login-input-group .input-group-text:last-child { border-top-left-radius: 0; border-bottom-left-radius: 0; border-radius: 12px; }
+    
+    .login-input-group:focus-within .form-control,
+    .login-input-group:focus-within .input-group-text {
+        border-color: #3B82F6; background-color: #ffffff;
+    }
+    .login-input-group .form-control:focus { box-shadow: none; }
+    
+    /* Button Styles */
+    .custom-checkbox:checked { background-color: #3B82F6; border-color: #3B82F6; }
+    
+    .auth-submit-btn {
+        background: #0A1128; border-radius: 12px; font-weight: 700;
+        font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 0.02em;
+        color: #fff; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex; justify-content: center; align-items: center;
+    }
+    .auth-submit-btn:hover {
+        background: #16213E; transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(10, 17, 40, 0.3) !important;
+    }
+    .auth-submit-btn:hover .transition-transform { transform: translateX(5px); }
+    .auth-submit-btn:active { transform: translateY(0); }
+    
+    .auth-submit-btn.disabled {
+        background: #64748B; opacity: 0.8; cursor: not-allowed;
+        transform: none !important; box-shadow: none !important;
+    }
+</style>
+
+<script>
+    function togglePassword() {
+        const passwordField = document.getElementById('password');
+        const icon = document.getElementById('toggleIcon');
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordField.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    $('#login-form').submit(function() {
+        const btn = $('#login-btn');
+        btn.addClass('disabled').html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> <span>Verifying Access...</span>');
+    });
+</script>
+{% endblock content %}

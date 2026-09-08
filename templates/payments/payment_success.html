@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card border-0 shadow-lg p-5 rounded-4 bg-white">
+                <div class="d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; background-color: #dcfce7; border-radius: 50%;">
+                    <i class="fas fa-check-circle text-success fs-1"></i>
+                </div>
+                <h2 class="fw-bold text-dark mb-2">Payment Successful!</h2>
+                <p class="text-muted mb-4">Thank you for subscribing to RISE360 Institute. Your MCQ preparation plan is now activated. You have full access to MCQs, practice questions, and exam simulations.</p>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <a href="{% url 'ea_home' %}" class="btn btn-outline-dark w-100 py-2.5 rounded-3 fw-bold">
+                            Go to Dashboard
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'billing' %}" class="btn btn-primary w-100 py-2.5 rounded-3 fw-bold border-0" style="background-color: #0A1128;">
+                            View Billing
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

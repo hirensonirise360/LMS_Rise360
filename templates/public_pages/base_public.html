@@ -1,0 +1,334 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>{% block title %}RISE360 Institute — Next-Generation Learning Management Platform{% endblock %}</title>
+
+    <!-- Dynamic Meta -->
+    <meta name="description" content="{% block meta_description %}Empower your learning journey with RISE360 Institute's feature-rich Learning Management System. Explore interactive courses, study materials, and real-time progress analytics.{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}learning management system, LMS platform, online courses, education portal, study resources, RISE360 Institute{% endblock %}">
+    <meta name="author" content="RISE360 Institute">
+    <meta name="robots" content="index, follow">
+
+    <!-- Canonical -->
+    {% block canonical %}<link rel="canonical" href="{{ request.build_absolute_uri }}">{% endblock %}
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:title" content="{% block og_title %}RISE360 Institute — Learning Management Platform{% endblock %}">
+    <meta property="og:description" content="{% block og_desc %}Explore interactive courses, comprehensive study resources, and progress tracking at RISE360 Institute.{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% static 'img/og-image.png' %}{% endblock %}">
+    <meta property="og:site_name" content="RISE360 Institute">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block tw_title %}RISE360 Institute — Online Learning Platform{% endblock %}">
+    <meta name="twitter:description" content="{% block tw_desc %}Interactive learning platform with courses, study guides, and progress tracking.{% endblock %}">
+    <meta name="twitter:image" content="{% block tw_image %}{% static 'img/og-image.png' %}{% endblock %}">
+
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-5.3.2/css/bootstrap.min.css' %}">
+
+    <!-- Page-specific schema / head extras -->
+    {% block schema %}{% endblock %}
+
+    <style>
+        :root {
+            --hks-navy: #0f172a;
+            --hks-blue: #1e40af;
+            --hks-gold: #f59e0b;
+            --hks-green: #10b981;
+            --hks-light: #f8fafc;
+        }
+
+        * { font-family: 'Inter', sans-serif; }
+        body { background: #ffffff; color: #1e293b; }
+
+        /* ── PUBLIC NAVBAR ── */
+        .pub-navbar {
+            background: #0d1b2a;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 12px 0;
+        }
+        .pub-navbar .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none !important;
+        }
+        .pub-navbar .navbar-brand img {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+        }
+        .pub-navbar .navbar-brand span {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+        }
+        .pub-navbar .navbar-brand span em {
+            font-style: normal;
+            color: var(--hks-gold);
+        }
+        .pub-navbar .nav-link {
+            color: rgba(255,255,255,0.75) !important;
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 8px 16px !important;
+            border-radius: 8px;
+            transition: all 0.2s;
+            text-decoration: none !important;
+        }
+        .pub-navbar .nav-link:hover { color: #fff !important; background: rgba(255,255,255,0.07); }
+        .pub-navbar .btn-login {
+            background: transparent;
+            border: 1.5px solid rgba(255,255,255,0.25);
+            color: #fff !important;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 8px 20px;
+            transition: all 0.2s;
+            text-decoration: none !important;
+            display: inline-block;
+        }
+        .pub-navbar .btn-login:hover {
+            border-color: var(--hks-gold);
+            color: var(--hks-gold) !important;
+            text-decoration: none !important;
+        }
+        .pub-navbar .btn-cta {
+            background: var(--hks-gold);
+            color: #0d1b2a !important;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 20px;
+            border: none;
+            transition: all 0.2s;
+            text-decoration: none !important;
+            display: inline-block;
+        }
+        .pub-navbar .btn-cta:hover {
+            background: #e08e00;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(245,158,11,0.35);
+            text-decoration: none !important;
+        }
+
+        /* ── HERO ── */
+        .hero-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-gradient::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 60% 50%, rgba(245,158,11,0.12) 0%, transparent 65%);
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(245,158,11,0.15);
+            border: 1px solid rgba(245,158,11,0.3);
+            color: var(--hks-gold);
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        .hero-title {
+            font-size: clamp(2rem, 5vw, 3.4rem);
+            font-weight: 900;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+            color: #fff;
+        }
+        .hero-title .highlight { color: var(--hks-gold); }
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.75);
+            line-height: 1.7;
+            max-width: 620px;
+        }
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--hks-gold);
+            line-height: 1;
+        }
+        .stat-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(255,255,255,0.6);
+            margin-top: 4px;
+        }
+
+        /* ── SECTIONS ── */
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--hks-gold);
+            margin-bottom: 12px;
+        }
+        .section-title {
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--hks-navy);
+        }
+
+        /* ── FEATURE CARDS ── */
+        .feature-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 28px 24px;
+            transition: all 0.3s;
+            background: #fff;
+            height: 100%;
+        }
+        .feature-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); border-color: var(--hks-gold); }
+        .feature-icon {
+            width: 56px; height: 56px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 18px;
+        }
+
+        /* ── TESTIMONIALS ── */
+        .testimonial-card {
+            background: var(--hks-navy);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 28px;
+            position: relative;
+        }
+        .testimonial-card::before { content: '"'; position: absolute; top: -10px; left: 24px; font-size: 5rem; color: var(--hks-gold); opacity: 0.3; line-height: 1; font-family: Georgia, serif; }
+        .testimonial-text { color: rgba(255,255,255,0.85); line-height: 1.7; font-size: 0.95rem; }
+        .testimonial-author { font-weight: 700; color: #fff; margin-top: 16px; font-size: 0.9rem; }
+
+        /* ── ACCORDION FAQ ── */
+        .faq-accordion .accordion-button { font-weight: 600; font-size: 0.95rem; background: #fff; }
+        .faq-accordion .accordion-button:not(.collapsed) { background: #fff3cd; color: #92400e; box-shadow: none; }
+
+        /* ── FOOTER ── */
+        .pub-footer { background: var(--hks-navy); color: rgba(255,255,255,0.6); }
+        .pub-footer a { color: rgba(255,255,255,0.6) !important; text-decoration: none; transition: color 0.2s; }
+        .pub-footer a:hover { color: var(--hks-gold) !important; }
+        .pub-footer .footer-brand { font-size: 1.3rem; font-weight: 800; color: #fff; }
+        .pub-footer .footer-brand span { color: var(--hks-gold); }
+
+        /* ── CTA SECTION ── */
+        .cta-section { background: linear-gradient(135deg, #1e40af, #0f172a); }
+        .btn-gold { background: var(--hks-gold); color: #0f172a !important; font-weight: 700; border-radius: 10px; padding: 14px 32px; font-size: 1rem; border: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: inline-flex; align-items: center; gap: 8px; text-decoration: none !important; position: relative; z-index: 10; cursor: pointer; }
+        .btn-gold:hover { background: #f59e0b; transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 24px rgba(245,158,11,0.4); }
+        .btn-outline-white { border: 2px solid rgba(255,255,255,0.4); color: #fff !important; font-weight: 600; border-radius: 10px; padding: 14px 32px; font-size: 1rem; background: transparent; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: inline-flex; align-items: center; gap: 8px; text-decoration: none !important; position: relative; z-index: 10; cursor: pointer; }
+        .btn-outline-white:hover { border-color: #fff; background: rgba(255,255,255,0.1); transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 24px rgba(255,255,255,0.15); }
+    </style>
+    {% include 'security_scripts.html' %}
+</head>
+
+<body>
+    <!-- ── PUBLIC NAVBAR ── -->
+    <nav class="pub-navbar navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'ea_public_home' %}">
+                <img src="{% static 'img/rise360-logo.png' %}" alt="RISE360 Institute Logo" style="height:42px;width:42px;border-radius:6px;object-fit:cover;">
+                <span>RISE360 <em>Institute</em></span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#pubNav" aria-label="Toggle navigation">
+                <i class="fas fa-bars text-white"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="pubNav">
+                <ul class="navbar-nav mx-auto gap-2">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'ea_public_home' %}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'blog_list' %}">Blog & Resources</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About Us</a></li>
+                </ul>
+                <div class="d-flex gap-2 mt-3 mt-lg-0 align-items-center">
+                    <a href="{% url 'login' %}" class="btn-login">Learner Login</a>
+                    <a href="{% url 'register' %}" class="btn-cta">Get Started Free →</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── MAIN CONTENT ── -->
+    <main id="pub-main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ── FOOTER ── -->
+    <footer class="pub-footer py-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-5">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <img src="{% static 'img/rise360-logo.png' %}" alt="RISE360 Institute Logo" style="height:36px;width:36px;border-radius:5px;object-fit:cover;" loading="lazy">
+                        <span class="footer-brand">RISE360 <span>Institute</span></span>
+                    </div>
+                    <p style="font-size:0.88rem; line-height:1.8; max-width:420px;">A next-generation Learning Management System designed to empower learners and instructors with interactive courses, study guides, and progress tracking tools.</p>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <h6 class="text-white fw-700 mb-3" style="font-size:0.8rem; letter-spacing:0.08em; text-transform:uppercase;">Quick Links</h6>
+                    <ul class="list-unstyled" style="font-size:0.85rem;">
+                        <li class="mb-2"><a href="{% url 'ea_public_home' %}">Home</a></li>
+                        <li class="mb-2"><a href="{% url 'blog_list' %}">Blog &amp; Articles</a></li>
+                        <li class="mb-2"><a href="{% url 'about' %}">About RISE360</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-6">
+                    <h6 class="text-white fw-700 mb-3" style="font-size:0.8rem; letter-spacing:0.08em; text-transform:uppercase;">Get Started</h6>
+                    <p style="font-size:0.85rem;">Join RISE360 Institute today and access your interactive learner portal.</p>
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+                        <a href="{% url 'register' %}" class="btn-gold" style="padding:10px 20px; font-size:0.85rem;">Register Free →</a>
+                        <a href="{% url 'login' %}" class="btn-outline-white" style="padding:10px 20px; font-size:0.85rem;">Portal Login</a>
+                    </div>
+                </div>
+            </div>
+            <hr style="border-color:rgba(255,255,255,0.1); margin: 40px 0 24px;">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <p class="mb-0" style="font-size:0.8rem;">© {% now "Y" %} RISE360 Institute. All rights reserved.</p>
+                <p class="mb-0" style="font-size:0.8rem;">Next-Generation Learning Management System</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'vendor/jquery-3.7.1/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap-5.3.2/js/bootstrap.bundle.min.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

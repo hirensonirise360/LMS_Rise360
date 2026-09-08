@@ -1,0 +1,81 @@
+<!-- SECURITY HARDENING: Anti-Cheat & Protection Scripts -->
+<style>
+  /* Disable text selection and drag site-wide */
+  * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Allow text selection only in input fields */
+  input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  
+  /* Disable Print */
+  @media print { 
+    body { display: none !important; } 
+  }
+</style>
+
+<script>
+// 1. DISABLE CONSOLE OUTPUT (Production only)
+if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+  const noop = () => {};
+  ['log','warn','error','info','debug','table','dir','trace','group',
+   'groupEnd','groupCollapsed','count','time','timeEnd','assert']
+  .forEach(method => { console[method] = noop; });
+}
+
+// 2. DISABLE RIGHT-CLICK
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// 3. DISABLE KEYBOARD SHORTCUTS
+document.addEventListener('keydown', function(e) {
+  // Block F12
+  if (e.key === 'F12') { e.preventDefault(); return false; }
+  // Block Ctrl+Shift+I / J / C / K
+  if (e.ctrlKey && e.shiftKey && ['I','J','C','K'].includes(e.key.toUpperCase())) {
+    e.preventDefault(); return false;
+  }
+  // Block Ctrl+U (view source)
+  if (e.ctrlKey && e.key.toLowerCase() === 'u') {
+    e.preventDefault(); return false;
+  }
+  // Block Ctrl+S (save page)
+  if (e.ctrlKey && e.key.toLowerCase() === 's') {
+    e.preventDefault(); return false;
+  }
+  // Block Ctrl+A (select all)
+  if (e.ctrlKey && e.key.toLowerCase() === 'a') {
+    e.preventDefault(); return false;
+  }
+  // Block Ctrl+P (print)
+  if (e.ctrlKey && e.key.toLowerCase() === 'p') {
+    e.preventDefault(); return false;
+  }
+});
+
+// 4. DISABLE PRINT VIA JS
+window.onbeforeprint = function() { document.body.style.display = 'none'; };
+window.onafterprint  = function() { document.body.style.display = '';     };
+
+// 5. DEVTOOLS DETECTION
+(function() {
+  const threshold = 160;
+  function detectDevTools() {
+    const widthDiff = window.outerWidth - window.innerWidth > threshold;
+    const heightDiff = window.outerHeight - window.innerHeight > threshold;
+    if (widthDiff || heightDiff) {
+      document.body.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;
+        height:100vh;font-family:sans-serif;font-size:20px;color:#333;">
+          ⚠️ Access Restricted. Please close Developer Tools to continue.
+        </div>`;
+    }
+  }
+  setInterval(detectDevTools, 1000);
+})();
+</script>

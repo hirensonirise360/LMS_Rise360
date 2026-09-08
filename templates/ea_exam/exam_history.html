@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Exam History | RISE360 Institute{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0"><i class="fas fa-history me-2 text-primary"></i>Exam History</h4>
+    <a href="{% url 'ea_home' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Back to Home</a>
+  </div>
+
+  {% if sessions %}
+  <div class="card border-0 shadow-sm" style="border-radius:12px;">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Date</th>
+            <th>Topic</th>
+            <th>Mode</th>
+            <th>Questions</th>
+            <th>Score</th>
+            <th>Time</th>
+            <th>Result</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for session in sessions %}
+          <tr>
+            <td><small class="text-muted">{{ session.started_at|date:"M d, Y" }}</small></td>
+            <td><span class="badge bg-primary">{{ session.part.name }}</span></td>
+            <td>
+              {% if session.mode == "exam" %}
+              <span class="badge bg-danger-subtle text-danger">Exam Sim</span>
+              {% else %}
+              <span class="badge bg-primary-subtle text-primary">Practice</span>
+              {% endif %}
+            </td>
+            <td>{{ session.total_correct }}/{{ session.num_questions }}</td>
+            <td>
+              <span class="fw-bold {% if session.score >= 70 %}text-success{% elif session.score >= 50 %}text-warning{% else %}text-danger{% endif %}">
+                {% if session.score is not None %}{{ session.score|floatformat:1 }}%{% else %}—{% endif %}
+              </span>
+            </td>
+            <td><small>{{ session.elapsed_minutes }}m</small></td>
+            <td>
+              {% if session.mode == "exam" %}
+                {% if session.score >= 70 %}
+                  <span class="badge bg-success">Pass</span>
+                {% else %}
+                  <span class="badge bg-danger">Fail</span>
+                {% endif %}
+              {% else %}
+                <span class="badge bg-secondary">—</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'session_results' session.id %}" class="btn btn-sm btn-outline-primary">View</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="fas fa-clipboard-list text-muted" style="font-size:4rem;opacity:.3;"></i>
+    <h5 class="mt-3 text-muted">No exam attempts yet.</h5>
+    <a href="{% url 'ea_home' %}" class="btn btn-primary mt-2">Start Practicing</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

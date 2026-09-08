@@ -1,0 +1,73 @@
+{% extends "public_pages/base_public.html" %}
+{% block title %}EA Exam Prep Blog — Study Guides & Tips | RISE360 Institute{% endblock %}
+{% block meta_description %}Explore RISE360 Institute's EA exam blog: how to become an enrolled agent, exam syllabus, salary data, EA vs CPA, passing score guides, and Part 1/2/3 practice questions.{% endblock %}
+{% block canonical %}<link rel="canonical" href="https://www.rise360institute.com/en/ea/blog/">{% endblock %}
+
+{% block schema %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://www.rise360institute.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog"
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div style="background:#f8fafc;padding:20px 0;border-bottom:1px solid #e2e8f0;">
+  <div class="container">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0" style="font-size:0.85rem;">
+      <li class="breadcrumb-item"><a href="{% url 'ea_public_home' %}">Home</a></li>
+      <li class="breadcrumb-item active">Blog</li>
+    </ol></nav>
+  </div>
+</div>
+
+<section class="py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-label">Enrolled Agent Resources</div>
+      <h1 class="section-title">EA Exam Preparation Blog &amp; Guides</h1>
+      <p class="text-muted mt-3" style="max-width:600px;margin:0 auto;">Expert articles on how to become an enrolled agent, EA exam syllabus, salary guides, study tips, and free practice questions for all 3 parts.</p>
+    </div>
+
+    <div class="row g-4">
+      {% for article in articles %}
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card h-100" style="display:flex;flex-direction:column;">
+          <span class="badge mb-3" style="background:#eff6ff;color:#1e40af;font-size:0.7rem;align-self:flex-start;">EA Exam Guide</span>
+          <h2 style="font-size:1rem;font-weight:700;line-height:1.5;margin-bottom:12px;flex-grow:1;">
+            <a href="{% url 'blog_detail' article.slug %}" style="text-decoration:none;color:inherit;">{{ article.title }}</a>
+          </h2>
+          <p class="text-muted" style="font-size:0.85rem;line-height:1.7;margin-bottom:16px;">{{ article.meta_description|truncatechars:100 }}</p>
+          <div class="d-flex justify-content-between align-items-center mt-auto">
+            <span style="font-size:0.75rem;color:#94a3b8;">{{ article.created_at|date:"M d, Y" }}</span>
+            <a href="{% url 'blog_detail' article.slug %}" style="font-weight:700;font-size:0.82rem;color:var(--hks-blue);">Read →</a>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center text-muted">Articles are being published. Check back soon!</div>
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-5 p-5 rounded-3" style="background:linear-gradient(135deg,#1e40af,#0f172a);color:#fff;">
+      <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:8px;">Ready to Practice with Free MCQs?</h2>
+      <p style="color:rgba(255,255,255,0.75);margin-bottom:24px;">Skip the reading and test yourself directly with our free enrolled agent practice questions.</p>
+      <a href="{% url 'free_practice_test' %}" class="btn-gold" style="text-decoration:none;border-radius:10px;padding:14px 32px;display:inline-block;">Try Free Practice Test →</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

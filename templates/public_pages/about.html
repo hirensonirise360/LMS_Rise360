@@ -1,0 +1,286 @@
+{% extends "public_pages/base_public.html" %}
+{% load static %}
+
+{% block title %}About RISE360 Institute — Founded by Hiren Soni CA, in Official Collaboration with Tom Norton CPA, EA{% endblock %}
+{% block meta_description %}Learn about RISE360 Institute — founded in 2025 by Hiren Soni, Chartered Accountant. Officially allied with EA expert Tom Norton CPA, EA for world-class Enrolled Agent exam preparation.{% endblock %}
+{% block canonical %}<link rel="canonical" href="https://www.rise360institute.com/ea/about/">{% endblock %}
+
+{% block schema %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  "name": "RISE360 Institute",
+  "url": "https://www.rise360institute.com",
+  "logo": "https://www.rise360institute.com/static/img/rise360-logo.png",
+  "foundingDate": "2025",
+  "sameAs": [
+    "https://www.facebook.com/rise360institute",
+    "https://www.linkedin.com/company/rise360institute",
+    "https://www.youtube.com/@rise360institute"
+  ],
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "India"
+  },
+  "founder": {
+    "@type": "Person",
+    "name": "Hiren Soni",
+    "jobTitle": "Founder & Chartered Accountant",
+    "sameAs": "https://www.rise360institute.com/en/ea/about/"
+  },
+  "description": "RISE360 Institute is a premier Enrolled Agent exam preparation platform founded in 2025, in official collaboration with Tom Norton CPA, EA, designed to provide high-quality free tax prep questions and adaptive LMS tools."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://www.rise360institute.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "About"
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── HERO BANNER ── -->
+<section style="background:linear-gradient(135deg, #0d1b2a 0%, #1a3355 60%, #0d1b2a 100%); position:relative; overflow:hidden; padding: 80px 0;">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%, rgba(245,158,11,0.1) 0%, transparent 60%);"></div>
+  <div class="container" style="position:relative;z-index:1;">
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb mb-0" style="font-size:0.8rem;">
+        <li class="breadcrumb-item"><a href="{% url 'ea_public_home' %}" style="color:rgba(255,255,255,0.5);text-decoration:none;">Home</a></li>
+        <li class="breadcrumb-item active" style="color:rgba(255,255,255,0.4);">About</li>
+      </ol>
+    </nav>
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25);color:#f59e0b;padding:6px 16px;border-radius:999px;font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:20px;">
+          <i class="fas fa-building-columns"></i> Our Story
+        </div>
+        <h1 style="font-size:clamp(2rem,4.5vw,3.2rem);font-weight:900;color:#fff;line-height:1.1;letter-spacing:-0.03em;margin-bottom:20px;">
+          Built by Practitioners,<br><span style="color:#f59e0b;">for EA Candidates.</span>
+        </h1>
+        <p style="color:rgba(255,255,255,0.7);font-size:1.05rem;line-height:1.8;max-width:560px;">
+          RISE360 Institute was founded with one mission — to make world-class Enrolled Agent exam preparation accessible, affordable, and effective for every serious candidate, anywhere in the world.
+        </p>
+      </div>
+      <div class="col-lg-5 text-center">
+        <img src="{% static 'img/rise360-logo.png' %}" alt="RISE360 Institute Logo" style="width:180px;height:180px;border-radius:20px;object-fit:cover;box-shadow:0 30px 80px rgba(0,0,0,0.4);border:3px solid rgba(245,158,11,0.3);">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOUNDING STORY ── -->
+<section style="padding:80px 0;background:#fff;">
+  <div class="container">
+    <div class="row g-5 align-items-center">
+      <div class="col-lg-6">
+        <div style="background:linear-gradient(135deg,#f8fafc,#fff);border:1px solid #e2e8f0;border-radius:24px;padding:48px 40px;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#0d1b2a,#f59e0b);"></div>
+          <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#f59e0b;margin-bottom:16px;">Est. 2025</div>
+          <h2 style="font-size:1.8rem;font-weight:900;color:#0d1b2a;letter-spacing:-0.02em;margin-bottom:20px;">The RISE360 Institute Story</h2>
+          <p style="color:#475569;line-height:1.9;font-size:0.95rem;margin-bottom:20px;">
+            RISE360 Institute was founded in <strong>2025</strong> with a clear vision: to create the most accessible and rigorous Accounting, Taxation, and Bookkeeping learning platform. What began as a passion project driven by the belief that quality professional education should be available to all has grown into a comprehensive learning platform trusted by learners and accounting professionals.
+          </p>
+          <p style="color:#475569;line-height:1.9;font-size:0.95rem;margin-bottom:20px;">
+            From day one, our approach has been simple — combine deep accounting and tax expertise with modern technology to create an adaptive, learner-first learning experience. Every question, explanation, and simulation in our platform is crafted for practical mastery.
+          </p>
+          <div style="display:flex;gap:32px;margin-top:32px;padding-top:28px;border-top:1px solid #e2e8f0;">
+            <div><div style="font-size:1.8rem;font-weight:900;color:#0d1b2a;">2025</div><div style="font-size:0.72rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">Year Founded</div></div>
+            <div><div style="font-size:1.8rem;font-weight:900;color:#0d1b2a;">2500+</div><div style="font-size:0.72rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">MCQs</div></div>
+            <div><div style="font-size:1.8rem;font-weight:900;color:#0d1b2a;">98%</div><div style="font-size:0.72rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">Pass Rate</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#f59e0b;margin-bottom:16px;">Our Mission</div>
+        <h2 style="font-size:1.6rem;font-weight:900;color:#0d1b2a;letter-spacing:-0.02em;margin-bottom:24px;">Democratizing Access to EA Exam Excellence</h2>
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <div style="display:flex;gap:16px;align-items:flex-start;">
+            <div style="width:44px;height:44px;background:#ecfdf5;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#10b981;font-size:1.1rem;"><i class="fas fa-graduation-cap"></i></div>
+            <div><strong style="display:block;margin-bottom:4px;color:#0d1b2a;">World-Class Content, Free to Start</strong><p style="color:#64748b;font-size:0.875rem;line-height:1.7;margin:0;">2500+ practice questions accessible for our learners. We believe the best prep should be available to all serious candidates.</p></div>
+          </div>
+          <div style="display:flex;gap:16px;align-items:flex-start;">
+            <div style="width:44px;height:44px;background:#eff6ff;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#3b82f6;font-size:1.1rem;"><i class="fas fa-brain"></i></div>
+            <div><strong style="display:block;margin-bottom:4px;color:#0d1b2a;">Adaptive, Technology-Driven Learning</strong><p style="color:#64748b;font-size:0.875rem;line-height:1.7;margin:0;">Our LMS tracks your progress in real time, identifies weak domains, and personalizes your study experience for maximum efficiency.</p></div>
+          </div>
+          <div style="display:flex;gap:16px;align-items:flex-start;">
+            <div style="width:44px;height:44px;background:#fefce8;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#ca8a04;font-size:1.1rem;"><i class="fas fa-handshake"></i></div>
+            <div><strong style="display:block;margin-bottom:4px;color:#0d1b2a;">Expert Collaboration, Not Just Software</strong><p style="color:#64748b;font-size:0.875rem;line-height:1.7;margin:0;">Every piece of content is backed by real EA exam expertise and official collaboration with practicing tax professionals.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOUNDER ── -->
+<section style="padding:80px 0;background:#f8fafc;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#f59e0b;margin-bottom:12px;">Leadership</div>
+      <h2 style="font-size:clamp(1.6rem,3vw,2.2rem);font-weight:900;color:#0d1b2a;letter-spacing:-0.02em;">The Minds Behind RISE360 Institute</h2>
+    </div>
+
+    <div class="row g-5 justify-content-center">
+
+      <!-- Hiren Soni -->
+      <div class="col-lg-5">
+        <div style="background:#fff;border-radius:24px;padding:40px;box-shadow:0 4px 30px rgba(0,0,0,0.06);border:1px solid #e2e8f0;height:100%;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#0d1b2a,#1e40af);"></div>
+          <!-- Avatar initials -->
+          <div style="width:80px;height:80px;background:linear-gradient(135deg,#0d1b2a,#1e40af);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:900;color:#f59e0b;margin-bottom:24px;letter-spacing:-0.02em;">HS</div>
+          <div style="display:inline-block;background:#ecfdf5;color:#065f46;font-size:0.7rem;font-weight:700;padding:4px 12px;border-radius:999px;margin-bottom:16px;letter-spacing:0.05em;text-transform:uppercase;">Founder</div>
+          <h3 style="font-size:1.5rem;font-weight:900;color:#0d1b2a;margin-bottom:4px;">Hiren Soni</h3>
+          <p style="color:#f59e0b;font-weight:600;font-size:0.875rem;margin-bottom:20px;">Chartered Accountant &amp; Founder, RISE360 Institute</p>
+          <p style="color:#475569;line-height:1.85;font-size:0.9rem;margin-bottom:20px;">
+            Hiren Soni is a qualified <strong>Chartered Accountant</strong> with deep expertise in taxation and financial education. Driven by the belief that premium exam preparation should be accessible and not prohibitively expensive, he founded RISE360 Institute to bridge the gap between aspiring EA candidates and quality learning resources.
+          </p>
+          <p style="color:#475569;line-height:1.85;font-size:0.9rem;margin-bottom:24px;">
+            As a CA himself, Hiren brings a practitioner's perspective to every aspect of the platform — ensuring that concepts are explained with real-world relevance, not just academic theory. His vision is for RISE360 Institute to become the gold standard in EA exam preparation globally.
+          </p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <span style="background:#f1f5f9;color:#334155;font-size:0.75rem;padding:5px 12px;border-radius:6px;font-weight:600;">Chartered Accountant</span>
+            <span style="background:#f1f5f9;color:#334155;font-size:0.75rem;padding:5px 12px;border-radius:6px;font-weight:600;">EdTech Founder</span>
+            <span style="background:#f1f5f9;color:#334155;font-size:0.75rem;padding:5px 12px;border-radius:6px;font-weight:600;">Tax Education</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tom Norton -->
+      <div class="col-lg-5">
+        <div style="background:#fff;border-radius:24px;padding:40px;box-shadow:0 4px 30px rgba(0,0,0,0.06);border:1px solid #e2e8f0;height:100%;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#f59e0b,#d97706);"></div>
+          <!-- Avatar initials -->
+          <div style="width:80px;height:80px;background:linear-gradient(135deg,#92400e,#f59e0b);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:900;color:#fff;margin-bottom:24px;letter-spacing:-0.02em;">TN</div>
+          <div style="display:inline-block;background:#fff3cd;color:#92400e;font-size:0.7rem;font-weight:700;padding:4px 12px;border-radius:999px;margin-bottom:16px;letter-spacing:0.05em;text-transform:uppercase;">Official Collaborator</div>
+          <h3 style="font-size:1.5rem;font-weight:900;color:#0d1b2a;margin-bottom:4px;">Tom Norton</h3>
+          <p style="color:#f59e0b;font-weight:600;font-size:0.875rem;margin-bottom:20px;">CPA, EA — Expert Author &amp; Educator</p>
+          <p style="color:#475569;line-height:1.85;font-size:0.9rem;margin-bottom:20px;">
+            Tom Norton is a distinguished <strong>Certified Public Accountant (CPA)</strong> and <strong>Enrolled Agent (EA)</strong> with decades of experience in US federal taxation and IRS practice. He is the author of widely respected EA exam preparation books and lectures, known for his ability to make complex tax law concepts clear and approachable.
+          </p>
+          <p style="color:#475569;line-height:1.85;font-size:0.9rem;margin-bottom:24px;">
+            RISE360 Institute has officially allied with Tom Norton, integrating his <strong>lectures and study materials</strong> into our platform. This collaboration ensures our learners have access to the most authoritative and exam-relevant content available — the same materials trusted by thousands of EA candidates.
+          </p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <span style="background:#fff3cd;color:#92400e;font-size:0.75rem;padding:5px 12px;border-radius:6px;font-weight:600;">CPA, EA</span>
+            <span style="background:#fff3cd;color:#92400e;font-size:0.75rem;padding:5px 12px;border-radius:6px;font-weight:600;">Official EA Author</span>
+            <span style="background:#fff3cd;color:#92400e;font-size:0.75rem;padding:5px 12px;border-radius:6px;font-weight:600;">IRS Tax Expert</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── COLLABORATION BANNER ── -->
+<section style="background:linear-gradient(135deg,#0d1b2a,#1a3355);padding:70px 0;">
+  <div class="container">
+    <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:24px;padding:56px 48px;text-align:center;">
+      <div style="width:64px;height:64px;background:rgba(245,158,11,0.15);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:#f59e0b;margin:0 auto 24px;">
+        <i class="fas fa-handshake"></i>
+      </div>
+      <h2 style="font-size:clamp(1.5rem,3vw,2rem);font-weight:900;color:#fff;letter-spacing:-0.02em;margin-bottom:16px;">Official Collaboration with Tom Norton CPA, EA</h2>
+      <p style="color:rgba(255,255,255,0.7);max-width:680px;margin:0 auto 32px;line-height:1.85;font-size:0.975rem;">
+        RISE360 Institute has entered into an official collaboration with <strong style="color:#f59e0b;">Tom Norton CPA, EA</strong> — one of the most respected names in EA exam preparation. His books and lecture series are officially licensed and integrated into our learning management system, giving our learners access to the same expert-level instruction that has helped thousands of candidates pass the IRS Special Enrollment Examination.
+      </p>
+      <div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap;">
+        <div style="text-align:center;">
+          <div style="font-size:1.5rem;color:#f59e0b;margin-bottom:6px;"><i class="fas fa-book-open"></i></div>
+          <div style="color:#fff;font-weight:700;font-size:0.88rem;">Official Books</div>
+          <div style="color:rgba(255,255,255,0.5);font-size:0.78rem;">by Tom Norton CPA, EA</div>
+        </div>
+        <div style="width:1px;background:rgba(255,255,255,0.1);"></div>
+        <div style="text-align:center;">
+          <div style="font-size:1.5rem;color:#f59e0b;margin-bottom:6px;"><i class="fas fa-chalkboard-user"></i></div>
+          <div style="color:#fff;font-weight:700;font-size:0.88rem;">Video Lectures</div>
+          <div style="color:rgba(255,255,255,0.5);font-size:0.78rem;">Licensed for HKS Learners</div>
+        </div>
+        <div style="width:1px;background:rgba(255,255,255,0.1);"></div>
+        <div style="text-align:center;">
+          <div style="font-size:1.5rem;color:#f59e0b;margin-bottom:6px;"><i class="fas fa-certificate"></i></div>
+          <div style="color:#fff;font-weight:700;font-size:0.88rem;">Official Alliance</div>
+          <div style="color:rgba(255,255,255,0.5);font-size:0.78rem;">Formally established</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PLATFORM HIGHLIGHTS ── -->
+<section style="padding:80px 0;background:#fff;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#f59e0b;margin-bottom:12px;">What We Offer</div>
+      <h2 style="font-size:clamp(1.5rem,3vw,2rem);font-weight:900;color:#0d1b2a;letter-spacing:-0.02em;">Everything You Need to Pass the EA Exam</h2>
+    </div>
+    <div class="row g-4">
+      {% for icon,bg,clr,title,desc in highlights %}
+      <div class="col-md-6 col-lg-3">
+        <div style="border:1px solid #e2e8f0;border-radius:16px;padding:28px 22px;text-align:center;transition:all 0.3s;height:100%;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 40px rgba(0,0,0,0.08)';this.style.borderColor='#f59e0b'" onmouseout="this.style.transform='';this.style.boxShadow='';this.style.borderColor='#e2e8f0'">
+          <div style="width:52px;height:52px;background:{{bg}};color:{{clr}};border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin:0 auto 16px;"><i class="fas fa-{{icon}}"></i></div>
+          <h3 style="font-size:0.95rem;font-weight:800;color:#0d1b2a;margin-bottom:8px;">{{title}}</h3>
+          <p style="color:#64748b;font-size:0.825rem;line-height:1.7;margin:0;">{{desc}}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── EDITORIAL POLICY ── -->
+<section style="padding:60px 0;background:#ffffff;border-top:1px solid #e2e8f0;">
+  <div class="container" style="max-width:800px;">
+    <div style="text-align:center;margin-bottom:40px;">
+      <span style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#f59e0b;">Trust & Integrity</span>
+      <h2 style="font-size:1.8rem;font-weight:900;color:#0d1b2a;margin-top:8px;">Our Editorial Policy</h2>
+    </div>
+    <div style="color:#475569;line-height:1.85;font-size:0.95rem;">
+      <p>
+        At RISE360 Institute, we are committed to providing the most accurate, reliable, and up-to-date educational resources for IRS Enrolled Agent candidates. Taxation laws are dynamic, changing annually due to legislative acts, inflation index adjustments, and regulatory revisions. Here is how we maintain the absolute integrity of our content:
+      </p>
+      <ul style="padding-left:20px;" class="d-flex flex-column gap-3 mt-3">
+        <li>
+          <strong>Written by Tax Professionals:</strong> All study guides, syllabus outlines, and blog guides are authored by qualified tax professionals, including Chartered Accountants and Enrolled Agents with years of active tax experience.
+        </li>
+        <li>
+          <strong>Rigorous Fact-Checking:</strong> Content is peer-reviewed and cross-checked against official U.S. government sources, including the Internal Revenue Code (IRC), Treasury Department Circular 230, and official IRS publications (e.g., Pub 17, Pub 535).
+        </li>
+        <li>
+          <strong>Annual Updates:</strong> Our learning materials, practice question bank (2500+ MCQs), and mock Prometric simulations are updated every year during March and April to align with the new tax laws tested in the upcoming SEE testing window (May 1 – Feb 28).
+        </li>
+        <li>
+          <strong>Clear Citation of Sources:</strong> We cite official IRS forms, instruction booklets, and publications in all our materials to ensure learners can verify tax concepts directly from source regulations.
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section style="background:linear-gradient(135deg,#1e40af,#0d1b2a);padding:70px 0;text-align:center;">
+  <div class="container">
+    <h2 style="font-size:clamp(1.6rem,3vw,2.4rem);font-weight:900;color:#fff;letter-spacing:-0.02em;margin-bottom:16px;">Join the RISE360 Institute Community</h2>
+    <p style="color:rgba(255,255,255,0.7);max-width:520px;margin:0 auto 36px;font-size:1rem;line-height:1.7;">Start with free practice questions today. No credit card, no commitment — just the best EA exam prep available.</p>
+    <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
+      <a href="{% url 'register' %}" class="btn-gold" style="text-decoration:none;border-radius:10px;padding:14px 32px;display:inline-block;">Apply for Admission — Free</a>
+      <a href="{% url 'free_practice_test' %}" style="border:2px solid rgba(255,255,255,0.3);color:#fff;border-radius:10px;padding:14px 32px;text-decoration:none;font-weight:600;display:inline-block;transition:all 0.2s;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='rgba(255,255,255,0.3)'">Try Free MCQs</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

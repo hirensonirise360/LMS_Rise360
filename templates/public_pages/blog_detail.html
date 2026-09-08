@@ -1,0 +1,124 @@
+{% extends "public_pages/base_public.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block meta_description %}{{ article.meta_description }}{% endblock %}
+{% block og_title %}{{ article.title }} | RISE360 Institute{% endblock %}
+{% block og_desc %}{{ article.meta_description }}{% endblock %}
+{% block canonical %}<link rel="canonical" href="https://www.rise360institute.com/ea/blog/{{ article.slug }}/">{% endblock %}
+
+{% block schema %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.rise360institute.com/en/ea/blog/{{ article.slug }}/"
+  },
+  "headline": "{{ article.title|escapejs }}",
+  "description": "{{ article.meta_description|escapejs }}",
+  "author": {
+    "@type": "Person",
+    "name": "Hiren Soni",
+    "jobTitle": "Founder & Chartered Accountant",
+    "sameAs": "https://www.rise360institute.com/en/ea/about/"
+  },
+  "editor": {
+    "@type": "Person",
+    "name": "Tom Norton",
+    "jobTitle": "CPA, EA & Tax Educator"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "RISE360 Institute",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.rise360institute.com/static/img/rise360-logo.png"
+    }
+  },
+  "datePublished": "{{ article.created_at|date:'c' }}",
+  "dateModified": "{{ article.updated_at|date:'c' }}"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://www.rise360institute.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://www.rise360institute.com/en/ea/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{{ article.title|truncatechars:50|escapejs }}"
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div style="background:#f8fafc;padding:20px 0;border-bottom:1px solid #e2e8f0;">
+  <div class="container">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0" style="font-size:0.85rem;">
+      <li class="breadcrumb-item"><a href="{% url 'ea_public_home' %}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'blog_list' %}">Blog</a></li>
+      <li class="breadcrumb-item active">{{ article.title|truncatechars:40 }}</li>
+    </ol></nav>
+  </div>
+</div>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <span class="badge mb-3" style="background:#eff6ff;color:#1e40af;font-size:0.75rem;">EA Exam Guide</span>
+        <h1 style="font-size:clamp(1.6rem,3vw,2.3rem);font-weight:900;letter-spacing:-0.02em;line-height:1.2;margin-bottom:16px;">{{ article.title }}</h1>
+        
+        <!-- Reusable EEAT Expert Box (Author & Reviewer) -->
+        {% include 'snippets/author_reviewer_box.html' %}
+
+        <div class="article-content" style="font-size:1rem;line-height:1.9;color:#334155;">
+          {{ article.content|safe }}
+        </div>
+
+        <!-- Internal links cluster -->
+        <div class="mt-5 p-4 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0;">
+          <h3 style="font-size:1rem;font-weight:700;margin-bottom:16px;">Continue Your EA Exam Preparation</h3>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'free_practice_test' %}" class="btn btn-sm btn-warning fw-600">Free Practice Test</a>
+            <a href="{% url 'part_detail' 1 %}" class="btn btn-sm btn-outline-secondary">Part 1 — Individual Tax</a>
+            <a href="{% url 'part_detail' 2 %}" class="btn btn-sm btn-outline-secondary">Part 2 — Business Tax</a>
+            <a href="{% url 'part_detail' 3 %}" class="btn btn-sm btn-outline-secondary">Part 3 — Representation</a>
+          </div>
+        </div>
+
+        <!-- CTA after article -->
+        <div class="mt-5 p-5 rounded-3 text-center" style="background:linear-gradient(135deg,#1e40af,#0f172a);color:#fff;">
+          <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:8px;">Ready to Practice with Real EA Exam MCQs?</h2>
+          <p style="color:rgba(255,255,255,0.75);margin-bottom:24px;font-size:0.9rem;">Join the learners using RISE360 Institute's free enrolled agent prep platform.</p>
+          <div class="d-flex flex-wrap justify-content-center gap-3">
+            <a href="{% url 'register' %}" class="btn-gold" style="text-decoration:none;border-radius:8px;padding:12px 28px;display:inline-block;">Register Free →</a>
+            <a href="{% url 'free_practice_test' %}" style="border:2px solid rgba(255,255,255,0.4);color:#fff;border-radius:8px;padding:12px 28px;text-decoration:none;font-weight:600;display:inline-block;">Try Free MCQs</a>
+          </div>
+        </div>
+
+        <!-- Related articles -->
+        <div class="mt-5">
+          <h3 style="font-size:1rem;font-weight:700;margin-bottom:16px;">More EA Exam Guides</h3>
+          <a href="{% url 'blog_list' %}" style="color:var(--hks-blue);font-weight:600;">← Browse all EA exam articles</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

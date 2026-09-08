@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Flashcards — {{ part.name }} | RISE360 Institute{% endblock %}
+
+{% block header %}
+<style>
+  .flashcard-container { perspective: 1000px; width: 100%; max-width: 600px; margin: 0 auto; }
+  .flashcard { position: relative; width: 100%; height: 350px; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 16px; margin-bottom: 32px; }
+  .flashcard.is-flipped { transform: rotateX(180deg); }
+  .flashcard-face { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; border-radius: 16px; background: white; border: 2px solid #e3e6f0; }
+  .flashcard-back { transform: rotateX(180deg); background: #f8f9fc; border-color: #4e73df; }
+  
+  .srs-buttons { display: none; opacity: 0; transition: opacity 0.3s; }
+  .srs-buttons.show { display: flex; opacity: 1; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4" id="top-action-bar">
+    <h4 class="fw-bold mb-0">Review: {{ part.name }}</h4>
+    <button class="btn btn-outline-danger btn-sm px-2.5 py-1.5 fw-semibold" style="font-size:0.75rem; border-radius:6px;" onclick="confirmExit()"><i class="fas fa-sign-out-alt me-1.5"></i>Exit Session</button>
+  </div>
+  
+  <div class="text-center mb-4" id="status-text">
+    <p class="text-muted">Card <span id="current-idx">1</span> of {{ cards|length }}</p>
+  </div>
+
+  <div class="flashcard-container" id="fc-container">
+    <div class="flashcard" id="the-card" onclick="flipCard()">
+      <!-- Front -->
+      <div class="flashcard-face" id="card-front">
+        <span class="badge bg-primary-subtle text-primary position-absolute top-0 start-50 translate-middle-x mt-3">Front</span>
+        <h4 class="fw-bold mb-0" id="front-text"></h4>
+      </div>
+      <!-- Back -->
+      <div class="flashcard-face flashcard-back" id="card-back">
+        <span class="badge bg-success-subtle text-success position-absolute top-0 start-50 translate-middle-x mt-3">Back (Answer)</span>
+        <h5 class="fw-semibold mb-0 text-dark" id="back-text" style="line-height:1.6;"></h5>
+      </div>
+    </div>
+
+    <!-- Navigation & Completion Buttons -->
+    <div class="d-flex justify-content-between align-items-center mb-3 gap-2">
+      <button class="btn btn-outline-secondary px-3 py-2 fw-semibold btn-sm flex-fill" id="prev-btn" onclick="prevCard()"><i class="fas fa-arrow-left me-1.5"></i>Previous</button>
+      <button class="btn btn-warning px-3 py-2 fw-bold btn-sm text-dark flex-fill" onclick="confirmComplete()"><i class="fas fa-check-circle me-1.5"></i>Complete</button>
+      <button class="btn btn-outline-secondary px-3 py-2 fw-semibold btn-sm flex-fill" id="next-btn" onclick="nextCard()">Next<i class="fas fa-arrow-right ms-1.5"></i></button>
+    </div>
+
+    <!-- Rating Buttons (SM-2) -->
+    <div class="srs-buttons gap-2 justify-content-center mb-3" id="srs-panel">
+      <button class="btn btn-lg btn-danger flex-fill" onclick="rateCard(3)">Hard</button>
+      <button class="btn btn-lg btn-warning text-dark flex-fill" onclick="rateCard(4)">Average</button>
+      <button class="btn btn-lg btn-success flex-fill" onclick="rateCard(5)">Easy</button>
+    </div>
+    <div class="text-center mt-2 text-muted small" id="flip-hint">Click the card to flip between Question and Answer</div>
+  </div>
+
+  <!-- End State / Report Dashboard -->
+  <div id="end-state" class="d-none">
+    <div class="card border-0 shadow-lg p-4 mx-auto" style="border-radius: 16px; max-width: 600px; background: #ffffff;">
+      <div class="text-center mb-4">
+        <div class="stats-icon bg-success-subtle text-success p-3 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px; background-color: #d1fae5; color: #059669;">
+          <i class="fas fa-check-double fs-4"></i>
+        </div>
+        <h4 class="fw-bold text-dark">Session Summary Report</h4>
+        <p class="text-muted small mb-0">Here is a summary of your performance during this session.</p>
+      </div>
+
+      <!-- KPI Summary Row -->
+      <div class="row g-2 mb-4 text-center">
+        <div class="col-6 col-md-3">
+          <div class="bg-light p-2.5 rounded-3 border">
+            <span class="text-muted small d-block mb-0.5" style="font-size:0.68rem; text-transform:uppercase; font-weight:700;">Total Cards</span>
+            <span class="fw-black text-dark fs-5" id="report-total" style="font-weight: 800;">0</span>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="bg-light p-2.5 rounded-3 border">
+            <span class="text-muted small d-block mb-0.5" style="font-size:0.68rem; text-transform:uppercase; font-weight:700;">Viewed</span>
+            <span class="fw-black text-primary fs-5" id="report-viewed" style="font-weight: 800;">0</span>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="bg-light p-2.5 rounded-3 border">
+            <span class="text-muted small d-block mb-0.5" style="font-size:0.68rem; text-transform:uppercase; font-weight:700;">Completion</span>
+            <span class="fw-black text-success fs-5" id="report-completion" style="font-weight: 800;">0%</span>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="bg-light p-2.5 rounded-3 border">
+            <span class="text-muted small d-block mb-0.5" style="font-size:0.68rem; text-transform:uppercase; font-weight:700;">Total Rated</span>
+            <span class="fw-black text-dark fs-5" id="report-total-ratings" style="font-weight: 800;">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Ratings Count -->
+      <h6 class="fw-bold mb-3 text-dark" style="font-size:0.9rem;"><i class="fas fa-chart-pie me-1 text-muted"></i> Ratings Breakdown</h6>
+      <div class="row g-2 mb-4">
+        <div class="col-4">
+          <div class="card border-0 p-2.5 h-100 text-center" style="border-radius:10px; border-left: 4px solid #10b981 !important; background: #f0fdf4;">
+            <span class="fw-bold text-success text-uppercase" style="font-size:0.65rem; letter-spacing:0.05em;">Easy</span>
+            <div class="h3 fw-black text-success mt-1.5 mb-0" id="report-easy" style="font-weight: 800;">0</div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="card border-0 p-2.5 h-100 text-center" style="border-radius:10px; border-left: 4px solid #f59e0b !important; background: #fffdf5;">
+            <span class="fw-bold text-warning text-uppercase" style="font-size:0.65rem; letter-spacing:0.05em;">Average</span>
+            <div class="h3 fw-black text-warning mt-1.5 mb-0" id="report-average" style="font-weight: 800;">0</div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="card border-0 p-2.5 h-100 text-center" style="border-radius:10px; border-left: 4px solid #ef4444 !important; background: #fef2f2;">
+            <span class="fw-bold text-danger text-uppercase" style="font-size:0.65rem; letter-spacing:0.05em;">Hard</span>
+            <div class="h3 fw-black text-danger mt-1.5 mb-0" id="report-hard" style="font-weight: 800;">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- List of Reviewed Cards -->
+      <h6 class="fw-bold mb-2 text-dark" style="font-size:0.9rem;"><i class="fas fa-history me-1 text-muted"></i> Review History</h6>
+      <div class="border rounded-3 bg-light scroll-container p-2 mb-4" id="report-history-container" style="max-height: 180px; overflow-y: auto;">
+        <!-- Filled dynamically -->
+      </div>
+
+      <div class="row g-2">
+        <div class="col-6">
+          <button class="btn btn-outline-primary w-100 fw-bold py-2" onclick="location.reload()" style="border-radius:8px; font-size:0.85rem;">
+            <i class="fas fa-redo me-2"></i>Study Again
+          </button>
+        </div>
+        <div class="col-6">
+          <a href="{% url 'flashcard_home' %}" class="btn btn-primary w-100 fw-bold py-2" style="border-radius:8px; font-size:0.85rem;">
+            <i class="fas fa-arrow-left me-2"></i>Back to Decks
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Exit Confirmation Modal -->
+<div class="modal fade" id="exitConfirmModal" tabindex="-1" aria-labelledby="exitConfirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; background: #ffffff;">
+      <div class="modal-body text-center p-4">
+        <div class="d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: #fee2e2; border-radius: 50%;">
+          <i class="fas fa-sign-out-alt text-danger fs-3"></i>
+        </div>
+        <h5 class="fw-bold text-dark mb-2" style="font-family:'Plus Jakarta Sans',sans-serif; font-size:1.15rem;">Exit Study Session?</h5>
+        <p class="text-muted small mb-4 px-2" style="line-height: 1.5; font-size:0.8rem;">Are you sure you want to exit this session? Your current progress won't be saved in the session report.</p>
+        <div class="row g-2">
+          <div class="col-6">
+            <button type="button" class="btn btn-light w-100 py-2.5 fw-bold" data-bs-dismiss="modal" style="border-radius: 12px; font-size:0.8rem; background-color: #f1f5f9; border: none; color: #475569;">Cancel</button>
+          </div>
+          <div class="col-6">
+            <a href="{% url 'flashcard_home' %}" class="btn btn-danger w-100 py-2.5 fw-bold" style="border-radius: 12px; font-size:0.8rem; border: none; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">Yes, Exit</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Complete Confirmation Modal -->
+<div class="modal fade" id="completeConfirmModal" tabindex="-1" aria-labelledby="completeConfirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; background: #ffffff;">
+      <div class="modal-body text-center p-4">
+        <div class="d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: #fef3c7; border-radius: 50%;">
+          <i class="fas fa-check-circle text-warning fs-3" style="color:#d97706 !important;"></i>
+        </div>
+        <h5 class="fw-bold text-dark mb-2" style="font-family:'Plus Jakarta Sans',sans-serif; font-size:1.15rem;">Complete Session?</h5>
+        <p class="text-muted small mb-4 px-2" style="line-height: 1.5; font-size:0.8rem;">Are you sure you want to complete this session early? You will see a summary report of the cards viewed and rated so far.</p>
+        <div class="row g-2">
+          <div class="col-6">
+            <button type="button" class="btn btn-light w-100 py-2.5 fw-bold" data-bs-dismiss="modal" style="border-radius: 12px; font-size:0.8rem; background-color: #f1f5f9; border: none; color: #475569;">Cancel</button>
+          </div>
+          <div class="col-6">
+            <button type="button" class="btn btn-warning text-dark w-100 py-2.5 fw-bold" onclick="executeComplete()" style="border-radius: 12px; font-size:0.8rem; border: none; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); background-color: #f59e0b;">Complete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+const cards = {{ cards_json|safe }};
+let currentIndex = 0;
+const cardEl = document.getElementById('the-card');
+const srsPanel = document.getElementById('srs-panel');
+const flipHint = document.getElementById('flip-hint');
+
+// Track viewed cards and ratings in this session
+const viewedIndices = new Set();
+const sessionRatings = {};
+
+function renderCard() {
+  if (currentIndex >= cards.length) {
+    showReport();
+    return;
+  }
+  
+  // Track viewed index
+  viewedIndices.add(currentIndex);
+  
+  const c = cards[currentIndex];
+  document.getElementById('front-text').textContent = c.front;
+  document.getElementById('back-text').textContent = c.back;
+  document.getElementById('current-idx').textContent = currentIndex + 1;
+  cardEl.classList.remove('is-flipped');
+  srsPanel.classList.remove('show');
+  flipHint.classList.remove('d-none');
+
+  // Disable / Enable Navigation Buttons
+  document.getElementById('prev-btn').disabled = (currentIndex === 0);
+  document.getElementById('next-btn').disabled = (currentIndex === cards.length - 1);
+}
+
+function flipCard() {
+  if (cardEl.classList.contains('is-flipped')) {
+    cardEl.classList.remove('is-flipped');
+    srsPanel.classList.remove('show');
+    flipHint.classList.remove('d-none');
+  } else {
+    cardEl.classList.add('is-flipped');
+    flipHint.classList.add('d-none');
+    setTimeout(() => { srsPanel.classList.add('show'); }, 300);
+  }
+}
+
+function prevCard() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderCard();
+  }
+}
+
+function nextCard() {
+  if (currentIndex < cards.length - 1) {
+    currentIndex++;
+    renderCard();
+  }
+}
+
+function rateCard(quality) {
+  const c = cards[currentIndex];
+  const fd = new FormData();
+  fd.append('card_id', c.id);
+  fd.append('quality', quality);
+  fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+  
+  // Record rating locally
+  let ratingStr = 'hard';
+  if (quality === 5) ratingStr = 'easy';
+  else if (quality === 4) ratingStr = 'average';
+  sessionRatings[c.id] = ratingStr;
+  
+  fetch('{% url "flashcard_review" %}', {method: 'POST', body: fd})
+    .then(r => r.json())
+    .then(data => {
+      currentIndex++;
+      renderCard();
+    });
+}
+
+function confirmExit() {
+  const exitModal = new bootstrap.Modal(document.getElementById('exitConfirmModal'));
+  exitModal.show();
+}
+
+function confirmComplete() {
+  const completeModal = new bootstrap.Modal(document.getElementById('completeConfirmModal'));
+  completeModal.show();
+}
+
+function executeComplete() {
+  const modalEl = document.getElementById('completeConfirmModal');
+  const modalInstance = bootstrap.Modal.getInstance(modalEl);
+  if (modalInstance) {
+    modalInstance.hide();
+  }
+  showReport();
+}
+
+function showReport() {
+  // Hide active components
+  document.getElementById('fc-container').classList.add('d-none');
+  document.getElementById('status-text').classList.add('d-none');
+  document.getElementById('top-action-bar').classList.add('d-none');
+  
+  // Show report container
+  document.getElementById('end-state').classList.remove('d-none');
+
+  // Compute stats
+  const total = cards.length;
+  const viewed = viewedIndices.size;
+  const completionPct = total > 0 ? Math.round((viewed / total) * 100) : 0;
+  
+  let easyCount = 0;
+  let averageCount = 0;
+  let hardCount = 0;
+  
+  Object.values(sessionRatings).forEach(r => {
+    if (r === 'easy') easyCount++;
+    else if (r === 'average') averageCount++;
+    else if (r === 'hard') hardCount++;
+  });
+  
+  const totalRatings = easyCount + averageCount + hardCount;
+
+  // Render values
+  document.getElementById('report-total').textContent = total;
+  document.getElementById('report-viewed').textContent = viewed;
+  document.getElementById('report-completion').textContent = `${completionPct}%`;
+  document.getElementById('report-total-ratings').textContent = totalRatings;
+  
+  document.getElementById('report-easy').textContent = easyCount;
+  document.getElementById('report-average').textContent = averageCount;
+  document.getElementById('report-hard').textContent = hardCount;
+
+  // Build list of reviewed cards
+  const historyContainer = document.getElementById('report-history-container');
+  historyContainer.innerHTML = '';
+  
+  if (viewed === 0) {
+    historyContainer.innerHTML = '<div class="text-muted small text-center p-3">No cards viewed in this session.</div>';
+  } else {
+    cards.forEach((c, idx) => {
+      if (viewedIndices.has(idx)) {
+        const rating = sessionRatings[c.id];
+        let ratingBadge = '<span class="badge bg-secondary" style="font-size:0.65rem;">Not Rated</span>';
+        if (rating === 'easy') {
+          ratingBadge = '<span class="badge bg-success" style="font-size:0.65rem;">Easy</span>';
+        } else if (rating === 'average') {
+          ratingBadge = '<span class="badge bg-warning text-dark" style="font-size:0.65rem;">Average</span>';
+        } else if (rating === 'hard') {
+          ratingBadge = '<span class="badge bg-danger" style="font-size:0.65rem;">Hard</span>';
+        }
+        
+        const row = document.createElement('div');
+        row.className = 'd-flex align-items-center justify-content-between p-2 border-bottom border-light-subtle';
+        row.style.fontSize = '0.78rem';
+        row.innerHTML = `
+          <div class="text-truncate me-3 fw-medium text-dark" style="max-width: 70%;" title="${c.front}">${idx + 1}. ${c.front}</div>
+          <div>${ratingBadge}</div>
+        `;
+        historyContainer.appendChild(row);
+      }
+    });
+  }
+}
+
+// Initial render
+if (cards.length > 0) renderCard();
+</script>
+{% endblock %}

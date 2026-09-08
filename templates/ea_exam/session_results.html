@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Session Results | RISE360 Institute{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Score Summary Card -->
+  <div class="row mb-4">
+    <div class="col-lg-8 mx-auto">
+      <div class="card border-0 shadow text-center {% if passed == True %}border-success{% elif passed == False %}border-danger{% endif %}" style="border-radius:14px;overflow:hidden;">
+        <div class="card-body p-5" style="background: linear-gradient(135deg, {% if passed == True %}#1cc88a,#17a673{% elif passed == False %}#e74a3b,#be2617{% else %}#4e73df,#224abe{% endif %});">
+          <div class="text-white mb-3">
+            {% if passed == True %}
+              <i class="fas fa-trophy" style="font-size:4rem;"></i>
+              <h2 class="fw-bold mt-2">Passed!</h2>
+            {% elif passed == False %}
+              <i class="fas fa-times-circle" style="font-size:4rem;"></i>
+              <h2 class="fw-bold mt-2">Not Passed</h2>
+            {% else %}
+              <i class="fas fa-star" style="font-size:4rem;"></i>
+              <h2 class="fw-bold mt-2">Practice Complete</h2>
+            {% endif %}
+            <div class="display-4 fw-bold">{{ session.score|floatformat:1 }}%</div>
+            <p class="opacity-75">{{ correct }} correct out of {{ total }} questions</p>
+          </div>
+        </div>
+        <div class="card-footer bg-white p-3">
+          <div class="row text-center">
+            <div class="col-3 border-end">
+              <div class="fw-bold text-success fs-4">{{ correct }}</div><small>Correct</small>
+            </div>
+            <div class="col-3 border-end">
+              <div class="fw-bold text-danger fs-4">{{ wrong }}</div><small>Wrong</small>
+            </div>
+            <div class="col-3 border-end">
+              <div class="fw-bold text-warning fs-4">{{ unanswered }}</div><small>Unanswered</small>
+            </div>
+            <div class="col-3">
+              <div class="fw-bold text-muted fs-4">{{ session.elapsed_minutes }}m</div><small>Time</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Domain Breakdown -->
+  {% if domain_stats %}
+  <div class="row mb-4">
+    <div class="col-lg-8 mx-auto">
+      <div class="card border-0 shadow-sm" style="border-radius:12px;">
+        <div class="card-header bg-white border-bottom">
+          <h6 class="fw-bold mb-0"><i class="fas fa-chart-pie me-2 text-primary"></i>Performance by Domain</h6>
+        </div>
+        <div class="card-body p-3">
+          {% for domain_name, stats in domain_stats.items %}
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="small fw-semibold">{{ domain_name }}</span>
+              <span class="badge {% if stats.accuracy >= 70 %}bg-success{% elif stats.accuracy >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                {{ stats.accuracy }}% ({{ stats.correct }}/{{ stats.total }})
+              </span>
+            </div>
+            <div class="progress" style="height:10px;border-radius:6px;">
+              <div class="progress-bar {% if stats.accuracy >= 70 %}bg-success{% elif stats.accuracy >= 50 %}bg-warning{% else %}bg-danger{% endif %}"
+                   style="width:{{ stats.accuracy }}%"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Question-by-Question Review -->
+  <div class="row">
+    <div class="col-lg-10 mx-auto">
+      <div class="card border-0 shadow-sm" style="border-radius:12px;">
+        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold mb-0"><i class="fas fa-list me-2 text-primary"></i>Question Review</h6>
+          <div class="d-flex gap-2">
+            <span class="badge bg-success"><i class="fas fa-check me-1"></i>Correct</span>
+            <span class="badge bg-danger"><i class="fas fa-times me-1"></i>Incorrect</span>
+            <span class="badge bg-warning text-dark"><i class="fas fa-flag me-1"></i>Flagged</span>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          {% for r in results %}
+          <div class="p-3 border-bottom {% if not forloop.last %}{% endif %}">
+            <div class="d-flex gap-3 align-items-start">
+              <span class="badge rounded-circle {% if r.is_correct %}bg-success{% elif not r.was_answered %}bg-secondary{% else %}bg-danger{% endif %} flex-shrink-0 mt-1" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">
+                {% if r.is_correct %}<i class="fas fa-check"></i>{% elif not r.was_answered %}?{% else %}<i class="fas fa-times"></i>{% endif %}
+              </span>
+              <div class="flex-grow-1">
+                <div class="d-flex gap-2 mb-1 flex-wrap">
+                  <span class="badge bg-primary-subtle text-primary small">{{ r.question.domain.name }}</span>
+                  {% if r.is_flagged %}<span class="badge bg-warning text-dark small"><i class="fas fa-flag me-1"></i>Flagged</span>{% endif %}
+                  <span class="badge {% if r.question.difficulty == 'easy' %}bg-success{% elif r.question.difficulty == 'medium' %}bg-warning text-dark{% else %}bg-danger{% endif %} small">{{ r.question.get_difficulty_display }}</span>
+                </div>
+                <p class="mb-2 fw-semibold">{{ r.question.question_text }}</p>
+
+                {% if not r.is_correct %}
+                <div class="row g-2 mb-2">
+                  {% if r.chosen_choice %}
+                  <div class="col-md-6">
+                    <div class="alert alert-danger py-2 mb-0 small"><i class="fas fa-times me-1"></i><strong>Your answer:</strong> {{ r.chosen_choice.choice_text }}</div>
+                  </div>
+                  {% endif %}
+                  {% if r.correct_choice %}
+                  <div class="col-md-6">
+                    <div class="alert alert-success py-2 mb-0 small"><i class="fas fa-check me-1"></i><strong>Correct:</strong> {{ r.correct_choice.choice_text }}</div>
+                  </div>
+                  {% endif %}
+                </div>
+                {% endif %}
+
+                {% if r.question.explanation %}
+                <div class="alert alert-info py-2 mb-0 small"><i class="fas fa-book-open me-1"></i>{{ r.question.explanation }}</div>
+                {% endif %}
+                {% if r.question.irs_pub_ref %}
+                <div class="mt-1"><small class="text-muted"><i class="fas fa-bookmark me-1"></i>Reference: {{ r.question.irs_pub_ref }}</small></div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex gap-2 justify-content-center mt-4 flex-wrap">
+        <a href="{% url 'part_study' session.part.number %}" class="btn btn-primary px-4 py-2">
+          <i class="fas fa-arrow-left me-2"></i>Back
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

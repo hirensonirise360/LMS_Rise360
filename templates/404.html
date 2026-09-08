@@ -1,0 +1,18 @@
+{% extends 'error_handler_base.html' %}
+{% load i18n static %}
+{% block content %}
+<div class="text-center" style="padding: 80px 20px;">
+    <div style="width:100px;height:100px;border-radius:50%;background:rgba(239,68,68,0.1);display:flex;align-items:center;justify-content:center;margin: 0 auto 24px;">
+        <i class="fas fa-map-signs" style="font-size:2.8rem;color:#EF4444;"></i>
+    </div>
+    <h1 style="font-size:5rem;font-weight:900;color:#0A1128;margin-bottom:0;line-height:1;">404</h1>
+    <h2 style="font-size:1.5rem;font-weight:700;color:#0A1128;margin-bottom:12px;">Page Not Found</h2>
+    <p class="text-muted" style="max-width:400px;margin:0 auto 32px;">{% trans "Looks like the page you're looking for does not exist or has been moved." %}</p>
+    <a href="/" class="btn btn-dark px-5 py-3 rounded-3 fw-bold">
+        <i class="fas fa-arrow-left me-2"></i>{% trans 'Return to Home' %}
+    </a>
+    <div class="mt-5 pt-4" style="border-top:1px solid #eee;">
+        <img src="{% static 'img/rise360-logo.png' %}" alt="RISE360 Institute" style="height:50px;width:auto;opacity:0.6;">
+    </div>
+</div>
+{% endblock %}

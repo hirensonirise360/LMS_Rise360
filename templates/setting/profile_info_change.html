@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}Account Settings | RISE360 Institute{% endblock %}
+
+{% block content %}
+<div class="uea-theme" style="max-width: 860px; margin: 0 auto; padding: 24px 16px 40px;">
+
+  <!-- Header -->
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(102,126,234,0.3);">
+      <i class="fas fa-user-edit text-white" style="font-size: 1.1rem;"></i>
+    </div>
+    <div>
+      <h1 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--ec-navy); margin: 0;">Account Settings</h1>
+      <p class="text-muted mb-0" style="font-size: 0.82rem;">Manage your profile information and photo</p>
+    </div>
+  </div>
+
+  {% include 'snippets/messages.html' %}
+
+  <form action="" method="POST" enctype="multipart/form-data" id="profile-form">
+    {% csrf_token %}
+
+    <div class="row g-4">
+
+      <!-- LEFT: Avatar Card -->
+      <div class="col-md-4">
+        <div class="ec-card p-4 text-center h-100" style="border-radius: 18px;">
+          <p style="font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #94a3b8; margin-bottom: 14px;">
+            <i class="fas fa-camera me-1"></i> Profile Photo
+          </p>
+
+          <!-- Avatar Preview -->
+          <div style="position: relative; display: inline-block; margin-bottom: 18px;">
+            <div id="avatar-ring" style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid #e2e8f0; overflow: hidden; margin: 0 auto; background: #f1f5f9; position: relative;">
+              <img id="avatar-preview"
+                src="{% if request.user.profile_picture_url %}{{ request.user.profile_picture_url }}{% elif request.user.picture %}{{ request.user.picture.url }}{% else %}{% static 'img/default_avatar.png' %}{% endif %}"
+                style="width: 100%; height: 100%; object-fit: cover;"
+                onerror="this.src='{% static 'img/default_avatar.png' %}'">
+            </div>
+            <!-- Camera Icon Overlay -->
+            <label for="{{ form.picture.id_for_label }}" style="
+              position: absolute; bottom: 4px; right: 4px;
+              width: 32px; height: 32px; border-radius: 50%;
+              background: #3B82F6; color: white; border: 2px solid white;
+              display: flex; align-items: center; justify-content: center;
+              cursor: pointer; font-size: 0.75rem;
+              box-shadow: 0 2px 8px rgba(59,130,246,0.4);
+              transition: all 0.2s;">
+              <i class="fas fa-camera"></i>
+            </label>
+          </div>
+
+          <!-- Hidden file input rendered by Django -->
+          <div style="display: none;">{{ form.picture }}</div>
+
+          <p style="font-size: 0.76rem; color: #94a3b8; margin-bottom: 6px;">
+            Click the <i class="fas fa-camera text-primary"></i> icon to change
+          </p>
+          <p style="font-size: 0.72rem; color: #cbd5e1;">
+            JPG, PNG, GIF or WEBP · Max 5MB
+          </p>
+
+          {% if request.user.profile_picture_url %}
+          <div style="font-size: 0.72rem; color: #10B981; margin-top: 4px;">
+            <i class="fas fa-cloud me-1"></i> Saved to cloud
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- RIGHT: Info Card -->
+      <div class="col-md-8">
+        <div class="ec-card p-4" style="border-radius: 18px;">
+          <p style="font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #94a3b8; margin-bottom: 18px;">
+            <i class="fas fa-id-card me-1"></i> Personal Information
+          </p>
+
+          <div class="row g-3">
+            <div class="col-12">{{ form.email|as_crispy_field }}</div>
+            <div class="col-sm-6">{{ form.first_name|as_crispy_field }}</div>
+            <div class="col-sm-6">{{ form.last_name|as_crispy_field }}</div>
+            <div class="col-sm-6">{{ form.gender|as_crispy_field }}</div>
+            <div class="col-sm-6">{{ form.phone|as_crispy_field }}</div>
+            <div class="col-12">{{ form.address|as_crispy_field }}</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex align-items-center gap-3 mt-4">
+      <button type="submit" class="btn fw-bold px-5 py-2" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; box-shadow: 0 4px 14px rgba(102,126,234,0.35); font-size: 0.9rem; transition: all 0.2s;">
+        <i class="fas fa-save me-2"></i>Save Changes
+      </button>
+      <a href="{% url 'change_password' %}" class="btn btn-outline-secondary fw-bold px-4 py-2" style="border-radius: 10px; font-size: 0.9rem;">
+        <i class="fas fa-lock me-2"></i>Change Password
+      </a>
+    </div>
+
+  </form>
+</div>
+
+<style>
+  .form-label { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #64748b; }
+  .form-control, .form-select { border-radius: 9px; border: 2px solid #e2e8f0; font-size: .88rem; transition: border-color .2s; }
+  .form-control:focus, .form-select:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,.12); }
+  #avatar-ring { transition: border-color .2s; }
+  #avatar-ring:hover { border-color: #3B82F6; }
+</style>
+
+{% block js %}
+<script>
+  // Live avatar preview on file selected
+  document.addEventListener('DOMContentLoaded', function () {
+    const fileInput = document.getElementById('{{ form.picture.id_for_label }}');
+    const preview = document.getElementById('avatar-preview');
+    const ring = document.getElementById('avatar-ring');
+
+    if (fileInput) {
+      fileInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+
+        // Validate size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Image is too large. Please choose a file under 5MB.');
+          this.value = '';
+          return;
+        }
+
+        // Show local preview instantly
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          preview.src = e.target.result;
+          ring.style.borderColor = '#10B981';
+          ring.style.borderWidth = '3px';
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  });
+</script>
+{% endblock js %}
+{% endblock content %}

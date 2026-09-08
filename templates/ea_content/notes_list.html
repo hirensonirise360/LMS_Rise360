@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Study Notes | RISE360 Institute{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0"><i class="fas fa-sticky-note me-2 text-warning"></i>Study Notes</h4>
+    <div class="d-flex gap-2">
+      <a href="{% url 'note_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i>New Note</a>
+      <a href="{% url 'ea_home' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Home</a>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
+    <div class="card-body p-3">
+      <form method="get" class="row g-2">
+        <div class="col-md-5">
+          <input type="text" name="q" class="form-control" placeholder="Search notes..." value="{{ q }}">
+        </div>
+        <div class="col-md-3">
+          <select name="part" class="form-select">
+            <option value="">All Topics</option>
+            {% for p in parts %}
+            <option value="{{ p.number }}" {% if part_filter == p.number|stringformat:"s" %}selected{% endif %}>{{ p.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4 d-grid">
+          <button type="submit" class="btn btn-secondary"><i class="fas fa-search me-1"></i>Filter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    {% for note in notes %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100 border-0 shadow-sm" style="border-radius:12px;">
+        <div class="card-body">
+          <div class="d-flex justify-content-between mb-2">
+            {% if note.is_admin_note %}
+            <span class="badge bg-info text-dark"><i class="fas fa-crown me-1"></i>Official</span>
+            {% else %}
+            <span class="badge bg-secondary"><i class="fas fa-user me-1"></i>Personal</span>
+            {% endif %}
+            <small class="text-muted">{{ note.updated_at|date:"M d" }}</small>
+          </div>
+          <h5 class="fw-bold mb-2">
+            <a href="{% url 'note_detail' note.id %}" class="text-decoration-none text-dark">{{ note.title }}</a>
+          </h5>
+          {% if note.part %}<span class="badge bg-primary-subtle text-primary mb-2">{{ note.part.name }}</span>{% endif %}
+          <p class="small text-muted mb-0" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
+            {{ note.content|striptags }}
+          </p>
+        </div>
+        <div class="card-footer bg-white border-top-0 pt-0">
+          <a href="{% url 'note_detail' note.id %}" class="btn btn-sm btn-outline-primary w-100">View Note</a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+      <p class="text-muted mb-0">No notes found. Create your first personal note!</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

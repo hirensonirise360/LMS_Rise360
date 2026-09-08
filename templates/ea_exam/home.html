@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load ea_extras %}
+
+{% block title %}RISE360 Institute — Learner Learning Portal{% endblock %}
+
+{% block content %}
+<div class="uea-theme p-3">
+
+  <!-- ── HERO SECTION ── -->
+  <div class="ec-hero mb-3 animate-fade-in shadow-sm" style="min-height: 160px; padding: 16px 32px;">
+    <div class="ec-hero-content">
+      <div class="ec-hero-badge animate-slide-up">
+        <i class="fas fa-graduation-cap me-2"></i> CA Firm Learning Portal
+      </div>
+      <h1 class="visually-hidden">RISE360 Institute — CA Firm Learner Learning Dashboard</h1>
+      <h2 class="ec-greeting animate-slide-up">
+        Welcome to <span style="color: #F5A623;">RISE360 INSTITUTE</span>, {{ request.user.first_name|upper|default:request.user.username|upper }}
+      </h2>
+
+      <a href="{% url 'part_study' active_part %}" class="ec-continue-btn animate-slide-up py-2 px-4" style="font-size: 14px;">
+        Continue Learning <i class="fas fa-arrow-right ms-2"></i>
+      </a>
+    </div>
+    <div class="d-none d-lg-block animate-fade-in shadow-lg profile-img-wrapper avatar border border-2 border-warning" style="width: 140px; height: 140px; position: absolute; right: 10%; top: 50%; transform: translateY(-50%); z-index: 10; border-radius: 50%; overflow: hidden; cursor: pointer; background-color: #0A1128; color: #f59e0b; font-weight: 900; font-size: 2.8rem; display: flex; align-items: center; justify-content: center;">
+        <span style="position: absolute; z-index: 1;">{{ request.user.get_initials }}</span>
+        <img id="dashboardProfileImg" src="{{ request.user.get_picture }}" alt="User Profile" style="width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 2; top: 0; left: 0;" onerror="this.style.display='none'">
+        
+        <div class="profile-img-overlay d-flex flex-column justify-content-center align-items-center" onclick="document.getElementById('profilePicInput').click();">
+            <i class="fas fa-camera text-white fs-3"></i>
+            <span class="text-white small fw-bold mt-1">Edit</span>
+        </div>
+    </div>
+    
+    <form id="profilePicForm" style="display: none;">
+        {% csrf_token %}
+        <input type="file" id="profilePicInput" name="picture" accept="image/*" onchange="uploadProfilePic()">
+    </form>
+    
+    <style>
+        .profile-img-wrapper .profile-img-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .profile-img-wrapper:hover .profile-img-overlay {
+            opacity: 1;
+        }
+    </style>
+  </div>
+
+  <!-- ── QUICK STATS ── -->
+  {% with active_pp=part_progress|get_item:active_part %}
+  <div class="row g-2 mb-3">
+    <div class="col-12 col-md-4">
+      <div class="ec-card p-3 d-flex align-items-center justify-content-between h-100">
+        <div>
+          <div class="text-muted small fw-bold text-uppercase mb-1">Questions Attempted</div>
+          <div class="h3 fw-800 mb-0">{{ active_pp.attempted|default:0 }}</div>
+        </div>
+        <div class="d-flex flex-column align-items-end justify-content-center">
+          <div style="width:48px;height:48px;border-radius:14px;background:rgba(59,130,246,0.1);display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-list-check" style="font-size:1.4rem;color:#3B82F6;"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="ec-card p-3 d-flex align-items-center justify-content-between h-100">
+        <div>
+          <div class="text-muted small fw-bold text-uppercase mb-1">Overall Accuracy</div>
+          <div class="h3 fw-800 mb-0">{{ active_pp.accuracy|default:0 }}%</div>
+        </div>
+        <div class="d-flex flex-column align-items-end justify-content-center gap-2">
+          <div style="width:48px;height:48px;border-radius:14px;background:rgba(16,185,129,0.1);display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-bullseye" style="font-size:1.4rem;color:#10B981;"></i>
+          </div>
+            {% if active_pp.accuracy|default:0 >= 75 %}
+            <div class="ec-badge-trend high mb-0">
+              <i class="fas fa-check me-1"></i> High
+            </div>
+            {% elif active_pp.accuracy|default:0 >= 50 %}
+            <div class="ec-badge-trend mb-0" style="background-color: var(--ec-amber-light, #FEF3C7); color: #B45309;">
+              <i class="fas fa-minus me-1"></i> Average
+            </div>
+            {% else %}
+            <div class="ec-badge-trend mb-0" style="background-color: #FEE2E2; color: #EF4444;">
+              <i class="fas fa-arrow-down me-1"></i> Low
+            </div>
+            {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="ec-card p-3 d-flex align-items-center justify-content-between h-100">
+        <div>
+          <div class="text-muted small fw-bold text-uppercase mb-1">Attempted / Total Practice</div>
+          <div class="h3 fw-800 mb-0">{{ active_pp.attempted|default:0 }} / {{ active_pp.total_q|default:0 }}</div>
+        </div>
+        <div class="d-flex flex-column align-items-end justify-content-center gap-2">
+          <div style="width:48px;height:48px;border-radius:14px;background:rgba(245,158,11,0.1);display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-chart-pie" style="font-size:1.4rem;color:#F59E0B;"></i>
+          </div>
+          <div class="ec-badge-trend info mb-0" style="background-color: var(--ec-sky-light); color: var(--ec-sky);">
+            <i class="fas fa-percentage me-1"></i> {{ active_pp.attempted_pct|floatformat:1|default:"0.0" }}%
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endwith %}
+
+  <!-- ── DYNAMIC LEARNING TOPICS / MODULES ── -->
+  <div class="d-flex justify-content-between align-items-end mb-3">
+    <div>
+        <h2 class="h5 fw-800 mb-0 text-navy">Learning Topics &amp; Modules</h2>
+        <p class="text-muted small mb-0">Select a topic to access study resources, video lessons, and practice assessments.</p>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    {% for part in all_parts %}
+    {% with pp=part_progress|get_item:part.number %}
+    <div class="col-md-6 col-lg-3">
+      <div class="v-journey-card {% if part.number == active_part %}active{% endif %} p-3 h-100 d-flex flex-column justify-content-between">
+        <div class="v-part-header mb-2">
+          <div>
+            <div class="v-part-title text-primary fw-800" style="font-size: 1.05rem;">{{ part.name }}</div>
+          </div>
+          {% if part.number == active_part %}
+          <div class="d-flex flex-column align-items-end gap-1">
+            <span class="badge bg-success text-white px-2 py-1" style="font-size: 10px; border-radius: 6px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);">ACTIVE</span>
+          </div>
+          {% else %}
+          <div class="d-flex align-items-start">
+            <form method="POST" action="{% url 'unlock_part' part.number %}">
+               {% csrf_token %}
+               <button type="submit" class="btn btn-sm" style="font-size: 11px; font-weight: 700; border-radius: 8px; background: rgba(59, 130, 246, 0.1); color: #3B82F6; border: 1px solid rgba(59, 130, 246, 0.2); transition: all 0.2s;">
+                 <i class="fas fa-play me-1"></i> SELECT
+               </button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="v-part-desc my-2 text-muted" style="font-size: 12px; line-height: 1.5; min-height: 48px;">
+          {{ part.description|default:"Comprehensive training module covering key accounting and professional practices." }}
+        </div>
+
+        <div class="v-ring-container my-2">
+          <svg width="70" height="70" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="60" fill="none" stroke="#EDF2F7" stroke-width="12" />
+            <circle cx="70" cy="70" r="60" fill="none" stroke="{% if part.number == active_part %}#10B981{% else %}#CBD5E0{% endif %}" 
+                    stroke-width="12" stroke-dasharray="377" 
+                    stroke-dashoffset="{{ 377|multiply:pp.attempted_pct|divide:100|subtract_from:377 }}" 
+                    stroke-linecap="round" transform="rotate(-90 70 70)" />
+          </svg>
+          <div class="v-ring-info">
+            <div class="v-ring-pct" style="font-size: 14px;">{{ pp.attempted_pct|floatformat:1 }}%</div>
+          </div>
+        </div>
+
+        <div class="mt-3">
+            {% if part.number == active_part %}
+            <a href="{% url 'part_study' part.number %}" class="v-btn-module py-2 text-center d-block text-decoration-none fw-bold" style="font-size: 13px; border-radius: 10px; background: #10B981; color: white;">
+                Open Module <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+            {% else %}
+            <a href="{% url 'part_study' part.number %}" class="v-btn-module py-2 text-center d-block text-decoration-none fw-bold" style="font-size: 13px; border-radius: 10px; background: #f1f5f9; color: #334155;">
+                View Module <i class="fas fa-folder-open ms-2"></i>
+            </a>
+            {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+
+  <!-- ── TODAY'S FOCUS ── -->
+  <div class="mb-2">
+    <h2 class="h4 fw-800 mb-1 text-navy">Today's Study Focus</h2>
+    <p class="text-muted small">Personalized learning actions based on your selected topic.</p>
+  </div>
+
+  <div class="row g-3 pb-3">
+    <div class="col-md-4">
+      <div class="focus-card h-100">
+        <div class="focus-icon" style="color: #F89B29; background: rgba(248, 155, 41, 0.1);">
+          <i class="fas fa-pencil-alt"></i>
+        </div>
+        <div class="focus-title">Practice Questions</div>
+        <div class="focus-desc">Practice questions tailored to your active learning topic and domain areas.</div>
+        <a href="{% url 'start_practice' active_part %}" class="focus-btn">Start Practice</a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="focus-card h-100">
+        <div class="focus-icon" style="color: #3B82F6; background: rgba(59, 130, 246, 0.1);">
+          <i class="fas fa-book-reader"></i>
+        </div>
+        <div class="focus-title">Flashcards &amp; Notes</div>
+        <div class="focus-desc">Review study cards and lesson notes for faster concept retention.</div>
+        <a href="{% url 'flashcard_home' %}" class="focus-btn focus-btn-filled">Open Flashcards</a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="focus-card h-100">
+        <div class="focus-icon" style="color: #10B981; background: rgba(16, 185, 129, 0.1);">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="focus-title">Topic Assessment</div>
+        <div class="focus-desc">Take a timed topic assessment to test your knowledge retention.</div>
+        <a href="{% url 'start_exam_simulation' active_part %}" class="focus-btn focus-btn-outline-green">Start Assessment</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function uploadProfilePic() {
+    const input = document.getElementById('profilePicInput');
+    if (!input.files || input.files.length === 0) return;
+    
+    const formData = new FormData(document.getElementById('profilePicForm'));
+    const imgEl = document.getElementById('dashboardProfileImg');
+    const overlay = document.querySelector('.profile-img-overlay');
+    overlay.innerHTML = '<div class="spinner-border text-light" role="status"></div>';
+    
+    fetch('{% url "update_profile_picture" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.url) {
+            imgEl.src = data.url;
+            document.querySelectorAll('.avatar img').forEach(img => {
+                img.src = data.url;
+                img.style.display = 'block';
+            });
+            overlay.innerHTML = '<i class="fas fa-camera text-white fs-3"></i><span class="text-white small fw-bold mt-1">Edit</span>';
+        } else {
+            alert('Error updating profile picture: ' + (data.error || 'Unknown error'));
+            overlay.innerHTML = '<i class="fas fa-camera text-white fs-3"></i><span class="text-white small fw-bold mt-1">Edit</span>';
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('A network error occurred.');
+        overlay.innerHTML = '<i class="fas fa-camera text-white fs-3"></i><span class="text-white small fw-bold mt-1">Edit</span>';
+    });
+}
+</script>
+{% endblock %}

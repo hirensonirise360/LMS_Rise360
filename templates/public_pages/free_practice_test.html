@@ -1,0 +1,90 @@
+{% extends "public_pages/base_public.html" %}
+{% block title %}Free EA Exam Practice Questions — All 3 Parts | RISE360 Institute{% endblock %}
+{% block meta_description %}Access free enrolled agent practice questions for Part 1 (Individual), Part 2 (Business), and Part 3 (Representation). No login needed. Register to unlock 500+ questions.{% endblock %}
+{% block canonical %}<link rel="canonical" href="https://www.rise360institute.com/ea/free-practice-test/">{% endblock %}
+{% block schema %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Course","name":"Enrolled Agent Exam Prep — Part 1, 2, 3","provider":{"@type":"Organization","name":"RISE360 Institute","sameAs":"https://www.rise360institute.com"},"description":"Free EA exam MCQ practice for all 3 parts with detailed explanations and 500+ questions."}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.rise360institute.com/"},{"@type":"ListItem","position":2,"name":"Free Practice Test"}]}
+</script>
+{% endblock %}
+
+{% block content %}
+<div style="background:#f8fafc; padding: 24px 0; border-bottom:1px solid #e2e8f0;">
+  <div class="container">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0" style="font-size:0.85rem;">
+      <li class="breadcrumb-item"><a href="{% url 'ea_public_home' %}">Home</a></li>
+      <li class="breadcrumb-item active">Free Practice Test</li>
+    </ol></nav>
+  </div>
+</div>
+
+<section class="py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-label">IRS Enrolled Agent Exam Prep</div>
+      <h1 class="section-title">Free EA Exam Practice Questions — All 3 Parts</h1>
+      <p class="text-muted mt-3" style="max-width:650px;margin:0 auto;">Test your knowledge with real enrolled agent free MCQs. Covers Individual Taxation (Part 1), Business Taxation (Part 2), and Representation (Part 3).</p>
+    </div>
+
+    <!-- Soft gate notice -->
+    <div class="alert text-center py-3 mb-5" style="background:#fff3cd;border:1px solid #fde68a;border-radius:12px;">
+      <strong>🔓 Showing 10 free questions per part.</strong> <a href="{% url 'register' %}" style="color:#92400e;font-weight:700;">Register free</a> to unlock 500+ questions with answers &amp; explanations.
+    </div>
+
+    {% for part, questions in questions_by_part.items %}
+    <div class="mb-5">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <span style="width:48px;height:48px;background:var(--hks-navy);color:var(--hks-gold);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;">{{ part.number }}</span>
+        <div>
+          <h2 style="font-size:1.3rem;font-weight:800;margin:0;">EA Exam Part {{ part.number }}: {{ part.name }}</h2>
+          <p class="text-muted mb-0" style="font-size:0.85rem;">Free enrolled agent part {{ part.number }} practice questions</p>
+        </div>
+      </div>
+
+      {% if questions %}
+        {% for q in questions %}
+        <div class="mcq-card mb-3">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <span class="fw-600" style="font-size:0.8rem;color:#64748b;">Question {{ forloop.counter }}</span>
+            {% if q.difficulty %}<span class="badge" style="background:{% if q.difficulty == 'easy' %}#ecfdf5;color:#065f46{% elif q.difficulty == 'medium' %}#fff3cd;color:#92400e{% else %}#fee2e2;color:#991b1b{% endif %};font-size:0.7rem;">{{ q.difficulty|title }}</span>{% endif %}
+          </div>
+          <h3 class="fw-600 mb-4" style="font-size:0.95rem;line-height:1.7;">{{ q.question_text }}</h3>
+          {% for c in q.get_choices %}
+          <div class="mcq-option {% if c.is_correct %}correct{% endif %}" style="flex-direction:column;align-items:flex-start;gap:6px;">
+            <div class="d-flex align-items-center gap-2 w-100">
+              <span style="width:24px;height:24px;border-radius:50%;border:2px solid {% if c.is_correct %}#10b981{% else %}#cbd5e0{% endif %};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.7rem;font-weight:700;color:{% if c.is_correct %}#10b981{% else %}#94a3b8{% endif %};">{{ forloop.counter }}</span>
+              <span>{{ c.choice_text }}</span>
+              {% if c.is_correct %}<span class="ms-auto" style="font-size:0.72rem;color:#10b981;font-weight:700;white-space:nowrap;">✓ Correct</span>{% endif %}
+            </div>
+            {% if c.is_correct and c.explanation %}
+            <div style="margin-left:32px;font-size:0.82rem;color:#065f46;font-style:italic;">{{ c.explanation }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+          {% if q.explanation %}
+          <div class="mt-3 p-3 d-flex gap-2" style="background:#f0fdf4;border-radius:10px;border-left:4px solid #10b981;">
+            <i class="fas fa-lightbulb mt-1" style="color:#10b981;flex-shrink:0;"></i>
+            <div style="font-size:0.875rem;color:#065f46;line-height:1.7;"><strong>Explanation: </strong>{{ q.explanation }}</div>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+
+        {% if forloop.last or forloop.counter == 3 %}
+        <div class="p-4 text-center rounded-3 mt-4" style="background:linear-gradient(135deg,#1e40af,#0f172a);color:#fff;">
+          <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:8px;">Want 500+ More Questions with Detailed Answers?</h3>
+          <p style="color:rgba(255,255,255,0.75);margin-bottom:20px;font-size:0.9rem;">Register free to unlock our complete EA MCQ bank for all 3 parts.</p>
+          <a href="{% url 'register' %}" class="btn-gold" style="text-decoration:none;border-radius:8px;padding:12px 28px;display:inline-block;">Register Free — No Credit Card</a>
+        </div>
+        {% endif %}
+      {% else %}
+        <p class="text-muted">Questions for Part {{ part.number }} are being updated. Check back soon!</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

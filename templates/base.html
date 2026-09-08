@@ -1,0 +1,211 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>{% block title %}RISE360 Institute — Accounting, Taxation & Bookkeeping Learning Platform{% endblock title %}</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="RISE360 Institute is the premier learning management platform for MS Excel, Bookkeeping, Accounting, Canadian & USA Taxation, and QuickBooks training.">
+    <meta name="keywords" content="RISE360 Institute, Accounting LMS, MS Excel, Bookkeeping, Accounting, Canadian Taxation, USA Taxation, Canadian Payroll, QuickBooks Training">
+    <meta name="author" content="RISE360 Institute">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:title" content="RISE360 Institute — Accounting & Taxation Learning Platform">
+    <meta property="og:description" content="Master MS Excel, Accounting, Canadian & USA Taxation, Bookkeeping, and QuickBooks with RISE360 Institute's advanced learning platform.">
+    <meta property="og:image" content="{% static 'img/og-image.png' %}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request.build_absolute_uri }}">
+    <meta property="twitter:title" content="RISE360 Institute — Accounting & Taxation Learning Platform">
+    <meta property="twitter:description" content="Master MS Excel, Accounting, Canadian & USA Taxation, Bookkeeping, and QuickBooks with RISE360 Institute's advanced learning platform.">
+    <meta property="twitter:image" content="{% static 'img/og-image.png' %}">
+
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <!-- Fontawesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Bootstrap5 -->
+    <link rel="stylesheet" type="text/css" href="{% static 'vendor/bootstrap-5.3.2/css/bootstrap.min.css' %}">
+
+    <!-- Legacy LMS styles -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.min.css' %}">
+
+    <!-- RISE360 Institute Design System -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/uea.css' %}">
+
+    <style>
+        /* Compatibility shim: keep old main content in position with new sidebar */
+        body { overflow-x: hidden; }
+        
+        /* Sidebar is the sole navigation */
+        /* Sidebar is the sole navigation */
+        /* Sidebar is the sole navigation */
+        #main {
+            margin-left: 240px !important;
+            padding-left: 0 !important;
+            padding-top: 0 !important;
+            margin-top: 0 !important;
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+            background-color: var(--ec-bg);
+            display: flow-root; /* Prevent margin collapsing that pushes main down */
+        }
+        body.sidebar-collapsed #main { margin-left: 72px !important; }
+
+        /* Navbar Slimming */
+        #top-navbar { 
+            background: var(--ec-bg, #f8fafc); /* Solid background to prevent overlap */
+            position: sticky !important;
+            top: 0;
+            margin: 0 !important;
+            padding: 0 !important;
+            border-bottom: 1px solid var(--ec-gray-light, #e2e8f0);
+            z-index: 1000;
+            pointer-events: none; /* Let clicks pass through except for items */
+            transition: top 0.3s ease-in-out, box-shadow 0.3s ease;
+        }
+        #top-navbar.nav-hidden {
+            top: -70px !important; /* Hide above the viewport */
+        }
+        #top-navbar.nav-scrolled {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        #top-navbar .container-fluid { pointer-events: auto; }
+
+        /* Force Full Width - Kill centering/shrinking from legacy/Bootstrap rules */
+        #main .container, 
+        #main .container-fluid {
+            max-width: none !important;
+            width: 100% !important;
+        }
+
+        /* Old sidebar hidden — replaced by #ec-sidebar */
+        #side-nav { display: none !important; }
+
+        @media (max-width: 768px) {
+            #main { margin-left: 0 !important; }
+            body.sidebar-collapsed #main { margin-left: 0 !important; }
+        }
+    </style>
+
+    {% block header %}{% endblock %}    {% include 'security_scripts.html' %}
+</head>
+
+<body class="uea-theme">
+
+    {% block sidebar %}
+        {% include 'sidebar.html' %}
+    {% endblock %}
+
+    <div id="main">
+        {% block topbar %}
+            {% include 'navbar.html' %}
+        {% endblock %}
+
+        <div class="container-fluid px-3 py-0" id="main-content">
+            {% include 'snippets/messages.html' %}
+            {% block content %}{% endblock content %}
+        </div>
+
+    </div>
+
+    <script src="{% url 'javascript-catalog' %}"></script>
+    <script type="text/javascript" src="{% static 'vendor/jquery-3.7.1/jquery-3.7.1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'vendor/bootstrap-5.3.2/js/bootstrap.bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+
+    <div class="ec-sidebar-overlay" id="mobileOverlay"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var navbar = document.getElementById('top-navbar');
+            var lastScrollTop = 0;
+            var scrollDelta = 5;
+
+            window.addEventListener('scroll', function() {
+                var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                // Add shadow when scrolled down a bit
+                if (scrollTop > 10) {
+                    navbar.classList.add('nav-scrolled');
+                } else {
+                    navbar.classList.remove('nav-scrolled');
+                }
+
+                // Make sure they scroll more than delta
+                if (Math.abs(lastScrollTop - scrollTop) <= scrollDelta) return;
+                
+                if (scrollTop > lastScrollTop && scrollTop > 60) {
+                    // Scroll Down - hide navbar
+                    navbar.classList.add('nav-hidden');
+                } else {
+                    // Scroll Up - show navbar
+                    navbar.classList.remove('nav-hidden');
+                }
+                lastScrollTop = scrollTop;
+            });
+
+            var sidebar = document.getElementById('ec-sidebar');
+            var body = document.body;
+            
+            // Desktop Collapse Logic
+            var stored = localStorage.getItem('ec-sidebar-collapsed');
+            if (stored === 'true' && window.innerWidth > 768) {
+                sidebar.classList.add('collapsed');
+                body.classList.add('sidebar-collapsed');
+            }
+
+            var desktopToggle = document.getElementById('desktopSidebarToggle');
+            if(desktopToggle) {
+                desktopToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                    body.classList.toggle('sidebar-collapsed');
+                    localStorage.setItem('ec-sidebar-collapsed', sidebar.classList.contains('collapsed'));
+                });
+            }
+
+            // Mobile Offcanvas Logic
+            var mobileToggle = document.getElementById('mobileSidebarToggle');
+            var overlay = document.getElementById('mobileOverlay');
+            if(mobileToggle) {
+                mobileToggle.addEventListener('click', function() {
+                    body.classList.add('sidebar-mobile-open');
+                });
+            }
+            if(overlay) {
+                overlay.addEventListener('click', function() {
+                    body.classList.remove('sidebar-mobile-open');
+                });
+            }
+        });
+    </script>
+    {% block js %}
+    {% endblock js %}
+    <!-- Load Offline Sync Scripts -->
+    <script src="{% static 'js/offline-sync.js' %}"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(reg => {
+                    console.log('ServiceWorker registered with scope:', reg.scope);
+                }).catch(err => {
+                    console.error('ServiceWorker registration failed:', err);
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

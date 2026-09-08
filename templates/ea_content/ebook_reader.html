@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Mock eBook Reader | RISE360 Institute{% endblock %}
+
+{% block header %}
+<style>
+  body { background-color: #f4f6f9; }
+  .reader-container { height: calc(100vh - 56px); display: flex; flex-direction: column; }
+  .reader-toolbar { background: white; border-bottom: 1px solid #dee2e6; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+  .reader-content { flex: 1; overflow-y: auto; padding: 32px; display: flex; justify-content: center; }
+  .page-card { background: white; width: 100%; max-width: 800px; min-height: 800px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 48px; position: relative; }
+</style>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}
+
+{% block maincontent %}
+<div class="reader-container">
+  <div class="reader-toolbar">
+    <div class="d-flex align-items-center gap-3">
+      <a href="{% url 'ebook_library' %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-left"></i></a>
+      <h6 class="mb-0 fw-bold">{{ ebook.title }}</h6>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <span class="small text-muted">Page {{ current_page }} of {{ ebook.total_pages }}</span>
+      <div class="btn-group">
+        <a href="?page={{ current_page|add:'-1' }}" class="btn btn-sm btn-outline-primary {% if current_page <= 1 %}disabled{% endif %}"><i class="fas fa-chevron-left"></i></a>
+        <a href="?page={{ current_page|add:'1' }}" class="btn btn-sm btn-outline-primary {% if current_page >= ebook.total_pages %}disabled{% endif %}"><i class="fas fa-chevron-right"></i></a>
+      </div>
+      <button class="btn btn-sm btn-warning" onclick="alert('Bookmark added for page {{ current_page }}!')"><i class="fas fa-bookmark me-1"></i>Bookmark</button>
+    </div>
+  </div>
+
+  <div class="reader-content">
+    <div class="page-card">
+      <div class="text-muted small text-end border-bottom pb-2 mb-4">{{ ebook.part.name }} - {{ ebook.title }}</div>
+      
+      <h3 class="fw-bold mb-4">Sample Chapter Content - Page {{ current_page }}</h3>
+      <p style="font-size:1.1rem;line-height:1.8;color:#333;">
+        This is a placeholder for the actual eBook content. In a production environment, this would render the PDF using PDF.js or display structured HTML chapters.
+      </p>
+      <p style="font-size:1.1rem;line-height:1.8;color:#333;">
+        Our courses provide comprehensive coverage of accounting and taxation rules. As you read through the material, you can highlight text and add bookmarks for quick reference later. Your progress is automatically saved to your account.
+      </p>
+      
+      <!-- Mock content blocks -->
+      <div class="alert alert-info border-0 bg-primary-subtle mt-5 p-4">
+        <h5 class="fw-bold"><i class="fas fa-lightbulb text-warning me-2"></i>Key Concept</h5>
+        <p class="mb-0">Always verify the most recent IRS publications. Tax laws change annually, and Prometric tests on specific tax year rules.</p>
+      </div>
+      
+      <div class="position-absolute bottom-0 start-50 translate-middle-x mb-4 text-muted small">
+        - {{ current_page }} -
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

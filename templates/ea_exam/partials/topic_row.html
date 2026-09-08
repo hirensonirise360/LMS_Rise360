@@ -1,0 +1,84 @@
+{% load ea_extras %}
+{# Requires: topic, domain, current_part, stats (may be None), chip_state #}
+
+<div class="ec-topic-row">
+  <div class="d-flex align-items-center gap-2" style="flex: 1; min-width: 160px;">
+    <!-- Status dot -->
+    <div class="d-flex align-items-center gap-2">
+      {% if chip_state == "done" %}
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--ec-emerald); flex-shrink: 0; display: inline-block;"></span>
+      {% elif chip_state == "in-progress" %}
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--ec-amber); flex-shrink: 0; display: inline-block;"></span>
+      {% else %}
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--ec-gray-light); border: 1.5px solid var(--ec-gray); flex-shrink: 0; display: inline-block;" id="status-dot-{{ topic.id }}"></span>
+      {% endif %}
+      
+      <i class="{% if read_statuses|get_item:topic.id %}fas fa-eye text-primary{% else %}far fa-eye text-muted{% endif %} cursor-pointer topic-read-toggle" 
+         title="Mark as Read" 
+         onclick="toggleReadStatus({{ topic.id }}, this)"
+         data-topic-id="{{ topic.id }}"
+         style="font-size: 14px;"></i>
+    </div>
+    
+    <span class="ec-topic-name {% if read_statuses|get_item:topic.id %}text-decoration-line-through opacity-50{% endif %}" id="topic-name-{{ topic.id }}">
+      {{ topic.name }}
+    </span>
+    {% if chip_state == "not-started" and forloop.first %}
+      <span class="ec-start-badge">Start Here</span>
+    {% endif %}
+  </div>
+
+  <div class="ec-chip-group">
+    <!-- Stats (if available) -->
+    {% if stats %}
+    <span style="font-size: 11px; color: var(--ec-gray); white-space: nowrap;">
+      {{ stats.attempted }}/{{ stats.total }} &bull; {{ stats.accuracy }}%
+    </span>
+    {% endif %}
+
+    <!-- E-Book Chip -->
+    {% if topic.supabase_pdf_path %}
+      <div style="cursor:pointer;" 
+           class="ec-chip {% if chip_state == 'done' %}done{% elif chip_state == 'in-progress' %}in-progress{% else %}not-started{% endif %}"
+           data-bs-toggle="modal" data-bs-target="#pdfViewerModal"
+           data-pdf-url="{% url 'serve_ebook_pdf' topic.id %}" data-pdf-title="{{ topic.name }}">
+        <i class="fas fa-book"></i> E-Book
+      </div>
+    {% elif topic.pdf_file or topic.ebook_external_url %}
+      <a href="{% if topic.pdf_file %}{{ topic.pdf_file.url }}{% else %}{{ topic.ebook_external_url }}{% endif %}"
+         target="_blank"
+         class="ec-chip {% if chip_state == 'done' %}done{% elif chip_state == 'in-progress' %}in-progress{% else %}not-started{% endif %}">
+        <i class="fas fa-book"></i> E-Book
+      </a>
+    {% else %}
+      <span class="ec-chip not-started disabled"><i class="fas fa-book"></i> E-Book</span>
+    {% endif %}
+
+    <!-- Video Chip -->
+    {% if topic.video_file %}
+      <div style="cursor:pointer;" 
+           class="ec-chip {% if chip_state == 'done' %}done{% elif chip_state == 'in-progress' %}in-progress{% else %}not-started{% endif %}"
+           data-bs-toggle="modal" data-bs-target="#videoPlayerModal"
+           data-video-url="{{ topic.video_file.url }}"
+           data-video-title="{{ topic.name }}">
+        <i class="fas fa-video"></i> Video
+      </div>
+    {% elif topic.video_external_url %}
+      <div style="cursor:pointer;" 
+           class="ec-chip {% if chip_state == 'done' %}done{% elif chip_state == 'in-progress' %}in-progress{% else %}not-started{% endif %}"
+           data-bs-toggle="modal" data-bs-target="#videoPlayerModal"
+           data-video-url="{{ topic.video_external_url }}"
+           data-video-title="{{ topic.name }}">
+        <i class="fas fa-video"></i> Video
+      </div>
+    {% else %}
+      <span class="ec-chip not-started disabled"><i class="fas fa-video"></i> Video</span>
+    {% endif %}
+
+    <!-- MCQ Chip — primary action -->
+    <div class="ec-chip primary-action" 
+         onclick="MCQModal.launch('topic', {{ topic.id }}, '{{ topic.name|escapejs }}')">
+      <i class="fas fa-rocket"></i> MCQ
+    </div>
+  </div>
+</div>

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ note.title }} | RISE360 Institute{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 800px;">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <a href="{% url 'notes_list' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Back to Notes</a>
+    {% if note.is_admin_note %}
+    <span class="badge bg-info text-dark"><i class="fas fa-crown me-1"></i>Official Note</span>
+    {% else %}
+    <span class="badge bg-secondary"><i class="fas fa-user me-1"></i>Personal Note</span>
+    {% endif %}
+  </div>
+
+  <div class="card border-0 shadow-sm" style="border-radius:12px;">
+    <div class="card-header bg-white border-bottom py-3">
+      <h3 class="fw-bold mb-1">{{ note.title }}</h3>
+      <div class="d-flex gap-2">
+        {% if note.part %}<span class="badge bg-primary">{{ note.part.name }}</span>{% endif %}
+        {% if note.domain %}<span class="badge bg-light text-dark border">{{ note.domain.name }}</span>{% endif %}
+      </div>
+    </div>
+    <div class="card-body p-4" style="font-size:1.1rem; line-height:1.7;">
+      {{ note.content|linebreaks }}
+    </div>
+    <div class="card-footer bg-light border-top text-muted small py-2">
+      Last updated: {{ note.updated_at|date:"F d, Y H:i" }}
+    </div>
+  </div>
+</div>
+{% endblock %}

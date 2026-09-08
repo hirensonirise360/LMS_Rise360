@@ -1,0 +1,304 @@
+{% extends "public_pages/base_public.html" %}
+{% load i18n %}
+
+{% block title %}RISE360 Institute — Next-Generation Learning Management Platform{% endblock %}
+{% block meta_description %}Empower your educational journey with RISE360 Institute. A feature-rich Learning Management System offering interactive courses, study materials, video lectures, and real-time learner analytics.{% endblock %}
+{% block canonical %}<link rel="canonical" href="https://www.rise360institute.com/">{% endblock %}
+
+{% block schema %}
+<!-- Organization & Brand Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  "name": "RISE360 Institute",
+  "url": "https://www.rise360institute.com",
+  "logo": "https://www.rise360institute.com/static/img/rise360-logo.png",
+  "description": "Next-generation Learning Management System offering interactive courses, comprehensive study guides, and real-time progress analytics.",
+  "sameAs": [
+    "https://www.facebook.com/rise360institute",
+    "https://www.linkedin.com/company/rise360institute"
+  ]
+}
+</script>
+
+<!-- WebSite Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "RISE360 Institute",
+  "url": "https://www.rise360institute.com/"
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- ── HERO SECTION ── -->
+<section class="hero-gradient py-5 py-lg-6">
+  <div class="container py-4">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <div class="hero-badge"><i class="fas fa-rocket"></i> All-In-One Learning Platform</div>
+        <h1 class="hero-title mb-4">Empowering Education with an <span class="highlight">All-In-One</span> Learning Platform</h1>
+        <p class="hero-subtitle mb-5">Streamline your education with interactive courses, comprehensive study resources, real-time analytics, and seamless learner-instructor collaboration — all in one place.</p>
+        <div class="d-flex flex-wrap gap-3 mb-5">
+          <a href="{% url 'register' %}" class="btn-gold">
+            Get Started Free →
+          </a>
+          <a href="{% url 'login' %}" class="btn-outline-white">
+            <i class="fas fa-user-graduate"></i> Learner Login
+          </a>
+        </div>
+        <div class="d-flex flex-wrap gap-4">
+          <div><div class="stat-number">50+</div><div class="stat-label">Courses & Programs</div></div>
+          <div><div class="stat-number">10k+</div><div class="stat-label">Active Learners</div></div>
+          <div><div class="stat-number">99%</div><div class="stat-label">Satisfaction Rate</div></div>
+          <div><div class="stat-number">24/7</div><div class="stat-label">Online Access</div></div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="mcq-card shadow-lg p-4" style="background:#ffffff; border-radius:20px; border:1px solid rgba(255,255,255,0.2);">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <span class="badge" style="background:var(--hks-gold);color:#0f172a;font-size:0.75rem;padding:6px 12px;font-weight:700;">LEARNING DASHBOARD PREVIEW</span>
+            <i class="fas fa-chart-pie text-muted"></i>
+          </div>
+          
+          <div class="p-3 mb-3 rounded-3" style="background:#f8fafc; border:1px solid #e2e8f0;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="fw-700" style="font-size:0.88rem; color:#0f172a;"><i class="fas fa-book-open text-primary me-2"></i>Active Course Progress</span>
+              <span class="badge bg-success" style="font-size:0.7rem;">On Track</span>
+            </div>
+            <div class="progress" style="height: 8px; border-radius: 4px;">
+              <div class="progress-bar bg-warning" role="progressbar" style="width: 82%;" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="d-flex justify-content-between mt-2" style="font-size:0.75rem; color:#64748b;">
+              <span>Module 4 of 5 Completed</span>
+              <span class="fw-700 text-dark">82%</span>
+            </div>
+          </div>
+
+          <div class="p-3 mb-3 rounded-3" style="background:#f8fafc; border:1px solid #e2e8f0;">
+            <div class="d-flex align-items-center gap-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;background:#ecfdf5;color:#10b981;flex-shrink:0;">
+                <i class="fas fa-file-alt"></i>
+              </div>
+              <div>
+                <div class="fw-700" style="font-size:0.88rem; color:#0f172a;">Digital Study Library</div>
+                <div style="font-size:0.75rem; color:#64748b;">Access E-Books, PDF notes, &amp; video lectures</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-3 rounded-3" style="background:#f8fafc; border:1px solid #e2e8f0;">
+            <div class="d-flex align-items-center gap-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;background:#eff6ff;color:#3b82f6;flex-shrink:0;">
+                <i class="fas fa-graduation-cap"></i>
+              </div>
+              <div>
+                <div class="fw-700" style="font-size:0.88rem; color:#0f172a;">Personalized Learning Analytics</div>
+                <div style="font-size:0.75rem; color:#64748b;">Track topic mastery and performance metrics</div>
+              </div>
+            </div>
+          </div>
+
+          <a href="{% url 'register' %}" class="d-block text-center mt-4" style="color:var(--hks-blue);font-weight:700;font-size:0.9rem;text-decoration:none;">Join RISE360 Institute Today →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PLATFORM FEATURES ── -->
+<section class="py-5 py-lg-6" style="background:#f8fafc;">
+  <div class="container py-3">
+    <div class="text-center mb-5">
+      <div class="section-label">Platform Capabilities</div>
+      <h2 class="section-title">Everything You Need for Modern Learning</h2>
+      <p class="text-muted mt-3" style="max-width:640px;margin:0 auto;">RISE360 Institute provides a comprehensive digital environment designed to optimize study habits, track growth, and deliver results.</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon" style="background:#eff6ff;color:#3b82f6;"><i class="fas fa-layer-group"></i></div>
+          <h3 class="fw-bold mb-2" style="font-size:1.05rem;">Structured Course Modules</h3>
+          <p class="text-muted" style="font-size:0.88rem;line-height:1.7;">Organized syllabi, programs, and lesson tracks designed to guide learners step-by-step through core subjects.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon" style="background:#fdf4ff;color:#9333ea;"><i class="fas fa-book"></i></div>
+          <h3 class="fw-bold mb-2" style="font-size:1.05rem;">Rich Study Resources</h3>
+          <p class="text-muted" style="font-size:0.88rem;line-height:1.7;">Access integrated digital E-Books, downloadable PDFs, study notes, and video materials directly in your browser.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon" style="background:#fff1f2;color:#f43f5e;"><i class="fas fa-chart-line"></i></div>
+          <h3 class="fw-bold mb-2" style="font-size:1.05rem;">Real-Time Learner Analytics</h3>
+          <p class="text-muted" style="font-size:0.88rem;line-height:1.7;">Monitor your study velocity, module completion rates, and topic mastery live on your dashboard.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon" style="background:#ecfdf5;color:#10b981;"><i class="fas fa-laptop"></i></div>
+          <h3 class="fw-bold mb-2" style="font-size:1.05rem;">Cross-Device Accessibility</h3>
+          <p class="text-muted" style="font-size:0.88rem;line-height:1.7;">Seamless experience across desktop, laptop, tablet, and mobile devices so you can learn anytime, anywhere.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon" style="background:#fefce8;color:#ca8a04;"><i class="fas fa-user-shield"></i></div>
+          <h3 class="fw-bold mb-2" style="font-size:1.05rem;">Instructor &amp; Admin Tools</h3>
+          <p class="text-muted" style="font-size:0.88rem;line-height:1.7;">Powerful administration suite for course management, content publishing, and learner evaluation.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon" style="background:#f0f9ff;color:#0284c7;"><i class="fas fa-clock"></i></div>
+          <h3 class="fw-bold mb-2" style="font-size:1.05rem;">Self-Paced Learning</h3>
+          <p class="text-muted" style="font-size:0.88rem;line-height:1.7;">Flexible schedules allow learners to review materials, revisit lessons, and complete tasks at their own speed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="py-5 py-lg-6">
+  <div class="container py-3">
+    <div class="text-center mb-5">
+      <div class="section-label">Simple Process</div>
+      <h2 class="section-title">How RISE360 Learning Platform Works</h2>
+      <p class="text-muted mt-3">Start your learning journey in three easy steps.</p>
+    </div>
+    <div class="row g-4 text-center">
+      <div class="col-md-4">
+        <div class="p-4 rounded-4" style="background:#f8fafc; border:1px solid #e2e8f0; height:100%;">
+          <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3" style="width:60px;height:60px;background:#1e3a5f;color:#f59e0b;font-weight:900;font-size:1.4rem;">1</div>
+          <h3 class="fw-bold mb-2" style="font-size:1.1rem;">Create Your Account</h3>
+          <p class="text-muted" style="font-size:0.88rem;">Sign up in seconds to obtain your personalized learner profile and dashboard access.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="p-4 rounded-4" style="background:#f8fafc; border:1px solid #e2e8f0; height:100%;">
+          <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3" style="width:60px;height:60px;background:#1e3a5f;color:#f59e0b;font-weight:900;font-size:1.4rem;">2</div>
+          <h3 class="fw-bold mb-2" style="font-size:1.1rem;">Explore &amp; Enroll</h3>
+          <p class="text-muted" style="font-size:0.88rem;">Browse course offerings, study modules, video lectures, and comprehensive reference guides.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="p-4 rounded-4" style="background:#f8fafc; border:1px solid #e2e8f0; height:100%;">
+          <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3" style="width:60px;height:60px;background:#1e3a5f;color:#f59e0b;font-weight:900;font-size:1.4rem;">3</div>
+          <h3 class="fw-bold mb-2" style="font-size:1.1rem;">Learn &amp; Succeed</h3>
+          <p class="text-muted" style="font-size:0.88rem;">Track your progress live, master core subjects, and complete your educational goals.</p>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-5">
+      <a href="{% url 'register' %}" class="btn-gold" style="text-decoration:none;border-radius:10px;padding:14px 28px;display:inline-block;">Join Free — Start Learning Today →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ── -->
+<section class="py-5 py-lg-6" style="background:var(--hks-navy);">
+  <div class="container py-3">
+    <div class="text-center mb-5">
+      <div class="section-label">Learner Feedback</div>
+      <h2 class="section-title" style="color:#fff;">Loved by Learners &amp; Educators</h2>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="testimonial-card">
+          <p class="testimonial-text">"RISE360 Institute makes learning so intuitive. The study materials, video integration, and clean progress metrics kept me on track throughout my course."</p>
+          <div class="testimonial-author">Sarah M.</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="testimonial-card">
+          <p class="testimonial-text">"The dashboard gives me instant visibility into my study progress. Being able to access notes and resources from any device is a huge game-changer."</p>
+          <div class="testimonial-author">David R.</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="testimonial-card">
+          <p class="testimonial-text">"An exceptional platform. The structured modules and self-paced environment allowed me to balance work and education seamlessly."</p>
+          <div class="testimonial-author">Priya K.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── RECENT BLOG / GUIDES ── -->
+{% if recent_blogs %}
+<section class="py-5 py-lg-6">
+  <div class="container py-3">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+      <div>
+        <div class="section-label">Educational Resources</div>
+        <h2 class="section-title">Latest Articles &amp; Learning Guides</h2>
+      </div>
+      <a href="{% url 'blog_list' %}" class="btn btn-outline-primary" style="font-weight:600;font-size:0.88rem;">View All Articles →</a>
+    </div>
+    <div class="row g-4">
+      {% for article in recent_blogs %}
+      <div class="col-md-4">
+        <div class="feature-card">
+          <span class="badge mb-3" style="background:#eff6ff;color:#1e40af;font-size:0.7rem;">Learning Resource</span>
+          <h3 class="fw-bold mb-3" style="font-size:1rem;line-height:1.5;"><a href="{% url 'blog_detail' article.slug %}" style="text-decoration:none;color:inherit;">{{ article.title }}</a></h3>
+          <p class="text-muted" style="font-size:0.85rem;line-height:1.7;">{{ article.meta_description|truncatechars:120 }}</p>
+          <a href="{% url 'blog_detail' article.slug %}" style="font-weight:700;font-size:0.85rem;color:var(--hks-blue);">Read Article →</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── FAQ ── -->
+<section class="py-5 py-lg-6" style="background:#f8fafc;">
+  <div class="container py-3">
+    <div class="text-center mb-5">
+      <div class="section-label">FAQ</div>
+      <h2 class="section-title">Frequently Asked Questions</h2>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="accordion faq-accordion" id="faqAcc">
+          <div class="accordion-item border mb-2 rounded">
+            <h3 class="accordion-header"><button class="accordion-button rounded" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">What is RISE360 Institute?</button></h3>
+            <div id="faq1" class="accordion-collapse collapse show"><div class="accordion-body text-muted" style="font-size:0.9rem;">RISE360 Institute is a modern Learning Management System (LMS) designed to deliver structured online courses, study materials, video lectures, and real-time learner analytics.</div></div>
+          </div>
+          <div class="accordion-item border mb-2 rounded">
+            <h3 class="accordion-header"><button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">How do I access my course materials?</button></h3>
+            <div id="faq2" class="accordion-collapse collapse"><div class="accordion-body text-muted" style="font-size:0.9rem;">Once registered, log in to your learner dashboard to view enrolled courses, digital E-Books, video lessons, and notes anytime 24/7.</div></div>
+          </div>
+          <div class="accordion-item border mb-2 rounded">
+            <h3 class="accordion-header"><button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">Can I study on mobile devices?</button></h3>
+            <div id="faq3" class="accordion-collapse collapse"><div class="accordion-body text-muted" style="font-size:0.9rem;">Yes! RISE360 Institute is fully responsive and optimized for mobile phones, tablets, laptops, and desktop computers.</div></div>
+          </div>
+          <div class="accordion-item border mb-2 rounded">
+            <h3 class="accordion-header"><button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">Is registration free?</button></h3>
+            <div id="faq4" class="accordion-collapse collapse"><div class="accordion-body text-muted" style="font-size:0.9rem;">Yes, you can register for free to create your learner account and explore available platform features.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FINAL CTA ── -->
+<section class="cta-section py-5 py-lg-6 text-white text-center">
+  <div class="container py-3">
+    <h2 style="font-size:clamp(1.8rem,3vw,2.8rem);font-weight:900;letter-spacing:-0.02em;margin-bottom:16px;">Ready to Elevate Your <span style="color:var(--hks-gold);">Learning Experience?</span></h2>
+    <p style="color:rgba(255,255,255,0.75);max-width:540px;margin:0 auto 36px;font-size:1.05rem;line-height:1.7;">Join RISE360 Institute today and access your interactive learner learning portal.</p>
+    <div class="d-flex flex-wrap justify-content-center gap-3">
+      <a href="{% url 'register' %}" class="btn-gold" style="text-decoration:none;border-radius:10px;padding:16px 36px;font-size:1.05rem;display:inline-block;">Start Free — Create Account</a>
+      <a href="{% url 'login' %}" class="btn-outline-white" style="text-decoration:none;display:inline-block;padding:16px 36px;font-size:1.05rem;">Learning Portal Login</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

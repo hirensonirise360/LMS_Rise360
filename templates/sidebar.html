@@ -1,0 +1,87 @@
+{% load static %}
+{% load i18n %}
+
+<nav id="ec-sidebar" class="uea-theme">
+
+  <!-- Brand -->
+  <a href="{% url 'ea_home' %}" class="ec-brand text-decoration-none d-flex flex-column align-items-center py-4">
+    <img src="{% static 'img/rise360-logo.png' %}" alt="RISE360 Logo" style="width: 55%; max-width: 110px; height: auto; border-radius: 6px; margin-bottom: 12px;">
+    <div class="text-center px-2">
+        <div class="ec-brand-sub" style="font-size: 0.8rem; opacity: 0.8; letter-spacing: 1px; text-transform: uppercase;">Learning Portal</div>
+    </div>
+  </a>
+
+  <!-- Main Nav -->
+  <div class="ec-nav">
+    {% url 'ea_home' as ea_url %}
+    {% url 'ea_analytics_dashboard' as analytics_url %}
+    {% url 'ebook_library' as ebook_url %}
+    {% url 'edit_profile' as edit_profile_url %}
+
+    <a href="{{ ea_url }}" class="ec-nav-item {% if request.path == ea_url or '/ea/portal/' in request.path %}active{% endif %}">
+      <i class="fas fa-th-large"></i>
+      <span class="ec-nav-label">Dashboard</span>
+    </a>
+
+    <a href="{{ analytics_url }}" class="ec-nav-item {% if request.path == analytics_url or '/ea/analytics/' in request.path %}active{% endif %}">
+      <i class="fas fa-chart-line"></i>
+      <span class="ec-nav-label">Progress</span>
+    </a>
+
+    <a href="{{ ebook_url }}" class="ec-nav-item {% if request.path == ebook_url or '/ea/content/' in request.path %}active{% endif %}">
+      <i class="fas fa-layer-group"></i>
+      <span class="ec-nav-label">Resources</span>
+    </a>
+
+    <a href="{{ edit_profile_url }}" class="ec-nav-item {% if request.path == edit_profile_url or '/setting/' in request.path %}active{% endif %}">
+      <i class="fas fa-cog"></i>
+      <span class="ec-nav-label">Settings</span>
+    </a>
+
+    <div class="mt-auto px-3 mb-3">
+    </div>
+
+    <div class="ec-nav-separator"></div>
+
+    <a href="#" class="ec-nav-item" style="opacity: 0.6;">
+      <i class="far fa-question-circle"></i>
+      <span class="ec-nav-label">Support</span>
+    </a>
+
+    <a href="#" class="ec-nav-item" style="opacity: 0.6;" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal">
+      <i class="fas fa-sign-out-alt"></i>
+      <span class="ec-nav-label">Logout</span>
+    </a>
+
+    <button class="ec-toggle d-none d-md-flex mt-2" id="desktopSidebarToggle">
+      <i class="fas fa-chevron-left collapse-icon" style="transition: transform 0.3s; width: 24px; text-align: center;"></i>
+      <span class="ec-nav-label">Collapse</span>
+    </button>
+
+  </div>
+
+</nav>
+
+<!-- Logout Confirmation Modal -->
+<div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmModalLabel" aria-hidden="true" style="z-index: 1060;">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; background: #ffffff;">
+      <div class="modal-body text-center p-4">
+        <div class="d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: #fee2e2; border-radius: 50%;">
+          <i class="fas fa-power-off text-danger fs-3"></i>
+        </div>
+        <h5 class="fw-bold text-dark mb-2" style="font-family:'Plus Jakarta Sans',sans-serif; font-size:1.15rem;">Logout?</h5>
+        <p class="text-muted small mb-4 px-2" style="line-height: 1.5; font-size:0.8rem;">Are you sure you want to log out of your RISE360 Institute account?</p>
+        <div class="row g-2">
+          <div class="col-6">
+            <button type="button" class="btn btn-light w-100 py-2.5 fw-bold" data-bs-dismiss="modal" style="border-radius: 12px; font-size:0.8rem; background-color: #f1f5f9; border: none; color: #475569;">Cancel</button>
+          </div>
+          <div class="col-6">
+            <a href="{% url 'logout' %}" class="btn btn-danger w-100 py-2.5 fw-bold" style="border-radius: 12px; font-size:0.8rem; border: none; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

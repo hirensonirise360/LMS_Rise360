@@ -1,0 +1,191 @@
+{% load i18n %}
+
+<!-- MCQ Create Session Modal -->
+<div class="modal fade" id="mcqModal" tabindex="-1" aria-labelledby="mcqModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+      
+      <!-- Modal Header -->
+      <div class="modal-header bg-navy text-white p-4 border-0" style="background: var(--ec-navy);">
+        <div class="d-flex align-items-center gap-3">
+          <div class="ec-brand-icon" style="background: var(--ec-amber); color: var(--ec-navy); width: 44px; height: 44px; border-radius: 12px; font-size: 22px;">
+            <i class="fas fa-play"></i>
+          </div>
+          <div>
+            <h5 class="modal-title fw-800 mb-0" id="mcqModalLabel">{% trans "Create Practice Session" %}</h5>
+            <p class="mb-0 opacity-75 small" id="mcqModalSubtitle">{% trans "Tailor your study experience" %}</p>
+          </div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <form id="createSessionForm" action="{% url 'start_practice' part_number=current_part.number %}" method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="domain_id" id="modal-domain-id">
+          <input type="hidden" name="topic_id" id="modal-topic-id">
+          <input type="hidden" name="part_number" value="{{ current_part.number }}">
+
+          <div class="row g-4">
+            <!-- Left Column: Settings -->
+            <div class="col-md-7">
+              <h6 class="ec-section-title mb-3" style="font-size: 14px;">{% trans "1. Session Configuration" %}</h6>
+              
+              <!-- Select MCQs -->
+              <div class="mb-3">
+                <label class="form-label fw-600 small text-muted">{% trans "Select MCQs" %}</label>
+                <select name="select_type" id="selectType" class="form-select border-0 bg-light p-3" style="border-radius: 12px; font-weight: 500;">
+                  <option value="all">{% trans "All Questions" %}</option>
+                  <option value="unattempted">{% trans "Unattempted" %}</option>
+                  <option value="incorrect">{% trans "Incorrectly Answered" %}</option>
+                  <option value="flagged">{% trans "Flagged Questions" %}</option>
+                  <option value="attempted">{% trans "Attempted Questions" %}</option>
+                  <option value="notes">{% trans "Notes Questions" %}</option>
+                </select>
+              </div>
+
+              <!-- Options Grid -->
+              <div class="row g-3">
+                <div class="col-6">
+                  <label class="form-label fw-600 small text-muted">{% trans "Session Size" %}</label>
+                  <div class="input-group">
+                    <input type="number" name="num_questions" id="numQuestions" class="form-control border-0 bg-light p-3" value="10" min="1" style="border-radius: 12px 0 0 12px;">
+                    <span class="input-group-text border-0 bg-light text-muted small" style="border-radius: 0 12px 12px 0;">
+                      {% trans "of" %} <span id="maxQuestions" class="ms-1 fw-bold">--</span>
+                    </span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <label class="form-label fw-600 small text-muted">{% trans "Mode" %}</label>
+                  <select name="practice_mode" class="form-select border-0 bg-light p-3" style="border-radius: 12px;">
+                    <option value="practice">{% trans "Practice" %}</option>
+                    <option value="practice_exam_view">{% trans "Practice (Exam View)" %}</option>
+                    <option value="exam_view">{% trans "Exam View" %}</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Info Checkbox -->
+              <div class="mt-4 p-3 bg-primary-subtle rounded-4 d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input mt-1" type="checkbox" id="showIntro" checked>
+                </div>
+                <div>
+                   <label class="form-check-label fw-600 small d-block" for="showIntro">{% trans "Show session rules before starting" %}</label>
+                   <p class="mb-0 text-muted" style="font-size: 11px;">{% trans "Includes review of time limits and scoring logic." %}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Rules & Stats -->
+            <div class="col-md-5">
+              <div class="h-100 p-4 bg-light rounded-4">
+                <h6 class="ec-section-title mb-3" style="font-size: 14px;">{% trans "Rules & Information" %}</h6>
+                <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
+                  <li class="d-flex gap-2">
+                    <i class="fas fa-check-circle text-emerald mt-1"></i>
+                    <div class="small">
+                      <strong class="d-block">{% trans "Instant Feedback" %}</strong>
+                      <span class="text-muted">{% trans "Get explanations after every answer in Practice mode." %}</span>
+                    </div>
+                  </li>
+                  <li class="d-flex gap-2">
+                    <i class="fas fa-history text-amber mt-1"></i>
+                    <div class="small">
+                      <strong class="d-block">{% trans "Progress Saved" %}</strong>
+                      <span class="text-muted">{% trans "Your results update your overall readiness markers." %}</span>
+                    </div>
+                  </li>
+                  <li class="d-flex gap-2">
+                    <i class="fas fa-clock text-primary mt-1"></i>
+                    <div class="small">
+                      <strong class="d-block">{% trans "No Time Limit" %}</strong>
+                      <span class="text-muted">{% trans "Focus on learning in Practice mode without pressure." %}</span>
+                    </div>
+                  </li>
+                </ul>
+                
+                <hr class="my-4 opacity-10">
+                
+                <div class="text-center">
+                  <p class="text-muted small mb-2">{% trans "Questions Selected" %}</p>
+                  <div class="display-6 fw-800 text-navy" id="selectedCountDisplay">10</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer Actions -->
+          <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center">
+            <button type="button" class="btn btn-link text-muted text-decoration-none fw-600" data-bs-dismiss="modal">{% trans "Maybe later" %}</button>
+            <button type="submit" class="btn btn-navy px-5 py-2 fw-700" style="background: var(--ec-navy); color: white; border-radius: 50px;">
+              {% trans "Start Mission" %} <i class="fas fa-arrow-right ms-2"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/**
+ * MCQ Modal Controller
+ */
+const MCQModal = {
+    modal: null,
+    counts: {},
+    
+    init() {
+        this.modal = new bootstrap.Modal(document.getElementById('mcqModal'));
+        document.getElementById('selectType').addEventListener('change', () => this.updateMaxCount());
+        document.getElementById('numQuestions').addEventListener('input', (e) => {
+            document.getElementById('selectedCountDisplay').innerText = e.target.value;
+        });
+    },
+    
+    launch(type, id, name) {
+        // Reset form
+        document.getElementById('modal-domain-id').value = type === 'domain' ? id : '';
+        document.getElementById('modal-topic-id').value = type === 'topic' ? id : '';
+        document.getElementById('mcqModalSubtitle').innerText = name;
+        
+        // Fetch counts for this scope
+        const url = `{% url 'get_mcq_counts' %}?type=${type}&id=${id}`;
+        
+        fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                this.counts = data.counts;
+                this.updateMaxCount();
+                this.modal.show();
+            })
+            .catch(err => console.error("Error fetching MCQ counts:", err));
+    },
+    
+    updateMaxCount() {
+        const type = document.getElementById('selectType').value;
+        const count = this.counts[type] || 0;
+        document.getElementById('maxQuestions').innerText = count;
+        
+        const input = document.getElementById('numQuestions');
+        input.max = count;
+        if (parseInt(input.value) > count) input.value = count;
+        if (count === 0) input.value = 0;
+        
+        document.getElementById('selectedCountDisplay').innerText = input.value;
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => MCQModal.init());
+</script>
+
+<style>
+  .bg-navy { background-color: var(--ec-navy); }
+  .text-emerald { color: var(--ec-emerald); }
+  .text-amber { color: var(--ec-amber); }
+  .fw-600 { font-weight: 600; }
+  .fw-700 { font-weight: 700; }
+  .fw-800 { font-weight: 800; }
+  .rounded-4 { border-radius: 1rem !important; }
+</style>

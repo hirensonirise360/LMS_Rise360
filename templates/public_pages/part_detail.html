@@ -1,0 +1,399 @@
+{% extends "public_pages/base_public.html" %}
+{% block title %}{{ title }} | RISE360 Institute{% endblock %}
+{% block meta_description %}Master {{ part.name }} with RISE360 Institute. Practice questions, domain weightage tables, and expert study tips.{% endblock %}
+{% block canonical %}<link rel="canonical" href="https://www.rise360institute.com/en/ea/part/{{ part.number }}/">{% endblock %}
+
+{% block schema %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://www.rise360institute.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{{ part.name }}"
+    }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Course",
+  "name": "RISE360 Institute Course - {{ part.name }}",
+  "description": "Master {{ part.name }} with practice questions, eBooks, and video lectures on RISE360 Institute.",
+  "provider": {
+    "@type": "Organization",
+    "name": "RISE360 Institute",
+    "sameAs": "https://www.rise360institute.com/"
+  },
+  "hasCourseInstance": {
+    "@type": "CourseInstance",
+    "courseMode": "online",
+    "courseWorkload": "PT40H"
+  }
+}
+</script>
+
+{% if part.number == 1 %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is covered on EA Exam Part 1?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "EA Exam Part 1 covers Individual Taxation, including filing requirements, gross income inclusions and exclusions, capital gains and losses, standard and itemized deductions, adjustments to income, and tax credits."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which IRS publication is key for Part 1?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "IRS Publication 17 (Your Federal Income Tax) is the primary reference publication for Part 1 of the SEE exam."
+      }
+    }
+  ]
+}
+</script>
+{% elif part.number == 2 %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is covered on EA Exam Part 2?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Part 2 covers Business Taxation, including Sole Proprietorships, Partnerships, C-Corporations, S-Corporations, LLCs, farm taxation, and specialized returns like trusts, estates, and retirement plans."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Part 2 the hardest part of the EA exam?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, Part 2 is widely considered the most difficult due to the complexity of partnership and corporate tax laws, basis calculations, and asset transactions."
+      }
+    }
+  ]
+}
+</script>
+{% else %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is covered on EA Exam Part 3?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Part 3 covers Representation, Practices, and Procedures, including Treasury Department Circular 230 rules of practice, representation before the IRS, powers of attorney, audits, appeals, tax collection, and penalties."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is Circular 230?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Circular 230 is the Treasury Department regulation that governs the ethical standards and practice requirements of Enrolled Agents, CPAs, and attorneys before the IRS."
+      }
+    }
+  ]
+}
+</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumbs -->
+<div style="background:#f8fafc;padding:20px 0;border-bottom:1px solid #e2e8f0;">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0" style="font-size:0.85rem;">
+        <li class="breadcrumb-item"><a href="{% url 'ea_public_home' %}" style="color:var(--hks-blue); text-decoration:none;">Home</a></li>
+        <li class="breadcrumb-item active">Part {{ part.number }} Detail</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-5">
+      <div class="col-lg-8">
+        <!-- Main Heading -->
+        <span class="badge mb-3 text-uppercase" style="background:rgba(30,64,175,0.1);color:#1e40af; font-size:0.75rem; letter-spacing:0.05em; font-weight:700;">Learning Module</span>
+        <h1 class="section-title mb-4" style="font-size:clamp(1.8rem, 4vw, 2.6rem); font-weight:900; line-height:1.2; letter-spacing:-0.03em;">{{ title }}</h1>
+        
+        <!-- EEAT Snippet -->
+        {% include 'snippets/author_reviewer_box.html' %}
+
+        <!-- GEO: Quick Answer & Definition Block -->
+        <div class="p-4 rounded-4 mb-5" style="background:#f0f7ff; border:1px solid #d0e7ff;">
+          <h2 style="font-size:1.15rem; font-weight:800; color:#1e40af; margin-bottom:16px;"><i class="fas fa-circle-info me-2"></i>{{ part.name }} Overview & Details</h2>
+          
+          <div class="mb-3">
+            <strong style="display:block; font-size:0.85rem; color:#475569; text-transform:uppercase; letter-spacing:0.05em;">Quick Answer:</strong>
+            <p class="fw-600 text-dark mb-0" style="font-size:1.02rem; line-height:1.6;">
+              {% if part.number == 1 %}
+              EA Exam Part 1 tests your technical knowledge of U.S. Federal Individual Taxation, including gross income, capital gains, standard or itemized deductions, and tax credits.
+              {% elif part.number == 2 %}
+              EA Exam Part 2 tests your knowledge of U.S. Federal Business Taxation, focusing on Sole Proprietorships, Partnerships, C-Corporations, S-Corporations, LLCs, and retirement plans.
+              {% else %}
+              EA Exam Part 3 focuses on tax representation rights, rules of practice before the IRS (Circular 230), power of attorney rules, audits, appeals, and tax collection procedures.
+              {% endif %}
+            </p>
+          </div>
+          
+          <hr style="border-color:#d0e7ff; margin:16px 0;">
+          
+          <div class="row g-3">
+            <div class="col-sm-4 border-end">
+              <div class="fw-800 text-dark" style="font-size:1.2rem;">100 MCQs</div>
+              <div style="font-size:0.72rem; color:#64748b; text-transform:uppercase; font-weight:700;">Question Count</div>
+            </div>
+            <div class="col-sm-4 border-end ps-sm-3">
+              <div class="fw-800 text-dark" style="font-size:1.2rem;">3.5 Hours</div>
+              <div style="font-size:0.72rem; color:#64748b; text-transform:uppercase; font-weight:700;">Testing Time Limit</div>
+            </div>
+            <div class="col-sm-4 ps-sm-3">
+              <div class="fw-800 text-dark" style="font-size:1.2rem;">105 / 130</div>
+              <div style="font-size:0.72rem; color:#64748b; text-transform:uppercase; font-weight:700;">Scaled Passing Score</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Part Details (Dynamic based on part) -->
+        {% if part.number == 1 %}
+        <!-- PART 1 STUDY GUIDE -->
+        <h2 class="h3 fw-bold text-dark mb-3"><i class="fas fa-book-open text-primary me-2"></i>EA Part 1 Syllabus & Domain Breakdown</h2>
+        <p class="text-muted mb-4" style="line-height:1.7;">Part 1 contains 100 questions representing 5 key tax domains. It focuses exclusively on filing requirements, tax brackets, and individual deductions.</p>
+        
+        <div class="table-responsive border rounded-3 mb-5">
+          <table class="table table-striped table-hover mb-0" style="font-size:0.9rem;">
+            <thead class="table-dark">
+              <tr>
+                <th>Domain</th>
+                <th>Focus Area</th>
+                <th>Syllabus Weight</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="fw-600">Domain 1</td>
+                <td>Filing Requirements, Status & Exemptions</td>
+                <td class="fw-700">15%</td>
+              </tr>
+              <tr>
+                <td class="fw-600">Domain 2</td>
+                <td>Gross Income & Exclusions (Wages, Dividends, Capital Gains)</td>
+                <td class="fw-700">25%</td>
+              </tr>
+              <tr>
+                <td class="fw-600">Domain 3</td>
+                <td>Deductions, Credits & Adjustments (Schedule A, Child Credit, AGI)</td>
+                <td class="fw-700">20%</td>
+              </tr>
+              <tr>
+                <td class="fw-600">Domain 4</td>
+                <td>Capital Gains, Losses & Asset Transactions</td>
+                <td class="fw-700">15%</td>
+              </tr>
+              <tr>
+                <td class="fw-600">Domain 5</td>
+                <td>Specialized Taxpayers & Eldercare (Gift, Estate, Fiduciary base)</td>
+                <td class="fw-700">15%</td>
+              </tr>
+              <tr>
+                <td class="fw-600">Domain 6</td>
+                <td>Tax Planning & Advisory</td>
+                <td class="fw-700">10%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="h4 fw-bold text-dark mb-3">Key Tax Forms and Publications for Part 1</h3>
+        <ul>
+          <li><strong>IRS Form 1040:</strong> The individual tax return master form and its Schedules 1, 2, and 3.</li>
+          <li><strong>Schedule A:</strong> Itemized deductions (medical, local taxes, mortgage interest, charitable donations).</li>
+          <li><strong>Schedule D:</strong> Capital gains and losses reporting.</li>
+          <li><strong>IRS Publication 17:</strong> The primary tax publication that covers individual income tax.</li>
+        </ul>
+
+        {% elif part.number == 2 %}
+        <!-- PART 2 STUDY GUIDE -->
+        <h2 class="h3 fw-bold text-dark mb-3"><i class="fas fa-building-user text-primary me-2"></i>EA Part 2 Syllabus & Domain Breakdown</h2>
+        <p class="text-muted mb-4" style="line-height:1.7;">Part 2 covers business entities and transactions. Because it includes corporate and partnership tax law, it is historically the longest prep syllabus.</p>
+        
+        <div class="table-responsive border rounded-3 mb-5">
+          <table class="table table-striped table-hover mb-0" style="font-size:0.9rem;">
+            <thead class="table-dark">
+              <tr>
+                <th>Domain</th>
+                <th>Focus Area</th>
+                <th>Syllabus Weight</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="fw-600">Domain 1</td>
+                <td>Business Entities (Sole Prop, Partnership, S-Corp, C-Corp, LLCs)</td>
+                <td class="fw-700">45%</td>
+              </tr>
+              <tr>
+                <td class="fw-600">Domain 2</td>
+                <td>Business Financials, Accounting Methods & Assets</td>
+                <td class="fw-700">30%</td>
+              </tr>
+              <tr>
+                <td class="fw-600">Domain 3</td>
+                <td>Specialized Returns, Trusts, Estates & Retirement Plans</td>
+                <td class="fw-700">25%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="h4 fw-bold text-dark mb-3">Key Tax Forms and Publications for Part 2</h3>
+        <ul>
+          <li><strong>Form 1065:</strong> Partnership tax return (pass-through entity generating Schedule K-1).</li>
+          <li><strong>Form 1120:</strong> C-Corporation income tax return (double taxation, Form 1120).</li>
+          <li><strong>Form 1120S:</strong> S-Corporation tax return (100 or fewer shareholders, pass-through).</li>
+          <li><strong>IRS Publication 535:</strong> Ordinary and necessary business expenses under IRC Section 162.</li>
+          <li><strong>IRS Publication 542:</strong> Corporations guide.</li>
+        </ul>
+
+        {% else %}
+        <!-- PART 3 STUDY GUIDE -->
+        <h2 class="h3 fw-bold text-dark mb-3"><i class="fas fa-scale-balanced text-primary me-2"></i>EA Part 3 Syllabus & Domain Breakdown</h2>
+        <p class="text-muted mb-4" style="line-height:1.7;">Part 3 covers practices, procedures, and representation rules. EAs must master the ethical guidelines established under Treasury Department Circular 230.</p>
+        
+        <div class="table-responsive border rounded-3 mb-5">
+          <table class="table table-striped table-hover mb-0" style="font-size:0.9rem;">
+            <thead class="table-dark">
+              <tr>
+                <th>Domain</th>
+                <th>Focus Area</th>
+                <th>Syllabus Weight</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="fw-600">Domain 1</td>
+                <td>Practice Before the IRS & Circular 230 Ethical Standards</td>
+                <td class="fw-700">33%</td>
+              </tr>
+              <tr>
+                <td class="fw-600">Domain 2</td>
+                <td>Taxpayer Representation & Power of Attorney (Form 2848, Form 8821)</td>
+                <td class="fw-700">33%</td>
+              </tr>
+              <tr>
+                <td class="fw-600">Domain 3</td>
+                <td>Specific Filings, Penalties, Audits & Appeals</td>
+                <td class="fw-700">34%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="h4 fw-bold text-dark mb-3">Key Tax Forms and Publications for Part 3</h3>
+        <ul>
+          <li><strong>Treasury Department Circular 230:</strong> Rules governing practice before the IRS.</li>
+          <li><strong>Form 2848:</strong> Power of Attorney and Declaration of Representative.</li>
+          <li><strong>Form 8821:</strong> Tax Information Authorization (information disclosure only).</li>
+          <li><strong>Form 9465:</strong> Installment Agreement Request.</li>
+          <li><strong>Form 656:</strong> Offer in Compromise (OIC).</li>
+        </ul>
+        {% endif %}
+
+        <!-- Domain List dynamically from DB -->
+        {% if part.domains.all %}
+        <div class="mb-5">
+          <h2 class="h4 fw-bold text-dark mb-3">Specific Study Domains</h2>
+          <div class="row g-2">
+            {% for domain in part.domains.all %}
+            <div class="col-md-6">
+              <div class="d-flex align-items-center gap-2 p-3" style="background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0; height:100%;">
+                <i class="fas fa-check-circle" style="color:#10b981;"></i>
+                <span style="font-size:0.88rem;font-weight:600;">{{ domain.name }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Free MCQs and Study Path CTA -->
+        <h2 class="h4 fw-bold text-dark mb-3"><i class="fas fa-graduation-cap text-success me-2"></i>Prepare for Part {{ part.number }} Free</h2>
+        <p class="text-muted mb-4" style="font-size:0.92rem; line-height:1.7;">RISE360 Institute provides 500+ free practice questions, explanation cards, and full Prometric-style mock exams for Part {{ part.number }}. Access study books and video lessons completely online.</p>
+        <div class="d-flex flex-wrap gap-2 mb-5">
+          <a href="{% url 'free_practice_test' %}" class="btn-gold" style="text-decoration:none;border-radius:10px;padding:14px 28px;display:inline-block;"><i class="fas fa-play me-2"></i>Try Free Practice Test</a>
+          <a href="{% url 'register' %}" class="btn btn-outline-dark font-weight-600" style="border-radius:10px;padding:14px 28px;">Start Full Free Course</a>
+        </div>
+
+        <!-- Official Citation Box -->
+        <div class="p-4 rounded-3 mb-5" style="background:#f8fafc; border:1px solid #e2e8f0;">
+          <h4 style="font-size:0.9rem; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:12px;"><i class="fas fa-book text-muted me-2"></i>Official IRS References</h4>
+          <ul style="list-style-type:none; padding-left:0; margin-bottom:0;" class="d-flex flex-column gap-2">
+            {% if part.number == 1 %}
+            <li><a href="https://www.irs.gov/forms-pubs/about-publication-17" target="_blank" rel="noopener" class="text-primary fw-600" style="text-decoration:none; font-size:0.9rem;"><i class="fas fa-external-link-alt me-1.5"></i> IRS Publication 17 (Individual Tax Guide) <span class="text-muted">(IRS.gov)</span></a></li>
+            <li><a href="https://www.irs.gov/forms-pubs/about-form-1040" target="_blank" rel="noopener" class="text-primary fw-600" style="text-decoration:none; font-size:0.9rem;"><i class="fas fa-external-link-alt me-1.5"></i> IRS Form 1040 (Individual Income Tax Return) <span class="text-muted">(IRS.gov)</span></a></li>
+            {% elif part.number == 2 %}
+            <li><a href="https://www.irs.gov/forms-pubs/about-publication-535" target="_blank" rel="noopener" class="text-primary fw-600" style="text-decoration:none; font-size:0.9rem;"><i class="fas fa-external-link-alt me-1.5"></i> IRS Publication 535 (Business Expenses) <span class="text-muted">(IRS.gov)</span></a></li>
+            <li><a href="https://www.irs.gov/forms-pubs/about-publication-542" target="_blank" rel="noopener" class="text-primary fw-600" style="text-decoration:none; font-size:0.9rem;"><i class="fas fa-external-link-alt me-1.5"></i> IRS Publication 542 (Corporations Guide) <span class="text-muted">(IRS.gov)</span></a></li>
+            {% else %}
+            <li><a href="https://www.irs.gov/tax-professionals/enrolled-agents/treasury-department-circular-no-230" target="_blank" rel="noopener" class="text-primary fw-600" style="text-decoration:none; font-size:0.9rem;"><i class="fas fa-external-link-alt me-1.5"></i> Treasury Department Circular 230 (Rules of Practice) <span class="text-muted">(IRS.gov)</span></a></li>
+            <li><a href="https://www.irs.gov/forms-pubs/about-form-2848" target="_blank" rel="noopener" class="text-primary fw-600" style="text-decoration:none; font-size:0.9rem;"><i class="fas fa-external-link-alt me-1.5"></i> IRS Form 2848 (Power of Attorney & Representation) <span class="text-muted">(IRS.gov)</span></a></li>
+            {% endif %}
+          </ul>
+        </div>
+
+        <!-- Related articles -->
+        <h2 style="font-size:1.15rem;font-weight:800;margin-bottom:16px;">Related EA Exam Guides</h2>
+        <ul style="list-style:none;padding:0;" class="d-flex flex-column gap-2">
+          <li><a href="{% url 'blog_list' %}" style="color:var(--hks-blue);font-weight:600; text-decoration:none;">→ Read all EA exam prep articles</a></li>
+          <li><a href="{% url 'ea_public_home' %}" style="color:var(--hks-blue);font-weight:600; text-decoration:none;">→ Back to RISE360 Institute Homepage</a></li>
+        </ul>
+      </div>
+
+      <!-- Right Sidebar -->
+      <div class="col-lg-4">
+        <div class="feature-card" style="position:sticky;top:90px; background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:24px;">
+          <h3 style="font-size:1.15rem;font-weight:800;margin-bottom:8px;">Start Your EA Journey Free</h3>
+          <p class="text-muted mb-4" style="font-size:0.88rem; line-height:1.6;">Instant access to 500+ practice questions, simulations, and progress tracking.</p>
+          <a href="{% url 'register' %}" class="btn-gold d-block text-center" style="text-decoration:none;border-radius:10px;padding:14px 0;margin-bottom:12px; font-weight:700;">Apply for Admission — Free</a>
+          <a href="{% url 'login' %}" class="d-block text-center btn-outline-white text-dark" style="border:2px solid #e2e8f0;border-radius:10px;padding:12px;font-weight:600;font-size:0.88rem;text-decoration:none; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--hks-blue)'; this.style.color='var(--hks-blue)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.color='#000';">Existing Learner Login</a>
+          
+          <hr style="margin:24px 0; border-color:#e2e8f0;">
+          
+          <h4 style="font-size:0.85rem; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:12px;">EA Parts Directory</h4>
+          <div class="d-flex flex-column gap-2">
+            {% for num,label in part_links %}
+            <a href="{% url 'part_detail' num %}" style="font-size:0.85rem;font-weight:600;color:{% if num == part.number %}var(--hks-blue){% else %}#64748b{% endif %};text-decoration:none;padding:10px 14px;border-radius:8px;background:{% if num == part.number %}#eff6ff{% else %}transparent{% endif %};">Part {{ num }}: {{ label }}</a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

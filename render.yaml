@@ -1,0 +1,22 @@
+databases:
+  - name: lms-ea-db
+    databaseName: lms_ea
+    user: lms_user
+
+services:
+  - type: web
+    name: lms-ea-web
+    env: python
+    buildCommand: "bash build.sh"
+    startCommand: "gunicorn config.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.10.13"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: lms-ea-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"

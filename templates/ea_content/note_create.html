@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Create Note | RISE360 Institute{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 700px;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">Create Personal Note</h4>
+    <a href="{% url 'notes_list' %}" class="btn btn-outline-secondary btn-sm">Cancel</a>
+  </div>
+
+  <div class="card border-0 shadow-sm" style="border-radius:12px;">
+    <div class="card-body p-4">
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label fw-bold">Title *</label>
+          <input type="text" name="title" class="form-control" required>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Learning Topic / Module</label>
+            <select name="part_id" class="form-select">
+              <option value="">-- Optional --</option>
+              {% for p in parts %}
+              <option value="{{ p.id }}">{{ p.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Domain</label>
+            <select name="domain_id" class="form-select">
+              <option value="">-- Optional --</option>
+              {% for d in domains %}
+              <option value="{{ d.id }}">{{ d.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-bold">Content *</label>
+          <textarea name="content" class="form-control" rows="8" required placeholder="Type your notes here..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100"><i class="fas fa-save me-1"></i>Save Note</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

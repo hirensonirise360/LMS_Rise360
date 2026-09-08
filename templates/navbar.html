@@ -1,0 +1,102 @@
+{% load i18n%}
+<div id="top-navbar">
+	<div class="container-fluid px-3">
+		<div class="nav-wrapper d-flex justify-content-between align-items-center" style="height: 50px;">
+			<!-- Mobile Sidebar Toggle -->
+			<div class="d-md-none" style="pointer-events: auto;">
+				<button id="mobileSidebarToggle" class="btn btn-link text-muted p-0 border-0">
+					<i class="fas fa-bars" style="font-size: 24px; color: var(--ec-navy);"></i>
+				</button>
+			</div>
+			<div class="d-none d-md-block"></div>
+
+			<div class="d-flex align-items-center gap-4">
+			<!-- Quick Icons -->
+			<div class="d-flex align-items-center gap-3 text-muted me-2">
+				<a href="{% url 'home' %}" class="text-muted text-decoration-none">
+					<i class="far fa-bell" style="cursor: pointer; font-size: 16px; position: relative;">
+						<span style="position: absolute; top: -1px; right: -1px; width: 5px; height: 5px; background: #EF4444; border-radius: 50%;"></span>
+					</i>
+				</a>
+			</div>
+
+			<!-- User Profile -->
+			<div class="dropdown">
+				<div class="ec-nav-user d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+					<div class="ec-nav-user-info d-none d-sm-block">
+						<div class="ec-nav-user-name text-nowrap">{{ request.user.first_name|default:request.user.username }}</div>
+					</div>
+					<div class="avatar border border-2 border-warning" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #0A1128; color: #f59e0b; font-weight: 800; font-size: 0.75rem; position: relative;">
+						<span style="position: absolute; z-index: 1;">{{ request.user.get_initials }}</span>
+						<img src="{{ request.user.get_picture }}" style="width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 2; top: 0; left: 0;" onerror="this.style.display='none'">
+					</div>
+				</div>
+				<div class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-0" style="min-width: 16rem !important; margin-top: 12px; border-radius: 16px; overflow: hidden; background: #ffffff;">
+					<!-- Header Section -->
+					<div class="p-3 text-center" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff;">
+						<div class="position-relative d-inline-block mb-2">
+							<div class="avatar border border-2 border-warning shadow-sm" style="width: 56px; height: 56px; border-radius: 50%; overflow: hidden; background-color: #0A1128; color: #f59e0b; font-weight: 800; font-size: 1.2rem; margin: 0 auto; display: flex; align-items: center; justify-content: center; position: relative;">
+								<span style="position: absolute; z-index: 1;">{{ request.user.get_initials }}</span>
+								<img src="{{ request.user.get_picture }}" style="width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 2; top: 0; left: 0;" onerror="this.style.display='none'">
+							</div>
+						</div>
+						<h6 class="fw-bold mb-0 text-white" style="font-family:'Plus Jakarta Sans',sans-serif; font-size: 0.92rem; letter-spacing: 0.3px;">{{ request.user.get_full_name|default:request.user.username }}</h6>
+						<div class="small opacity-75 text-light text-truncate px-2" style="font-size: 0.75rem;">{{ request.user.email|default:"Learner" }}</div>
+						<div class="small opacity-50 mt-1" style="font-size: 0.65rem;">
+							<i class="far fa-clock unstyled me-1"></i>{% trans 'Last login:' %} {{ request.user.last_login|date:"M d, Y" }}
+						</div>
+					</div>
+
+					<!-- Navigation Items -->
+					<div class="p-2">
+						<a class="dropdown-item d-flex align-items-center py-2 px-3 mb-1" href="{% url 'profile' %}" style="border-radius: 10px; transition: all 0.2s ease; font-size: 0.82rem; font-weight: 500;">
+							<div class="d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; background-color: #eff6ff; color: #3b82f6; border-radius: 8px;">
+								<i class="fas fa-user unstyled" style="font-size: 13px;"></i>
+							</div>
+							<span class="text-dark">{% trans 'My Profile' %}</span>
+						</a>
+						<a class="dropdown-item d-flex align-items-center py-2 px-3 mb-1" href="{% url 'edit_profile' %}" style="border-radius: 10px; transition: all 0.2s ease; font-size: 0.82rem; font-weight: 500;">
+							<div class="d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; background-color: #f1f5f9; color: #64748b; border-radius: 8px;">
+								<i class="fas fa-cog unstyled" style="font-size: 13px;"></i>
+							</div>
+							<span class="text-dark">{% trans 'Account Settings' %}</span>
+						</a>
+						<a class="dropdown-item d-flex align-items-center py-2 px-3 mb-1" href="{% url 'change_password' %}" style="border-radius: 10px; transition: all 0.2s ease; font-size: 0.82rem; font-weight: 500;">
+							<div class="d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; background-color: #faf5ff; color: #a855f7; border-radius: 8px;">
+								<i class="fas fa-key unstyled" style="font-size: 13px;"></i>
+							</div>
+							<span class="text-dark">{% trans 'Change Password' %}</span>
+						</a>
+
+						{% if request.user.is_superuser %}
+						<hr class="my-1.5 mx-2 opacity-25">
+						<a class="dropdown-item d-flex align-items-center py-2 px-3 mb-1" href="{% url 'admin_panel' %}" style="border-radius: 10px; transition: all 0.2s ease; font-size: 0.82rem; font-weight: 500;">
+							<div class="d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; background-color: #f0fdf4; color: #22c55e; border-radius: 8px;">
+								<i class="fas fa-shield-alt unstyled" style="font-size: 13px;"></i>
+							</div>
+							<span class="text-dark">{% trans 'Admin Panel' %}</span>
+						</a>
+						<a class="dropdown-item d-flex align-items-center py-2 px-3 mb-1" href="{% url 'admin_promo_dashboard' %}" style="border-radius: 10px; transition: all 0.2s ease; font-size: 0.82rem; font-weight: 500;">
+							<div class="d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; background-color: #eff6ff; color: #3b82f6; border-radius: 8px;">
+								<i class="fas fa-ticket-alt unstyled" style="font-size: 13px;"></i>
+							</div>
+							<span class="text-dark">{% trans 'Promo & Coupons' %}</span>
+						</a>
+						{% endif %}
+					</div>
+
+					<!-- Footer Section -->
+					<div class="p-2 border-top bg-light" style="border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+						<a class="dropdown-item d-flex align-items-center py-2 px-3" href="#" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal" style="border-radius: 10px; transition: all 0.2s ease; font-size: 0.82rem; font-weight: 600; color: #ef4444 !important; background-color: #fef2f2;">
+							<div class="d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; background-color: #fee2e2; color: #ef4444; border-radius: 8px;">
+								<i class="fas fa-sign-out-alt unstyled" style="font-size: 13px;"></i>
+							</div>
+							<span>{% trans 'Sign Out' %}</span>
+						</a>
+					</div>
+				</div>
+			</div>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}IRS Publication Library | RISE360 Institute{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0"><i class="fas fa-file-invoice-dollar me-2 text-primary"></i>Reference Library</h4>
+    <a href="{% url 'ea_home' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Home</a>
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
+    <div class="card-body p-3">
+      <form method="get" class="row g-2">
+        <div class="col-md-5">
+          <input type="text" name="q" class="form-control" placeholder="Search reference material..." value="{{ q }}">
+        </div>
+        <div class="col-md-3">
+          <select name="part" class="form-select">
+            <option value="">All Topics</option>
+            {% for p in parts %}
+            <option value="{{ p.number }}" {% if part_filter == p.number|stringformat:"s" %}selected{% endif %}>{{ p.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-center">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="featured" id="featured" value="1" {% if featured_only %}checked{% endif %}>
+            <label class="form-check-label small" for="featured">Featured Only</label>
+          </div>
+        </div>
+        <div class="col-md-2 d-grid">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-search me-1"></i>Search</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Results List -->
+  <div class="card border-0 shadow-sm" style="border-radius:12px;">
+    <div class="card-body p-0">
+      {% for pub in pubs %}
+      <div class="p-4 border-bottom {% if pub.is_featured %}bg-warning bg-opacity-10{% endif %}">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <h5 class="fw-bold mb-1 text-dark">
+              {% if pub.is_featured %}<i class="fas fa-star text-warning me-1" title="Featured"></i>{% endif %}
+              {{ pub.title }}
+              {% if pub.year %}<span class="badge bg-secondary ms-2">{{ pub.year }}</span>{% endif %}
+            </h5>
+            {% if pub.part %}
+            <span class="badge bg-primary-subtle text-primary mt-1">{{ pub.part.name }}</span>
+            {% endif %}
+          </div>
+          <a href="{{ pub.irs_url }}" target="_blank" class="btn btn-sm btn-outline-danger flex-shrink-0">
+            <i class="fas fa-external-link-alt me-1"></i>IRS.gov
+          </a>
+        </div>
+        <p class="text-muted small mb-0">{{ pub.summary }}</p>
+      </div>
+      {% empty %}
+      <div class="p-5 text-center text-muted">
+        <i class="fas fa-search text-muted mb-3" style="font-size:3rem;opacity:.3;"></i>
+        <p>No publications found matching your criteria.</p>
+        <a href="{% url 'irs_library' %}" class="btn btn-sm btn-outline-secondary">Clear Filters</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

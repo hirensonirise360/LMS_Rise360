@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline — RISE360 Institute</title>
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-5.3.2/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/uea.css' %}">
+    <style>
+        .offline-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--ec-navy);
+            color: white;
+            text-align: center;
+        }
+        .offline-card {
+            background: white;
+            color: var(--ec-navy);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 400px;
+            width: 90%;
+        }
+        .logo { max-width: 150px; margin-bottom: 2rem; }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-card">
+            <img src="{% static 'img/rise360-logo.png' %}" alt="RISE360 Logo" class="logo">
+            <h3 class="mb-3" style="font-family: 'Plus Jakarta Sans', sans-serif;">You're Offline</h3>
+            <p class="text-muted mb-4">Please check your internet connection. We'll automatically reconnect you when your network returns.</p>
+            
+            <div id="offline-stats" class="d-none mb-4 p-3 bg-light rounded text-start">
+                <strong>Saved Progress:</strong>
+                <p class="mb-0 small text-muted" id="last-sync-time"></p>
+            </div>
+
+            <button onclick="window.location.reload()" class="btn btn-warning w-100 fw-bold">Try Again</button>
+        </div>
+    </div>
+    <script>
+        // Display cached sync stats if available
+        const lastSync = localStorage.getItem('rise360_last_sync');
+        if (lastSync) {
+            document.getElementById('offline-stats').classList.remove('d-none');
+            document.getElementById('last-sync-time').innerText = "Last synced: " + new Date(parseInt(lastSync)).toLocaleString();
+        }
+    </script>
+</body>
+</html>

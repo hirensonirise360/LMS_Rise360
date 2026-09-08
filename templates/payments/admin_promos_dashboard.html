@@ -1,0 +1,417 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+{% block title %}{{ title }} - RISE360 Institute Admin{% endblock title %}
+
+{% block header %}
+<style>
+    .admin-card {
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        background: #ffffff;
+    }
+    .metric-icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+    .table-custom th {
+        background-color: #0A1128;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 12px 16px;
+    }
+    .table-custom td {
+        padding: 12px 16px;
+        vertical-align: middle;
+        font-size: 0.88rem;
+    }
+</style>
+{% endblock header %}
+
+{% block content %}
+<div class="container-fluid py-4 px-lg-5">
+    
+    <!-- Header Title & Action Buttons -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1"><i class="fas fa-ticket-alt me-2 text-primary"></i>Promo & Coupon Management</h2>
+            <p class="text-muted small mb-0">Create, configure, monitor, and analyze promotional discount rules & user redemptions.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'admin_subscription_dashboard' %}" class="btn btn-outline-secondary btn-sm fw-bold rounded-3">
+                <i class="fas fa-users me-1"></i> Subscriber Dashboard
+            </a>
+            <a href="{% url 'admin_promo_audit_logs' %}" class="btn btn-outline-dark btn-sm fw-bold rounded-3">
+                <i class="fas fa-history me-1"></i> Audit & Redemptions Log
+            </a>
+            <a href="{% url 'admin_promo_export_csv' %}" class="btn btn-outline-success btn-sm fw-bold rounded-3">
+                <i class="fas fa-file-csv me-1"></i> Export CSV
+            </a>
+            <a href="{% url 'admin_promo_create' %}" class="btn btn-primary btn-sm fw-bold rounded-3">
+                <i class="fas fa-plus me-1"></i> Create Promo Code
+            </a>
+        </div>
+    </div>
+
+    <!-- Analytics Dashboard Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4 col-lg-2">
+            <div class="admin-card p-3 d-flex align-items-center gap-3">
+                <div class="metric-icon-box bg-success-subtle text-success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-bold">Active Promos</div>
+                    <div class="fs-4 fw-bold text-dark">{{ active_count }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="admin-card p-3 d-flex align-items-center gap-3">
+                <div class="metric-icon-box bg-warning-subtle text-warning">
+                    <i class="fas fa-hourglass-end"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-bold">Expired Promos</div>
+                    <div class="fs-4 fw-bold text-dark">{{ expired_count }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="admin-card p-3 d-flex align-items-center gap-3">
+                <div class="metric-icon-box bg-info-subtle text-info">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-bold">Upcoming</div>
+                    <div class="fs-4 fw-bold text-dark">{{ upcoming_count }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="admin-card p-3 d-flex align-items-center gap-3">
+                <div class="metric-icon-box bg-primary-subtle text-primary">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-bold">Total Redemptions</div>
+                    <div class="fs-4 fw-bold text-dark">{{ total_redemptions_count }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="admin-card p-3 d-flex align-items-center gap-3">
+                <div class="metric-icon-box bg-danger-subtle text-danger">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-bold">Discount Given</div>
+                    <div class="fs-5 fw-bold text-dark">₹{{ total_discount_given }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="admin-card p-3 d-flex align-items-center gap-3">
+                <div class="metric-icon-box bg-dark-subtle text-dark">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-bold">Revenue Generated</div>
+                    <div class="fs-5 fw-bold text-dark">₹{{ total_revenue_generated }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search, Filter & Bulk Actions Bar -->
+    <div class="admin-card p-3 mb-4">
+        <form method="GET" action="{% url 'admin_promo_dashboard' %}" class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <input type="text" name="search" class="form-control form-control-sm rounded-3" placeholder="Search code, description..." value="{{ search_query }}">
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select form-select-sm rounded-3">
+                    <option value="">All Statuses</option>
+                    <option value="Active" {% if status_filter == 'Active' %}selected{% endif %}>Active</option>
+                    <option value="Inactive" {% if status_filter == 'Inactive' %}selected{% endif %}>Inactive</option>
+                    <option value="Expired" {% if status_filter == 'Expired' %}selected{% endif %}>Expired</option>
+                    <option value="Upcoming" {% if status_filter == 'Upcoming' %}selected{% endif %}>Upcoming</option>
+                    <option value="Archived" {% if status_filter == 'Archived' %}selected{% endif %}>Archived</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="type" class="form-select form-select-sm rounded-3">
+                    <option value="">All Discount Types</option>
+                    <option value="fixed" {% if type_filter == 'fixed' %}selected{% endif %}>Fixed Amount</option>
+                    <option value="percentage" {% if type_filter == 'percentage' %}selected{% endif %}>Percentage</option>
+                    <option value="free" {% if type_filter == 'free' %}selected{% endif %}>100% Free</option>
+                    <option value="validity_only" {% if type_filter == 'validity_only' %}selected{% endif %}>Extra Validity Only</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="visibility" class="form-select form-select-sm rounded-3">
+                    <option value="">All Visibilities</option>
+                    <option value="public" {% if visibility_filter == 'public' %}selected{% endif %}>Public</option>
+                    <option value="private" {% if visibility_filter == 'private' %}selected{% endif %}>Private</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="sort" class="form-select form-select-sm rounded-3">
+                    <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
+                    <option value="-overall_usage_count" {% if sort_by == '-overall_usage_count' %}selected{% endif %}>Most Used</option>
+                    <option value="-priority" {% if sort_by == '-priority' %}selected{% endif %}>Highest Priority</option>
+                    <option value="code" {% if sort_by == 'code' %}selected{% endif %}>Code (A-Z)</option>
+                    <option value="end_date" {% if sort_by == 'end_date' %}selected{% endif %}>Expiring Soon</option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex gap-1">
+                <button type="submit" class="btn btn-primary btn-sm rounded-3 w-100"><i class="fas fa-search"></i></button>
+                <a href="{% url 'admin_promo_dashboard' %}" class="btn btn-outline-secondary btn-sm rounded-3" title="Clear Filters"><i class="fas fa-redo"></i></a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Main Data Table & Bulk Actions Form -->
+    <form method="POST" action="{% url 'admin_promo_bulk_action' %}" id="bulk-action-form">
+        {% csrf_token %}
+        <div class="admin-card overflow-hidden mb-4">
+            <div class="p-3 bg-light border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-bold small text-muted text-uppercase">Bulk Action:</span>
+                    <select name="bulk_action" class="form-select form-select-sm rounded-3 w-auto d-inline-block">
+                        <option value="">Select Action...</option>
+                        <option value="activate">Activate Selected</option>
+                        <option value="deactivate">Deactivate Selected</option>
+                        <option value="archive">Archive Selected</option>
+                    </select>
+                    <button type="submit" class="btn btn-outline-primary btn-sm rounded-3 fw-bold" onclick="return confirm('Apply bulk action to selected promos?')">Apply</button>
+                </div>
+                <span class="badge bg-secondary" style="font-size:0.75rem;">Showing {{ promos|length }} Promo Codes</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th width="40"><input type="checkbox" id="select-all-promos"></th>
+                            <th>Code</th>
+                            <th>Discount</th>
+                            <th>Extra Days</th>
+                            <th>Rules & Limits</th>
+                            <th>Usage</th>
+                            <th>Validity Period</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if promos %}
+                            {% for p in promos %}
+                            <tr>
+                                <td><input type="checkbox" name="selected_promos" value="{{ p.id }}" class="promo-checkbox"></td>
+                                <td>
+                                    <div class="fw-bold text-dark font-monospace fs-6">{{ p.code }}</div>
+                                    {% if p.description %}<div class="text-muted small" style="font-size:0.75rem;">{{ p.description|truncatechars:40 }}</div>{% endif %}
+                                    <div class="mt-1">
+                                        {% if p.is_public %}
+                                            <span class="badge bg-info-subtle text-info" style="font-size:0.65rem;">Public</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary-subtle text-secondary" style="font-size:0.65rem;">Private</span>
+                                        {% endif %}
+                                        {% if p.auto_apply %}
+                                            <span class="badge bg-success-subtle text-success" style="font-size:0.65rem;">Auto-Apply</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if p.discount_type == 'percentage' %}
+                                        <span class="fw-bold text-success">{{ p.discount_value|floatformat:0 }}% OFF</span>
+                                        {% if p.max_discount_amount %}<div class="text-muted small" style="font-size:0.7rem;">Cap: ₹{{ p.max_discount_amount }}</div>{% endif %}
+                                    {% elif p.discount_type == 'fixed' %}
+                                        <span class="fw-bold text-success">₹{{ p.discount_value }} OFF</span>
+                                    {% elif p.discount_type == 'free' %}
+                                        <span class="badge bg-success text-white fw-bold">100% FREE</span>
+                                    {% elif p.discount_type == 'validity_only' %}
+                                        <span class="badge bg-primary text-white">Extra Days Only</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if p.total_extra_days > 0 %}
+                                        <span class="badge bg-primary-subtle text-primary font-monospace">+{{ p.total_extra_days }} Days</span>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="small">
+                                        {% if p.min_purchase_amount > 0 %}Min: ₹{{ p.min_purchase_amount }}<br>{% endif %}
+                                        {% if p.allowed_plans %}Plans: {{ p.allowed_plans|join:", " }}<br>{% endif %}
+                                        {% if p.first_purchase_only %}<span class="text-primary font-monospace" style="font-size:0.7rem;">First Purchase</span>{% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">{{ p.overall_usage_count }} / {% if p.overall_usage_limit %}{{ p.overall_usage_limit }}{% else %}∞{% endif %}</div>
+                                    <div class="text-muted small" style="font-size:0.7rem;">Max {{ p.per_user_limit }}/user</div>
+                                </td>
+                                <td>
+                                    <div class="small text-muted" style="font-size:0.75rem;">
+                                        {% if p.start_date %}From: {{ p.start_date|date:"Y-m-d" }}<br>{% endif %}
+                                        {% if p.end_date %}To: {{ p.end_date|date:"Y-m-d" }}{% else %}No Expiry{% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if p.status_label == 'Active' %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% elif p.status_label == 'Expired' %}
+                                        <span class="badge bg-danger">Expired</span>
+                                    {% elif p.status_label == 'Upcoming' %}
+                                        <span class="badge bg-info text-dark">Upcoming</span>
+                                    {% elif p.status_label == 'Archived' %}
+                                        <span class="badge bg-secondary">Archived</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">{{ p.status_label }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="dropdown">
+                                        <button class="btn btn-light btn-sm rounded-circle" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                            <li><a class="dropdown-item" href="{% url 'admin_promo_edit' p.id %}"><i class="fas fa-edit me-2 text-primary"></i>Edit Promo</a></li>
+                                            <li>
+                                                <form action="{% url 'admin_promo_duplicate' p.id %}" method="POST">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="dropdown-item"><i class="fas fa-copy me-2 text-info"></i>Duplicate / Clone</button>
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <form action="{% url 'admin_promo_toggle_status' p.id %}" method="POST">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="dropdown-item">
+                                                        {% if p.is_active %}
+                                                            <i class="fas fa-pause me-2 text-warning"></i>Deactivate
+                                                        {% else %}
+                                                            <i class="fas fa-play me-2 text-success"></i>Activate
+                                                        {% endif %}
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form action="{% url 'admin_promo_archive' p.id %}" method="POST">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="dropdown-item text-secondary"><i class="fas fa-archive me-2"></i>Archive</button>
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <form action="{% url 'admin_promo_delete' p.id %}" method="POST" onsubmit="return confirm('Delete or archive promo code {{ p.code }}?')">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="dropdown-item text-danger"><i class="fas fa-trash me-2"></i>Delete</button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="9" class="text-center py-5 text-muted">
+                                    <i class="fas fa-ticket-alt fs-1 mb-3 text-secondary d-block"></i>
+                                    No promo codes found matching your criteria.
+                                    <br>
+                                    <a href="{% url 'admin_promo_create' %}" class="btn btn-primary btn-sm mt-3">Create First Promo Code</a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+
+    <!-- Top Performing Promos & Recent Activity -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="admin-card p-4 h-100">
+                <h5 class="fw-bold text-dark mb-3"><i class="fas fa-trophy text-warning me-2"></i>Top Performing Promo Codes</h5>
+                <div class="list-group list-group-flush">
+                    {% for tp in top_promos %}
+                    <div class="list-group-item bg-transparent border-0 px-0 d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="fw-bold font-monospace text-primary">{{ tp.code }}</span>
+                            <span class="text-muted small ms-2">({{ tp.get_discount_type_display }})</span>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success-subtle text-success fw-bold">{{ tp.overall_usage_count }} Redemptions</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small">No promo redemptions recorded yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="admin-card p-4 h-100">
+                <h5 class="fw-bold text-dark mb-3"><i class="fas fa-history me-2 text-info"></i>Recent Redemptions</h5>
+                <div class="list-group list-group-flush">
+                    {% for r in recent_redemptions %}
+                    <div class="list-group-item bg-transparent border-0 px-0 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fw-bold small">{{ r.user.email }}</div>
+                            <div class="text-muted" style="font-size:0.75rem;">Code: <strong class="text-dark">{{ r.promo_code.code }}</strong> | {{ r.redeemed_at|date:"M d, Y H:i" }}</div>
+                        </div>
+                        <div class="text-end">
+                            <span class="fw-bold text-success small">-₹{{ r.discount_amount }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small">No redemptions log available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}
+
+{% block js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const selectAll = document.getElementById("select-all-promos");
+        if (selectAll) {
+            selectAll.addEventListener("change", function() {
+                document.querySelectorAll(".promo-checkbox").forEach(cb => cb.checked = this.checked);
+            });
+        }
+
+        const promoSearchInput = document.querySelector('input[name="search"]');
+        if (promoSearchInput) {
+            promoSearchInput.addEventListener("input", function() {
+                const query = this.value.toLowerCase().trim();
+                const rows = document.querySelectorAll("tbody tr");
+                rows.forEach(row => {
+                    const text = row.innerText.toLowerCase();
+                    if (!query || text.includes(query)) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+            });
+        }
+    });
+</script>
+{% endblock js %}
