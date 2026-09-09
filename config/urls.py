@@ -52,10 +52,7 @@ urlpatterns += i18n_patterns(
     # path("jet/dashboard/", include("jet.dashboard.urls", "jet-dashboard")),
     path("accounts/", include("accounts.urls")),
     path("programs/", include("course.urls")),
-    path("result/", include("result.urls")),
     path("search/", include("search.urls")),
-    path("quiz/", include("quiz.urls")),
-    path("payments/", include("payments.urls")),
     # EA Exam Prep
     path("ea/", include("ea_exam.urls")),
     path("ea/content/", include("ea_content.urls")),

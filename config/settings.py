@@ -102,10 +102,7 @@ PROJECT_APPS = [
     "core.apps.CoreConfig",
     "accounts.apps.AccountsConfig",
     "course.apps.CourseConfig",
-    "result.apps.ResultConfig",
     "search.apps.SearchConfig",
-    "quiz.apps.QuizConfig",
-    "payments.apps.PaymentsConfig",
     # EA Exam Prep Apps
     "ea_exam.apps.EaExamConfig",
     "ea_analytics",
@@ -125,7 +122,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.locale.LocaleMiddleware",
-    "payments.middleware.CheckSubscriptionMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"

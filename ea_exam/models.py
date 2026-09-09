@@ -13,8 +13,6 @@ class EAPart(models.Model):
     number = models.PositiveSmallIntegerField(unique=True, help_text=_("Display order / module number"))
     name = models.CharField(max_length=200, help_text=_("Topic name, e.g. MS Excel, Bookkeeping, Canadian Taxation"))
     description = models.TextField(blank=True)
-    total_questions = models.PositiveIntegerField(default=100)
-    time_limit_minutes = models.PositiveIntegerField(default=120)
 
     class Meta:
         ordering = ["number"]
@@ -49,7 +47,6 @@ class EATopic(models.Model):
     video_external_url = models.URLField(blank=True, help_text=_("YouTube/Vimeo link"))
     pdf_file = models.FileField(upload_to="ea_ebooks/", null=True, blank=True)
     supabase_pdf_path = models.CharField(max_length=500, blank=True, default="", help_text=_("Path in Supabase 'ea-ebooks' private bucket"))
-    ebook_external_url = models.URLField(blank=True, help_text=_("External link (IRS.gov, PDF CDN, etc.)"))
 
     class Meta:
         ordering = ["domain", "order"]
@@ -87,9 +84,6 @@ class EAQuestion(models.Model):
 
     difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES, default="medium")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="active")
-    year_appeared = models.PositiveSmallIntegerField(null=True, blank=True, help_text=_("Tax year this question first appeared"))
-    irs_pub_ref = models.CharField(max_length=100, blank=True, help_text=_("IRS Publication reference, e.g. 'Pub 17, Chapter 4'"))
-    version = models.PositiveSmallIntegerField(default=1)
 
     choice_1 = models.CharField(max_length=500, verbose_name=_("Choice 1"), default="", blank=True)
     choice_2 = models.CharField(max_length=500, verbose_name=_("Choice 2"), default="", blank=True)

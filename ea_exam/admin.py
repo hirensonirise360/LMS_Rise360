@@ -28,7 +28,7 @@ class EATopicInline(admin.TabularInline):
 
 @admin.register(EAPart)
 class EAPartAdmin(admin.ModelAdmin):
-    list_display = ("number", "name", "total_questions", "time_limit_minutes")
+    list_display = ("number", "name")
     inlines = [EADomainInline]
 
 
@@ -50,7 +50,7 @@ class EATopicAdmin(admin.ModelAdmin):
             "fields": ("domain", "name", "order")
         }),
         ("E-Book Content", {
-            "fields": ("pdf_file", "supabase_pdf_path", "ebook_external_url")
+            "fields": ("pdf_file", "supabase_pdf_path")
         }),
         ("Video Content", {
             "fields": ("video_file", "video_external_url")
@@ -58,7 +58,7 @@ class EATopicAdmin(admin.ModelAdmin):
     )
 
     def has_ebook(self, obj):
-        return bool(obj.pdf_file or obj.supabase_pdf_path or obj.ebook_external_url)
+        return bool(obj.pdf_file or obj.supabase_pdf_path)
     has_ebook.boolean = True
     has_ebook.short_description = "Has E-Book"
 
@@ -91,7 +91,6 @@ class EAQuestionResource(resources.ModelResource):
         fields = (
             "id", "part", "domain", "topic",
             "question_text", "explanation", "difficulty", "status",
-            "year_appeared", "irs_pub_ref", "version",
             "choice1_text", "choice1_correct",
             "choice2_text", "choice2_correct",
             "choice3_text", "choice3_correct",
@@ -105,10 +104,10 @@ class EAQuestionAdmin(ImportExportModelAdmin):
     resource_class = EAQuestionResource
     list_display = (
         "id", "short_text", "part", "domain", "topic",
-        "difficulty_badge", "status", "irs_pub_ref", "year_appeared", "delete_row"
+        "difficulty_badge", "status", "delete_row"
     )
-    list_filter = ("part", "domain", "topic", "difficulty", "status", "year_appeared")
-    search_fields = ("question_text", "irs_pub_ref")
+    list_filter = ("part", "domain", "topic", "difficulty", "status")
+    search_fields = ("question_text",)
     list_per_page = 25
     readonly_fields = ("created_at", "updated_at")
     ordering = ("id",)
@@ -127,7 +126,7 @@ class EAQuestionAdmin(ImportExportModelAdmin):
         
         headers = [
             "id", "part", "domain", "topic", "question_text", "explanation", "difficulty", "status", 
-            "irs_pub_ref", "choice1_text", "choice1_correct",
+            "choice1_text", "choice1_correct",
             "choice2_text", "choice2_correct",
             "choice3_text", "choice3_correct",
             "choice4_text", "choice4_correct"
@@ -136,7 +135,7 @@ class EAQuestionAdmin(ImportExportModelAdmin):
         
         writer.writerow([
             "100001", "1", "1", "", "What is the standard deduction for a single filer for 2024?", 
-            "Standard deduction for single 2024 is $14,600.", "medium", "active", "IRS Pub 17",
+            "Standard deduction for single 2024 is $14,600.", "medium", "active",
             "$12,950", "0",
             "$13,850", "0",
             "$14,600", "1",
@@ -164,7 +163,7 @@ class EAQuestionAdmin(ImportExportModelAdmin):
                 ("choice_4", "choice_4_correct"),
             )
         }),
-        ("Metadata", {"fields": ("difficulty", "status", "year_appeared", "irs_pub_ref", "version")}),
+        ("Metadata", {"fields": ("difficulty", "status")}),
         ("Timestamps", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )
 

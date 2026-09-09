@@ -27,7 +27,6 @@ from course.models import (
     Upload,
     UploadVideo,
 )
-from result.models import TakenCourse
 
 
 # ########################################################
