@@ -17,9 +17,9 @@ handler404 = "config.error_views.page_not_found"
 handler500 = "config.error_views.server_error"
 
 def is_authorized_admin(request):
-    """Custom permission check for the admin site, bound to the request."""
+    """Custom permission check for the admin site, permitting active staff and superusers."""
     user = request.user
-    return user.is_active and user.is_superuser and user.email == "sonihiren233@gmail.com"
+    return user.is_active and (user.is_staff or user.is_superuser)
 
 # Override admin permission to secure it as requested originally
 admin.site.has_permission = is_authorized_admin
