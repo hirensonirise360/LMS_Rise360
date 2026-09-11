@@ -10,24 +10,23 @@
         <th>{% trans 'ID No.' %}</th>
         <th>{% trans 'Full Name' %}</th>
         <th>{% trans 'Email' %}</th>
-        <th>{% trans 'Mob No.' %}</th>
         <th>{% trans 'Program' %}</th>
       </tr>
     </thead>
     <tbody>
-      {% for learner in learners %}
+      {% for student in students %}
       <tr>
         <td> {{ forloop.counter }}.</td>
         <td>{{ student.student.username }}</td>
-        <td><a href="{% url 'profile_single' student.id %}">{{ student.student.get_full_name }}</a></td>
+        <td><a href="{% url 'profile_single' student.student.id %}">{{ student.student.get_full_name }}</a></td>
         <td>{{ student.student.email }}</td>
-        <td>{{ learner.program }}</td>
+        <td>{{ student.program }}</td>
       </tr>
       {% empty %}
       <tr>
-        <td>
+        <td colspan="5">
           <span class="text-danger">
-            {% trans 'No Lecturer(s).' %}
+            {% trans 'No Learner(s).' %}
           </span>
         </td>
       </tr>

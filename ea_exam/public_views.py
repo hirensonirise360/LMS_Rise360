@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import Http404
-from .models import EAPart, EAQuestion
+from .models import EAPart
 from core.models import BlogArticle
 from .programmatic_data import get_programmatic_page, get_all_programmatic_urls
 
@@ -38,8 +38,7 @@ def free_practice_test_view(request):
     try:
         parts = EAPart.objects.all().order_by("number")
         for part in parts:
-            questions = EAQuestion.objects.filter(part=part, status="active")[:10]
-            questions_by_part[part] = questions
+            questions_by_part[part] = []
     except Exception:
         pass
     return render(request, "public_pages/free_practice_test.html", {

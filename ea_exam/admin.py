@@ -1,191 +1,302 @@
 from django.contrib import admin
-from django.utils.html import format_html
-from import_export import resources, fields
-from import_export.widgets import ForeignKeyWidget, BooleanWidget
-from import_export.admin import ImportExportModelAdmin
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.urls import path
-import csv
-import io
-from .models import (
-    EAPart, EADomain, EATopic,
-    EAQuestion, EAExamSession, QuestionUserNote
-)
+from django.db.models import Count, Q
+from .models import EAPart, EADomain, EATopic, EATopicEbook, EATopicVideo
 
 
 class EADomainInline(admin.TabularInline):
     model = EADomain
     extra = 0
     fields = ("name", "order")
+    show_change_link = True
 
 
 class EATopicInline(admin.TabularInline):
     model = EATopic
     extra = 0
     fields = ("name", "order")
+    show_change_link = True
 
 
 @admin.register(EAPart)
 class EAPartAdmin(admin.ModelAdmin):
-    list_display = ("number", "name")
+    list_display = ("number", "name", "is_active", "description", "domain_count_display", "topic_count_display")
+    list_editable = ("name", "is_active")
+    list_filter = ("is_active",)
+    search_fields = ("number", "name", "description")
+    ordering = ("number",)
+    save_on_top = True
+    actions = ["make_active", "make_inactive"]
     inlines = [EADomainInline]
+    fieldsets = (
+        (None, {
+            "fields": ("number", "name", "is_active", "description")
+        }),
+    )
+
+    @admin.action(description="Mark selected modules as Active")
+    def make_active(self, request, queryset):
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f"{updated} module(s) marked as Active.")
+
+    @admin.action(description="Mark selected modules as Inactive")
+    def make_inactive(self, request, queryset):
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f"{updated} module(s) marked as Inactive.")
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.annotate(
+            _domain_count=Count("domains", distinct=True),
+            _topic_count=Count("domains__topics", distinct=True)
+        )
+
+    def domain_count_display(self, obj):
+        return getattr(obj, "_domain_count", 0)
+    domain_count_display.short_description = "Domains"
+    domain_count_display.admin_order_field = "_domain_count"
+
+    def topic_count_display(self, obj):
+        return getattr(obj, "_topic_count", 0)
+    topic_count_display.short_description = "Topics"
+    topic_count_display.admin_order_field = "_topic_count"
 
 
 @admin.register(EADomain)
 class EADomainAdmin(admin.ModelAdmin):
-    list_display = ("name", "part", "order")
+    list_display = ("name", "part", "order", "topic_count_display")
     list_filter = ("part",)
-    search_fields = ("name",)
+    search_fields = ("name", "part__name")
+    list_editable = ("order",)
+    list_select_related = ("part",)
+    ordering = ("part__number", "order")
+    save_on_top = True
     inlines = [EATopicInline]
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.annotate(_topic_count=Count("topics", distinct=True))
+
+    def topic_count_display(self, obj):
+        return getattr(obj, "_topic_count", 0)
+    topic_count_display.short_description = "Topics"
+    topic_count_display.admin_order_field = "_topic_count"
+
+
+# ── Filters ──────────────────────────────────────────────────────────────────
+
+class HasEbookFilter(admin.SimpleListFilter):
+    title = "E-Book"
+    parameter_name = "has_ebook"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("yes", "Has E-Book"),
+            ("no",  "Missing E-Book"),
+        )
+
+    def queryset(self, request, queryset):
+        has = Q(pdf_file__isnull=False) & ~Q(pdf_file="")
+        supabase = ~Q(supabase_pdf_path="")
+        if self.value() == "yes":
+            return queryset.filter(has | supabase)
+        if self.value() == "no":
+            return queryset.exclude(has | supabase)
+        return queryset
+
+
+class HasVideoFilter(admin.SimpleListFilter):
+    title = "Video"
+    parameter_name = "has_video"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("yes", "Has Video"),
+            ("no",  "Missing Video"),
+        )
+
+    def queryset(self, request, queryset):
+        has_file = Q(video_file__isnull=False) & ~Q(video_file="")
+        has_url  = ~Q(video_external_url="")
+        if self.value() == "yes":
+            return queryset.filter(has_file | has_url)
+        if self.value() == "no":
+            return queryset.exclude(has_file | has_url)
+        return queryset
+
+
+# ── EATopic Admin ─────────────────────────────────────────────────────────────
 
 @admin.register(EATopic)
 class EATopicAdmin(admin.ModelAdmin):
-    list_display = ("name", "domain", "order", "has_ebook", "has_video")
-    list_filter = ("domain__part", "domain")
-    search_fields = ("name",)
+    list_display = (
+        "name", "domain", "order",
+        "has_ebook", "has_video",
+        "ebook_source", "video_source",
+    )
+    list_filter = ("domain__part", "domain", HasEbookFilter, HasVideoFilter)
+    search_fields = ("name", "domain__name", "domain__part__name")
+    list_editable = ("order",)
+    list_select_related = ("domain", "domain__part")
+    ordering = ("domain__part__number", "domain__order", "order")
+    save_on_top = True
     fieldsets = (
         ("Topic Information", {
             "fields": ("domain", "name", "order")
         }),
         ("E-Book Content", {
-            "fields": ("pdf_file", "supabase_pdf_path")
+            "description": "Upload a PDF file OR paste the Supabase storage path for private E-Books.",
+            "fields": ("pdf_file", "supabase_pdf_path"),
         }),
         ("Video Content", {
-            "fields": ("video_file", "video_external_url")
+            "description": "Upload a video file OR paste a YouTube / Vimeo URL.",
+            "fields": ("video_file", "video_external_url"),
         }),
     )
 
     def has_ebook(self, obj):
         return bool(obj.pdf_file or obj.supabase_pdf_path)
     has_ebook.boolean = True
-    has_ebook.short_description = "Has E-Book"
+    has_ebook.short_description = "E-Book ✓"
 
     def has_video(self, obj):
         return bool(obj.video_file or obj.video_external_url)
     has_video.boolean = True
-    has_video.short_description = "Has Video"
+    has_video.short_description = "Video ✓"
+
+    def ebook_source(self, obj):
+        if obj.supabase_pdf_path:
+            return "☁ Supabase"
+        if obj.pdf_file:
+            return "📁 File"
+        return "—"
+    ebook_source.short_description = "E-Book Source"
+
+    def video_source(self, obj):
+        if obj.video_external_url:
+            return "🔗 URL"
+        if obj.video_file:
+            return "📁 File"
+        return "—"
+    video_source.short_description = "Video Source"
 
 
-class EAQuestionResource(resources.ModelResource):
-    part = fields.Field(column_name='part', attribute='part', widget=ForeignKeyWidget(EAPart, 'pk'))
-    domain = fields.Field(column_name='domain', attribute='domain', widget=ForeignKeyWidget(EADomain, 'pk'))
-    topic = fields.Field(column_name='topic', attribute='topic', widget=ForeignKeyWidget(EATopic, 'pk'))
+# ── E-Book Admin (proxy) ─────────────────────────────────────────────────────
 
-    choice1_text = fields.Field(column_name='choice1_text', attribute='choice_1')
-    choice1_correct = fields.Field(column_name='choice1_correct', attribute='choice_1_correct', widget=BooleanWidget())
-    
-    choice2_text = fields.Field(column_name='choice2_text', attribute='choice_2')
-    choice2_correct = fields.Field(column_name='choice2_correct', attribute='choice_2_correct', widget=BooleanWidget())
-    
-    choice3_text = fields.Field(column_name='choice3_text', attribute='choice_3')
-    choice3_correct = fields.Field(column_name='choice3_correct', attribute='choice_3_correct', widget=BooleanWidget())
-    
-    choice4_text = fields.Field(column_name='choice4_text', attribute='choice_4')
-    choice4_correct = fields.Field(column_name='choice4_correct', attribute='choice_4_correct', widget=BooleanWidget())
-
-    class Meta:
-        model = EAQuestion
-        import_id_fields = ('id',)
-        fields = (
-            "id", "part", "domain", "topic",
-            "question_text", "explanation", "difficulty", "status",
-            "choice1_text", "choice1_correct",
-            "choice2_text", "choice2_correct",
-            "choice3_text", "choice3_correct",
-            "choice4_text", "choice4_correct"
-        )
-        export_order = fields
-
-
-@admin.register(EAQuestion)
-class EAQuestionAdmin(ImportExportModelAdmin):
-    resource_class = EAQuestionResource
+@admin.register(EATopicEbook)
+class EATopicEbookAdmin(admin.ModelAdmin):
+    """
+    Dedicated E-Book management view.
+    Shows every Topic with its e-book status.
+    Supabase path is editable inline; PDF file upload is in the change form.
+    """
     list_display = (
-        "id", "short_text", "part", "domain", "topic",
-        "difficulty_badge", "status", "delete_row"
+        "topic_name",
+        "module",
+        "domain_name",
+        "ebook_status",
+        "supabase_pdf_path",
     )
-    list_filter = ("part", "domain", "topic", "difficulty", "status")
-    search_fields = ("question_text",)
-    list_per_page = 25
-    readonly_fields = ("created_at", "updated_at")
-    ordering = ("id",)
-    import_template_name = "admin/ea_exam/eaquestion/import.html"
+    list_editable = ("supabase_pdf_path",)
+    list_filter = (HasEbookFilter, "domain__part", "domain")
+    search_fields = ("name", "domain__name", "domain__part__name", "supabase_pdf_path")
+    list_select_related = ("domain", "domain__part")
+    ordering = ("domain__part__number", "domain__order", "order")
+    save_on_top = True
 
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path('download-csv-template/', self.admin_site.admin_view(self.download_csv_template), name='ea_question_template'),
-        ]
-        return custom_urls + urls
-
-    def download_csv_template(self, request):
-        output = io.StringIO()
-        writer = csv.writer(output)
-        
-        headers = [
-            "id", "part", "domain", "topic", "question_text", "explanation", "difficulty", "status", 
-            "choice1_text", "choice1_correct",
-            "choice2_text", "choice2_correct",
-            "choice3_text", "choice3_correct",
-            "choice4_text", "choice4_correct"
-        ]
-        writer.writerow(headers)
-        
-        writer.writerow([
-            "100001", "1", "1", "", "What is the standard deduction for a single filer for 2024?", 
-            "Standard deduction for single 2024 is $14,600.", "medium", "active",
-            "$12,950", "0",
-            "$13,850", "0",
-            "$14,600", "1",
-            "$29,200", "0"
-        ])
-        
-        response = HttpResponse(output.getvalue(), content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="mcq_import_template.csv"'
-        return response
-
-    def delete_row(self, obj):
-        from django.urls import reverse
-        from django.utils.html import format_html
-        url = reverse('admin:ea_exam_eaquestion_delete', args=[obj.pk])
-        return format_html('<a class="deletelink" href="{}">Delete</a>', url)
-    delete_row.short_description = "Action"
-
+    # Show only E-Book relevant fields in the change form
     fieldsets = (
-        ("Question Info", {"fields": ("part", "domain", "topic", "question_text", "explanation")}),
-        ("MCQ Choices", {
-            "fields": (
-                ("choice_1", "choice_1_correct"),
-                ("choice_2", "choice_2_correct"),
-                ("choice_3", "choice_3_correct"),
-                ("choice_4", "choice_4_correct"),
-            )
+        ("Topic", {
+            "fields": ("domain", "name"),
         }),
-        ("Metadata", {"fields": ("difficulty", "status")}),
-        ("Timestamps", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+        ("E-Book Content", {
+            "description": (
+                "Choose one: either paste the Supabase storage path (private bucket) "
+                "OR upload a PDF file directly."
+            ),
+            "fields": ("supabase_pdf_path", "pdf_file"),
+        }),
     )
 
-    def short_text(self, obj):
-        return obj.question_text[:80] + "..." if len(obj.question_text) > 80 else obj.question_text
+    def topic_name(self, obj):
+        return obj.name
+    topic_name.short_description = "Topic"
+    topic_name.admin_order_field = "name"
 
-    def difficulty_badge(self, obj):
-        colors = {"easy": "green", "medium": "orange", "hard": "red"}
-        color = colors.get(obj.difficulty, "gray")
-        return format_html(
-            '<span style="color:white;background:{};padding:2px 8px;border-radius:4px;">{}</span>',
-            color, obj.get_difficulty_display()
-        )
-    difficulty_badge.short_description = "Difficulty"
-    short_text.short_description = "Question"
+    def module(self, obj):
+        return obj.domain.part.name
+    module.short_description = "Module"
+    module.admin_order_field = "domain__part__name"
+
+    def domain_name(self, obj):
+        return obj.domain.name
+    domain_name.short_description = "Domain"
+    domain_name.admin_order_field = "domain__name"
+
+    def ebook_status(self, obj):
+        if obj.supabase_pdf_path:
+            return "☁ Supabase"
+        if obj.pdf_file:
+            return "📁 File"
+        return "❌ Missing"
+    ebook_status.short_description = "E-Book"
 
 
-@admin.register(QuestionUserNote)
-class QuestionUserNoteAdmin(admin.ModelAdmin):
-    list_display = ("user", "question", "content_short", "updated_at")
-    list_filter = ("user", "updated_at")
-    search_fields = ("content", "user__email", "question__question_text")
+# ── Video Admin (proxy) ──────────────────────────────────────────────────────
 
-    def content_short(self, obj):
-        return obj.content[:50] + "..." if len(obj.content) > 50 else obj.content
+@admin.register(EATopicVideo)
+class EATopicVideoAdmin(admin.ModelAdmin):
+    """
+    Dedicated Video management view.
+    Shows every Topic with its video status.
+    External URL is editable inline; video file upload is in the change form.
+    """
+    list_display = (
+        "topic_name",
+        "module",
+        "domain_name",
+        "video_status",
+        "video_external_url",
+    )
+    list_editable = ("video_external_url",)
+    list_filter = (HasVideoFilter, "domain__part", "domain")
+    search_fields = ("name", "domain__name", "domain__part__name", "video_external_url")
+    list_select_related = ("domain", "domain__part")
+    ordering = ("domain__part__number", "domain__order", "order")
+    save_on_top = True
+
+    # Show only Video relevant fields in the change form
+    fieldsets = (
+        ("Topic", {
+            "fields": ("domain", "name"),
+        }),
+        ("Video Content", {
+            "description": (
+                "Choose one: either paste a YouTube/Vimeo URL "
+                "OR upload a video file directly."
+            ),
+            "fields": ("video_external_url", "video_file"),
+        }),
+    )
+
+    def topic_name(self, obj):
+        return obj.name
+    topic_name.short_description = "Topic"
+    topic_name.admin_order_field = "name"
+
+    def module(self, obj):
+        return obj.domain.part.name
+    module.short_description = "Module"
+    module.admin_order_field = "domain__part__name"
+
+    def domain_name(self, obj):
+        return obj.domain.name
+    domain_name.short_description = "Domain"
+    domain_name.admin_order_field = "domain__name"
+
+    def video_status(self, obj):
+        if obj.video_external_url:
+            return "🔗 URL"
+        if obj.video_file:
+            return "📁 File"
+        return "❌ Missing"
+    video_status.short_description = "Video"

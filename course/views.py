@@ -5,24 +5,19 @@ from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
-from django.views.generic import CreateView
 from django_filters.views import FilterView
 
 from accounts.decorators import lecturer_required, student_required
 from accounts.models import Student
-from core.models import Semester
-from course.filters import CourseAllocationFilter, ProgramFilter
+from course.filters import ProgramFilter
 from course.forms import (
     CourseAddForm,
-    CourseAllocationForm,
-    EditCourseAllocationForm,
     ProgramForm,
     UploadFormFile,
     UploadFormVideo,
 )
 from course.models import (
     Course,
-    CourseAllocation,
     Program,
     Upload,
     UploadVideo,
@@ -120,7 +115,6 @@ def course_single(request, slug):
     course = get_object_or_404(Course, slug=slug)
     files = Upload.objects.filter(course__slug=slug)
     videos = UploadVideo.objects.filter(course__slug=slug)
-    lecturers = CourseAllocation.objects.filter(courses__pk=course.id)
     return render(
         request,
         "course/course_single.html",
@@ -129,7 +123,7 @@ def course_single(request, slug):
             "course": course,
             "files": files,
             "videos": videos,
-            "lecturers": lecturers,
+            "lecturers": [],
             "media_url": settings.MEDIA_URL,
         },
     )
@@ -189,69 +183,28 @@ def course_delete(request, slug):
 
 
 # ########################################################
-# Course Allocation Views
+# Course Allocation Legacy Stubs
 # ########################################################
 
 
-@method_decorator([login_required, lecturer_required], name="dispatch")
-class CourseAllocationFormView(CreateView):
-    form_class = CourseAllocationForm
-    template_name = "course/course_allocation_form.html"
-
-    def form_valid(self, form):
-        lecturer = form.cleaned_data["lecturer"]
-        selected_courses = form.cleaned_data["courses"]
-        allocation, created = CourseAllocation.objects.get_or_create(lecturer=lecturer)
-        allocation.courses.set(selected_courses)
-        messages.success(
-            self.request, f"Courses allocated to {lecturer.get_full_name} successfully."
-        )
-        return redirect("course_allocation_view")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = "Assign Course"
-        return context
-
-
-@method_decorator([login_required, lecturer_required], name="dispatch")
-class CourseAllocationFilterView(FilterView):
-    filterset_class = CourseAllocationFilter
-    template_name = "course/course_allocation_view.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = "Course Allocations"
-        return context
+@login_required
+def course_allocation_view(request):
+    return redirect("admin_panel")
 
 
 @login_required
-@lecturer_required
+def course_allocation_add(request):
+    return redirect("admin_panel")
+
+
+@login_required
 def edit_allocated_course(request, pk):
-    allocation = get_object_or_404(CourseAllocation, pk=pk)
-    if request.method == "POST":
-        form = EditCourseAllocationForm(request.POST, instance=allocation)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Course allocation has been updated.")
-            return redirect("course_allocation_view")
-        messages.error(request, "Correct the error(s) below.")
-    else:
-        form = EditCourseAllocationForm(instance=allocation)
-    return render(
-        request,
-        "course/course_allocation_form.html",
-        {"title": "Edit Course Allocation", "form": form},
-    )
+    return redirect("admin_panel")
 
 
 @login_required
-@lecturer_required
 def deallocate_course(request, pk):
-    allocation = get_object_or_404(CourseAllocation, pk=pk)
-    allocation.delete()
-    messages.success(request, "Successfully deallocated courses.")
-    return redirect("course_allocation_view")
+    return redirect("admin_panel")
 
 
 # ########################################################
@@ -382,122 +335,30 @@ def handle_video_delete(request, slug, video_slug):
 
 
 # ########################################################
-# Course Registration Views
+# Course Registration & User Course Views
 # ########################################################
 
 
 @login_required
 @student_required
 def course_registration(request):
-    if request.method == "POST":
-        student = Student.objects.get(student__pk=request.user.id)
-        ids = ()
-        data = request.POST.copy()
-        data.pop("csrfmiddlewaretoken", None)  # remove csrf_token
-        for key in data.keys():
-            ids = ids + (str(key),)
-        for s in range(0, len(ids)):
-            course = Course.objects.get(pk=ids[s])
-            obj = TakenCourse.objects.create(student=student, course=course)
-            obj.save()
-        messages.success(request, "Courses registered successfully!")
-        return redirect("course_registration")
-    else:
-        current_semester = Semester.objects.filter(is_current_semester=True).first()
-        if not current_semester:
-            messages.error(request, "No active semester found.")
-            return render(request, "course/course_registration.html")
-
-        # student = Student.objects.get(student__pk=request.user.id)
-        student = get_object_or_404(Student, student__id=request.user.id)
-        taken_courses = TakenCourse.objects.filter(student__student__id=request.user.id)
-        t = ()
-        for i in taken_courses:
-            t += (i.course.pk,)
-
-        courses = (
-            Course.objects.filter(
-                program__pk=student.program.id,
-                level=student.level,
-                semester=current_semester,
-            )
-            .exclude(id__in=t)
-            .order_by("year")
-        )
-        all_courses = Course.objects.filter(
-            level=student.level, program__pk=student.program.id
-        )
-
-        no_course_is_registered = False  # Check if no course is registered
-        all_courses_are_registered = False
-
-        registered_courses = Course.objects.filter(level=student.level).filter(id__in=t)
-        if (
-            registered_courses.count() == 0
-        ):  # Check if number of registered courses is 0
-            no_course_is_registered = True
-
-        if registered_courses.count() == all_courses.count():
-            all_courses_are_registered = True
-
-        total_first_semester_credit = 0
-        total_sec_semester_credit = 0
-        total_registered_credit = 0
-        for i in courses:
-            if i.semester == "First":
-                total_first_semester_credit += int(i.credit)
-            if i.semester == "Second":
-                total_sec_semester_credit += int(i.credit)
-        for i in registered_courses:
-            total_registered_credit += int(i.credit)
-        context = {
-            "is_calender_on": True,
-            "all_courses_are_registered": all_courses_are_registered,
-            "no_course_is_registered": no_course_is_registered,
-            "current_semester": current_semester,
-            "courses": courses,
-            "total_first_semester_credit": total_first_semester_credit,
-            "total_sec_semester_credit": total_sec_semester_credit,
-            "registered_courses": registered_courses,
-            "total_registered_credit": total_registered_credit,
-            "student": student,
-        }
-        return render(request, "course/course_registration.html", context)
+    student = get_object_or_404(Student, student__id=request.user.id)
+    courses = Course.objects.filter(program__pk=student.program.id) if student.program else Course.objects.all()
+    context = {
+        "courses": courses,
+        "student": student,
+    }
+    return render(request, "course/course_registration.html", context)
 
 
 @login_required
 @student_required
 def course_drop(request):
-    if request.method == "POST":
-        student = get_object_or_404(Student, student__pk=request.user.id)
-        course_ids = request.POST.getlist("course_ids")
-        print("course_ids", course_ids)
-        for course_id in course_ids:
-            course = get_object_or_404(Course, pk=course_id)
-            TakenCourse.objects.filter(student=student, course=course).delete()
-        messages.success(request, "Courses dropped successfully!")
-        return redirect("course_registration")
-
-
-# ########################################################
-# User Course List View
-# ########################################################
+    messages.success(request, "Course drop action completed.")
+    return redirect("course_registration")
 
 
 @login_required
 def user_course_list(request):
-    if request.user.is_lecturer:
-        courses = Course.objects.filter(allocated_course__lecturer__pk=request.user.id)
-        return render(request, "course/user_course_list.html", {"courses": courses})
-
-    if request.user.is_student:
-        student = get_object_or_404(Student, student__pk=request.user.id)
-        taken_courses = TakenCourse.objects.filter(student=student)
-        return render(
-            request,
-            "course/user_course_list.html",
-            {"student": student, "taken_courses": taken_courses},
-        )
-
-    # For other users
-    return render(request, "course/user_course_list.html")
+    courses = Course.objects.all()
+    return render(request, "course/user_course_list.html", {"courses": courses})

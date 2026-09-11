@@ -1,6 +1,6 @@
 from django.contrib import admin
 from modeltranslation.admin import TranslationAdmin
-from .models import Session, Semester, NewsAndEvents, BlogArticle
+from .models import NewsAndEvents, BlogArticle
 
 
 class NewsAndEventsAdmin(TranslationAdmin):
@@ -20,6 +20,4 @@ class BlogArticleAdmin(admin.ModelAdmin):
     )
 
 
-admin.site.register(Semester)
-admin.site.register(Session)
 admin.site.register(NewsAndEvents, NewsAndEventsAdmin)

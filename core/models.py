@@ -40,9 +40,7 @@ class NewsAndEventsManager(models.Manager):
         return self.get_queryset()
 
     def get_by_id(self, id):
-        qs = self.get_queryset().filter(
-            id=id
-        )  # NewsAndEvents.objects == self.get_queryset()
+        qs = self.get_queryset().filter(id=id)
         if qs.count() == 1:
             return qs.first()
         return None
@@ -64,33 +62,13 @@ class NewsAndEvents(models.Model):
         return f"{self.title}"
 
 
-class Session(models.Model):
-    session = models.CharField(max_length=200, unique=True)
-    is_current_session = models.BooleanField(default=False, blank=True, null=True)
-    next_session_begins = models.DateField(blank=True, null=True)
-
-    def __str__(self):
-        return f"{self.session}"
-
-
-class Semester(models.Model):
-    semester = models.CharField(max_length=10, choices=SEMESTER, blank=True)
-    is_current_semester = models.BooleanField(default=False, blank=True, null=True)
-    session = models.ForeignKey(
-        Session, on_delete=models.CASCADE, blank=True, null=True
-    )
-    next_semester_begins = models.DateField(null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.semester}"
-
-
 class ActivityLog(models.Model):
     message = models.TextField()
     created_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"[{self.created_at}]{self.message}"
+
 
 class BlogArticle(models.Model):
     title = models.CharField(max_length=255)

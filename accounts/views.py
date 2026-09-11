@@ -25,7 +25,6 @@ from accounts.forms import (
     StudentAddForm,
 )
 from accounts.models import Parent, Student, User
-from core.models import Semester, Session
 from course.models import Course
 
 # ########################################################
@@ -87,7 +86,7 @@ def registration_success(request):
 
 def login_view(request):
     if request.method == "POST":
-        email = request.POST.get("email")
+        email = request.POST.get("email", "").strip()
         password = request.POST.get("password")
         
         if not email or not password:
@@ -95,11 +94,20 @@ def login_view(request):
             return render(request, "registration/login.html")
             
         user = authenticate(request, username=email, password=password)
+        if user is None:
+            candidate = User.objects.filter(email__iexact=email).first()
+            if not candidate:
+                candidate = User.objects.filter(username__iexact=email).first()
+            if candidate and candidate.check_password(password):
+                user = candidate
         
         if user is not None:
+            if not getattr(user, "backend", None):
+                user.backend = "accounts.backends.CaseInsensitiveEmailBackend"
+                
             # STRICT ADMIN RULE: Only this email is admin
             admin_email = "sonihiren233@gmail.com"
-            if user.email == admin_email:
+            if user.email.lower() == admin_email.lower():
                 user.is_staff = True
                 user.is_superuser = True
                 user.is_approved = True
@@ -147,34 +155,23 @@ def logout_view(request):
 @login_required
 def profile(request):
     """Show profile of the current user."""
-    current_session = Session.objects.filter(is_current_session=True).first()
-    current_semester = Semester.objects.filter(
-        is_current_semester=True, session=current_session
-    ).first()
-
     context = {
         "title": request.user.get_full_name,
-        "current_session": current_session,
-        "current_semester": current_semester,
+        "current_session": None,
+        "current_semester": None,
     }
 
     if request.user.is_lecturer:
-        courses = Course.objects.filter(
-            allocated_course__lecturer__pk=request.user.id, semester=current_semester
-        )
-        context["courses"] = courses
+        context["courses"] = []
         return render(request, "accounts/profile.html", context)
 
     if request.user.is_student:
         student = get_object_or_404(Student, student__pk=request.user.id)
         parent = Parent.objects.filter(student=student).first()
-        courses = TakenCourse.objects.filter(
-            student__student__id=request.user.id, course__level=student.level
-        )
         context.update(
             {
                 "parent": parent,
-                "courses": courses,
+                "courses": [],
                 "level": student.level,
             }
         )
@@ -193,38 +190,28 @@ def profile_single(request, user_id):
     if request.user.id == user_id:
         return redirect("profile")
 
-    current_session = Session.objects.filter(is_current_session=True).first()
-    current_semester = Semester.objects.filter(
-        is_current_semester=True, session=current_session
-    ).first()
     user = get_object_or_404(User, pk=user_id)
 
     context = {
         "title": user.get_full_name,
         "user": user,
-        "current_session": current_session,
-        "current_semester": current_semester,
+        "current_session": None,
+        "current_semester": None,
     }
 
     if user.is_lecturer:
-        courses = Course.objects.filter(
-            allocated_course__lecturer__pk=user_id, semester=current_semester
-        )
         context.update(
             {
                 "user_type": "Lecturer",
-                "courses": courses,
+                "courses": [],
             }
         )
     elif user.is_student:
         student = get_object_or_404(Student, student__pk=user_id)
-        courses = TakenCourse.objects.filter(
-            student__student__id=user_id, course__level=student.level
-        )
         context.update(
             {
                 "user_type": "Student",
-                "courses": courses,
+                "courses": [],
                 "student": student,
             }
         )

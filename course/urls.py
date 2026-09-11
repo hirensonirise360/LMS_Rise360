@@ -17,12 +17,12 @@ urlpatterns = [
     # CourseAllocation urls
     path(
         "course/assign/",
-        views.CourseAllocationFormView.as_view(),
+        views.course_allocation_add,
         name="course_allocation",
     ),
     path(
         "course/allocated/",
-        views.CourseAllocationFilterView.as_view(),
+        views.course_allocation_view,
         name="course_allocation_view",
     ),
     path(

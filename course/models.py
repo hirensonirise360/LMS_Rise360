@@ -7,7 +7,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from core.models import ActivityLog, Semester
+from core.models import ActivityLog
 from core.utils import unique_slug_generator
 
 
@@ -80,9 +80,7 @@ class Course(models.Model):
 
     @property
     def is_current_semester(self):
-
-        current_semester = Semester.objects.filter(is_current_semester=True).first()
-        return self.semester == current_semester.semester if current_semester else False
+        return True
 
 
 @receiver(pre_save, sender=Course)
@@ -100,24 +98,6 @@ def log_course_save(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=Course)
 def log_course_delete(sender, instance, **kwargs):
     ActivityLog.objects.create(message=_(f"The course '{instance}' has been deleted."))
-
-
-class CourseAllocation(models.Model):
-    lecturer = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="allocated_lecturer",
-    )
-    courses = models.ManyToManyField(Course, related_name="allocated_course")
-    session = models.ForeignKey(
-        "core.Session", on_delete=models.CASCADE, blank=True, null=True
-    )
-
-    def __str__(self):
-        return self.lecturer.get_full_name
-
-    def get_absolute_url(self):
-        return reverse("edit_allocated_course", kwargs={"pk": self.pk})
 
 
 class Upload(models.Model):
@@ -245,12 +225,3 @@ def log_uploadvideo_delete(sender, instance, **kwargs):
             f"The video '{instance.title}' of the course '{instance.course}' has been deleted."
         )
     )
-
-
-class CourseOffer(models.Model):
-    """NOTE: Only department head can offer semester courses"""
-
-    dep_head = models.ForeignKey("accounts.DepartmentHead", on_delete=models.CASCADE)
-
-    def __str__(self):
-        return str(self.dep_head)

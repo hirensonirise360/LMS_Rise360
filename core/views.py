@@ -4,8 +4,8 @@ from django.contrib.auth.decorators import login_required
 
 from accounts.decorators import admin_required, lecturer_required
 from accounts.models import User, Student
-from .forms import SessionForm, SemesterForm, NewsAndEventsForm
-from .models import NewsAndEvents, ActivityLog, Session, Semester
+from .forms import NewsAndEventsForm
+from .models import NewsAndEvents, ActivityLog
 
 
 # ########################################################
@@ -80,130 +80,43 @@ def delete_post(request, pk):
 
 
 # ########################################################
-# Session
+# Session & Semester Legacy Stubs
 # ########################################################
 @login_required
-@lecturer_required
 def session_list_view(request):
-    """Show list of all sessions"""
-    sessions = Session.objects.all().order_by("-is_current_session", "-session")
-    return render(request, "core/session_list.html", {"sessions": sessions})
+    return redirect("admin_panel")
 
 
 @login_required
-@lecturer_required
 def session_add_view(request):
-    """Add a new session"""
-    if request.method == "POST":
-        form = SessionForm(request.POST)
-        if form.is_valid():
-            if form.cleaned_data.get("is_current_session"):
-                unset_current_session()
-            form.save()
-            messages.success(request, "Session added successfully.")
-            return redirect("session_list")
-    else:
-        form = SessionForm()
-    return render(request, "core/session_update.html", {"form": form})
+    return redirect("admin_panel")
 
 
 @login_required
-@lecturer_required
 def session_update_view(request, pk):
-    session = get_object_or_404(Session, pk=pk)
-    if request.method == "POST":
-        form = SessionForm(request.POST, instance=session)
-        if form.is_valid():
-            if form.cleaned_data.get("is_current_session"):
-                unset_current_session()
-            form.save()
-            messages.success(request, "Session updated successfully.")
-            return redirect("session_list")
-    else:
-        form = SessionForm(instance=session)
-    return render(request, "core/session_update.html", {"form": form})
+    return redirect("admin_panel")
 
 
 @login_required
-@lecturer_required
 def session_delete_view(request, pk):
-    session = get_object_or_404(Session, pk=pk)
-    if session.is_current_session:
-        messages.error(request, "You cannot delete the current session.")
-    else:
-        session.delete()
-        messages.success(request, "Session successfully deleted.")
-    return redirect("session_list")
+    return redirect("admin_panel")
 
 
-def unset_current_session():
-    """Unset current session"""
-    current_session = Session.objects.filter(is_current_session=True).first()
-    if current_session:
-        current_session.is_current_session = False
-        current_session.save()
-
-
-# ########################################################
-# Semester
-# ########################################################
 @login_required
-@lecturer_required
 def semester_list_view(request):
-    semesters = Semester.objects.all().order_by("-is_current_semester", "-semester")
-    return render(request, "core/semester_list.html", {"semesters": semesters})
+    return redirect("admin_panel")
 
 
 @login_required
-@lecturer_required
 def semester_add_view(request):
-    if request.method == "POST":
-        form = SemesterForm(request.POST)
-        if form.is_valid():
-            if form.cleaned_data.get("is_current_semester"):
-                unset_current_semester()
-                unset_current_session()
-            form.save()
-            messages.success(request, "Semester added successfully.")
-            return redirect("semester_list")
-    else:
-        form = SemesterForm()
-    return render(request, "core/semester_update.html", {"form": form})
+    return redirect("admin_panel")
 
 
 @login_required
-@lecturer_required
 def semester_update_view(request, pk):
-    semester = get_object_or_404(Semester, pk=pk)
-    if request.method == "POST":
-        form = SemesterForm(request.POST, instance=semester)
-        if form.is_valid():
-            if form.cleaned_data.get("is_current_semester"):
-                unset_current_semester()
-                unset_current_session()
-            form.save()
-            messages.success(request, "Semester updated successfully!")
-            return redirect("semester_list")
-    else:
-        form = SemesterForm(instance=semester)
-    return render(request, "core/semester_update.html", {"form": form})
+    return redirect("admin_panel")
 
 
 @login_required
-@lecturer_required
 def semester_delete_view(request, pk):
-    semester = get_object_or_404(Semester, pk=pk)
-    if semester.is_current_semester:
-        messages.error(request, "You cannot delete the current semester.")
-    else:
-        semester.delete()
-        messages.success(request, "Semester successfully deleted.")
-    return redirect("semester_list")
-
-
-def unset_current_semester():
-    """Unset current semester"""
-    current_semester = Semester.objects.filter(is_current_semester=True).first()
-    if current_semester:
-        current_semester.is_current_semester = False
-        current_semester.save()
+    return redirect("admin_panel")

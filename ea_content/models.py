@@ -32,7 +32,8 @@ class EANote(models.Model):
 
     class Meta:
         ordering = ["part", "domain", "-created_at"]
-        verbose_name = "EA Note"
+        verbose_name = "Study Note"
+        verbose_name_plural = "Study Notes"
 
     def __str__(self):
         return self.title

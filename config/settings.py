@@ -73,12 +73,22 @@ if RENDER_EXTERNAL_HOSTNAME:
 # change the default user models to our custom model
 AUTH_USER_MODEL = "accounts.User"
 
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesBackend",
+    "accounts.backends.CaseInsensitiveEmailBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+AXES_AUTHENTICATION_BACKENDS = [
+    "accounts.backends.CaseInsensitiveEmailBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 # Application definition
 
 DJANGO_APPS = [
+    "jazzmin",              # Must be BEFORE django.contrib.admin
     "modeltranslation",  # Translation
-    # "jet.dashboard",  # Disabled on Vercel — queries DB at cold start → 8s timeout
-    # "jet",            # Disabled on Vercel — same reason
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -375,3 +385,131 @@ AXES_RESET_ON_SUCCESS = True
 RAZORPAY_KEY_ID = config("RAZORPAY_KEY_ID", default="rzp_test_1234567890abcdef")
 RAZORPAY_KEY_SECRET = config("RAZORPAY_KEY_SECRET", default="1234567890abcdef12345678")
 
+
+# ────────────────────────────────────────────────────────────────────────────
+# JAZZMIN — Django admin theme configuration
+# ────────────────────────────────────────────────────────────────────────────
+JAZZMIN_SETTINGS = {
+    # ── Branding ──────────────────────────────────────────────────────────
+    "site_title": "RISE360 Admin",
+    "site_header": "RISE360 Institute",
+    "site_brand": "RISE360",
+    "site_logo": "img/rise360-logo.png",
+    "site_logo_classes": "img-circle",
+    "site_icon": "img/rise360-logo.png",
+    "welcome_sign": "Welcome to RISE360 Admin",
+    "copyright": "RISE360 Institute",
+
+    # ── Search ────────────────────────────────────────────────────────────
+    "search_model": ["accounts.User"],
+
+    # ── Top Navigation ────────────────────────────────────────────────────
+    "topmenu_links": [
+        {"name": "Portal Home", "url": "/en/accounts/admin_panel/", "permissions": ["accounts.view_user"]},
+        {"name": "Learners", "url": "/en/accounts/students/", "permissions": ["accounts.view_user"]},
+        {"model": "accounts.User"},
+    ],
+
+    # ── User Menu (top-right avatar) ─────────────────────────────────────
+    "usermenu_links": [
+        {"name": "My Profile", "url": "/en/accounts/profile/", "icon": "fas fa-user"},
+    ],
+
+    # ── Sidebar ───────────────────────────────────────────────────────────
+    "show_sidebar": True,
+    "navigation_expanded": True,
+
+    # Hide apps we don't want staff to see in the sidebar
+    "hide_apps": ["auth", "axes"],
+
+    # Hide proxy models from sidebar (accessed via Admin Panel page links)
+    "hide_models": [
+        "ea_exam.EATopicEbook",
+        "ea_exam.EATopicVideo",
+    ],
+
+    # Rename app labels shown in the sidebar (app_name → display label)
+    "custom_apps": {
+        "ea_exam": "Learning Content",
+        "ea_content": "Study Materials",
+    },
+
+    # Order apps in sidebar
+    "order_with_respect_to": [
+        "ea_exam",
+        "ea_content",
+        "core",
+        "course",
+        "accounts",
+    ],
+
+    # Custom sidebar icons per model
+    "icons": {
+        # Learning Content (ea_exam)
+        "ea_exam.EAPart": "fas fa-layer-group",
+        "ea_exam.EADomain": "fas fa-sitemap",
+        "ea_exam.EATopic": "fas fa-book-open",
+        # Study Materials (ea_content)
+        "ea_content.EANote": "fas fa-sticky-note",
+        "ea_content.Flashcard": "fas fa-clone",
+        # Core
+        "core.BlogArticle": "fas fa-newspaper",
+        "core.NewsAndEvents": "fas fa-calendar-alt",
+        # Course
+        "course.Program": "fas fa-graduation-cap",
+        "course.Course": "fas fa-book",
+        "course.Upload": "fas fa-upload",
+        # Accounts
+        "accounts.User": "fas fa-users",
+        "accounts.Student": "fas fa-user-graduate",
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+
+    # ── UI Options ────────────────────────────────────────────────────────
+    "related_modal_active": False,
+    "custom_css": None,
+    "custom_js": None,
+    "use_google_fonts_cdn": False,
+    "show_ui_builder": False,
+
+    # ── Change view layout ────────────────────────────────────────────────
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {
+        "ea_exam.eapart": "collapsible",
+        "ea_exam.eatopic": "vertical_tabs",
+    },
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-dark",
+    "accent": "accent-primary",
+    # Dark sidebar to match the custom portal's dark navy sidebar
+    "navbar": "navbar-dark",
+    "no_navbar_border": True,
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": True,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "default",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success",
+    },
+}
