@@ -1,0 +1,30 @@
+{% load i18n %}
+<li class="lm-topic-item d-flex align-items-center justify-content-between gap-1 py-1 px-2 rounded"
+    data-topic-id="{{ topic.pk }}"
+    data-domain-id="{{ topic.domain_id }}"
+    role="button"
+    onclick="loadTopicEditor({{ topic.pk }})">
+
+  {# Clickable name — loads editor in right panel #}
+  <span class="lm-topic-name flex-grow-1 text-truncate"
+        title="{{ topic.name }}">
+    <i class="fas fa-circle text-muted me-1" style="font-size:.38rem;vertical-align:middle;"></i>
+    {{ topic.name }}
+  </span>
+
+  {# Media indicators #}
+  <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-1">
+    {% if topic.pdf_file or topic.supabase_pdf_path %}
+      <i class="fas fa-file-pdf text-danger" style="font-size: 0.75rem;" title="{% trans 'E-Book PDF Available' %}"></i>
+    {% else %}
+      <i class="fas fa-file-pdf text-muted opacity-25" style="font-size: 0.75rem;" title="{% trans 'No E-Book' %}"></i>
+    {% endif %}
+
+    {% if topic.video_file or topic.video_external_url %}
+      <i class="fas fa-video text-primary" style="font-size: 0.75rem;" title="{% trans 'Video Available' %}"></i>
+    {% else %}
+      <i class="fas fa-video text-muted opacity-25" style="font-size: 0.75rem;" title="{% trans 'No Video' %}"></i>
+    {% endif %}
+  </div>
+
+</li>

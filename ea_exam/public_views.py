@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404
 from .models import EAPart
 from core.models import BlogArticle
@@ -20,7 +20,12 @@ def about_view(request):
 
 
 def public_home_view(request):
-    """Public landing page at the root domain for SEO."""
+    """Public landing page at the root domain for SEO. Authenticated users are routed to their dashboard."""
+    if request.user.is_authenticated:
+        if request.user.is_superuser or request.user.is_staff:
+            return redirect("admin_panel")
+        return redirect("ea_home")
+
     recent_blogs = []
     try:
         recent_blogs = list(BlogArticle.objects.filter(is_published=True)[:3])
@@ -30,6 +35,7 @@ def public_home_view(request):
         "title": "RISE360 Institute — Next-Generation Learning Management Platform",
         "recent_blogs": recent_blogs,
     })
+
 
 def free_practice_test_view(request):
     """Free EA Exam Practice Questions — All 3 Parts"""

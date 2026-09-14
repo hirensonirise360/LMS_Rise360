@@ -279,8 +279,16 @@
                     <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About Us</a></li>
                 </ul>
                 <div class="d-flex gap-2 mt-3 mt-lg-0 align-items-center">
-                    <a href="{% url 'login' %}" class="btn-login">Learner Login</a>
-                    <a href="{% url 'register' %}" class="btn-cta">Get Started Free →</a>
+                    {% if request.user.is_authenticated %}
+                        {% if request.user.is_superuser or request.user.is_staff %}
+                            <a href="{% url 'admin_panel' %}" class="btn-cta"><i class="fas fa-shield-alt me-1"></i>Admin Panel →</a>
+                        {% else %}
+                            <a href="{% url 'ea_home' %}" class="btn-cta"><i class="fas fa-th-large me-1"></i>My Dashboard →</a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn-login">Learner Login</a>
+                        <a href="{% url 'register' %}" class="btn-cta">Get Started Free →</a>
+                    {% endif %}
                 </div>
             </div>
         </div>

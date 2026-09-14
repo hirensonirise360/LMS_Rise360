@@ -1,0 +1,170 @@
+{# partials/topic_editor.html — right panel content, injected via AJAX #}
+{% load i18n %}
+
+<div class="lm-editor-header">
+  <div>
+    {% if is_new %}
+      <div class="lm-editor-title-text">
+        <i class="fas fa-plus-circle text-success me-2"></i>{% trans "Add New Topic" %}
+      </div>
+      {% if selected_domain %}
+        <div class="lm-editor-breadcrumb">
+          {{ selected_domain.part.name }} &rsaquo; {{ selected_domain.name }}
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="lm-editor-title-text">
+        <i class="fas fa-edit text-primary me-2"></i>{% trans "Edit Topic" %}
+      </div>
+      <div class="lm-editor-breadcrumb">
+        {{ topic.domain.part.name }} &rsaquo; {{ topic.domain.name }} &rsaquo; {{ topic.name }}
+      </div>
+    {% endif %}
+  </div>
+  {% if not is_new %}
+    <span class="badge {% if topic.pdf_file or topic.supabase_pdf_path %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning{% endif %} small">
+      {% if topic.pdf_file or topic.supabase_pdf_path %}📖 E-Book OK{% else %}📖 No E-Book{% endif %}
+    </span>
+  {% endif %}
+</div>
+
+<form id="topic-editor-form" enctype="multipart/form-data" onsubmit="submitTopicForm(event)">
+  {% csrf_token %}
+  {% if not is_new %}
+    <input type="hidden" name="topic_id" value="{{ topic.pk }}">
+  {% endif %}
+
+  <!-- ── Core info ─────────────────────────────────────────────────────── -->
+  <div class="lm-section">
+    <div class="lm-section-title">
+      <i class="fas fa-info-circle text-primary"></i> {% trans "Topic Details" %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold small mb-1">
+        {% trans "Topic Name" %} <span class="text-danger">*</span>
+      </label>
+      <input type="text" name="name" class="form-control"
+             value="{% if topic %}{{ topic.name }}{% endif %}"
+             placeholder="e.g. Introduction to Payroll" required>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-sm-5">
+        <label class="form-label fw-semibold small mb-1">{% trans "Order #" %}</label>
+        <input type="number" name="order" class="form-control"
+               min="0" value="{% if topic %}{{ topic.order }}{% else %}0{% endif %}">
+      </div>
+      <div class="col-sm-7">
+        <label class="form-label fw-semibold small mb-1">{% trans "Domain" %} <span class="text-danger">*</span></label>
+        <select name="domain_id" class="form-select" required>
+          {% for d in domains %}
+            <option value="{{ d.pk }}"
+              {% if topic and topic.domain_id == d.pk %}selected
+              {% elif is_new and selected_domain and selected_domain.pk == d.pk %}selected{% endif %}>
+              {{ d.part.name }} › {{ d.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── E-Book ─────────────────────────────────────────────────────────── -->
+  <div class="lm-section">
+    <div class="lm-section-title">
+      <i class="fas fa-book-open text-danger"></i>
+      {% trans "E-Book" %}
+      {% if topic %}
+        {% if topic.pdf_file or topic.supabase_pdf_path %}
+          <span class="lm-status-pill ok">✓ Linked</span>
+        {% else %}
+          <span class="lm-status-pill miss">Missing</span>
+        {% endif %}
+      {% endif %}
+    </div>
+
+    <label class="form-label fw-semibold small mb-1">{% trans "Supabase Path" %}</label>
+    <div class="input-group input-group-sm mb-2">
+      <span class="input-group-text bg-light"><i class="fas fa-cloud text-secondary"></i></span>
+      <input type="text" name="supabase_pdf_path" class="form-control"
+             value="{% if topic %}{{ topic.supabase_pdf_path }}{% endif %}"
+             placeholder="ea-ebooks/module-1/topic-name.pdf">
+    </div>
+
+    <div class="lm-or">or upload a file</div>
+
+    <label class="lm-file-btn" for="pdf_file_input">
+      <i class="fas fa-file-upload text-danger"></i>
+      <span>{% trans "Choose PDF…" %}</span>
+      <input type="file" id="pdf_file_input" name="pdf_file" accept=".pdf"
+             onchange="this.previousElementSibling.textContent = this.files[0]?.name || 'Choose PDF…'">
+    </label>
+
+    {% if topic and topic.pdf_file %}
+      <div class="mt-2 d-flex align-items-center gap-2 small text-muted">
+        <i class="fas fa-file-pdf text-danger"></i>
+        <span class="text-truncate" style="max-width:220px;">{{ topic.pdf_file.name }}</span>
+        <label class="ms-auto text-danger d-flex align-items-center gap-1" style="cursor:pointer;">
+          <input type="checkbox" name="clear_pdf" value="true" class="form-check-input mt-0"> Remove
+        </label>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- ── Video ──────────────────────────────────────────────────────────── -->
+  <div class="lm-section">
+    <div class="lm-section-title">
+      <i class="fas fa-video text-warning"></i>
+      {% trans "Video" %}
+      {% if topic %}
+        {% if topic.video_file or topic.video_external_url %}
+          <span class="lm-status-pill ok">✓ Linked</span>
+        {% else %}
+          <span class="lm-status-pill miss">Missing</span>
+        {% endif %}
+      {% endif %}
+    </div>
+
+    <label class="form-label fw-semibold small mb-1">{% trans "YouTube / Vimeo URL" %}</label>
+    <div class="input-group input-group-sm mb-2">
+      <span class="input-group-text bg-light"><i class="fas fa-link text-secondary"></i></span>
+      <input type="url" name="video_external_url" class="form-control"
+             value="{% if topic %}{{ topic.video_external_url }}{% endif %}"
+             placeholder="https://www.youtube.com/watch?v=...">
+    </div>
+
+    <div class="lm-or">or upload a file</div>
+
+    <label class="lm-file-btn" for="video_file_input">
+      <i class="fas fa-film text-warning"></i>
+      <span>{% trans "Choose Video…" %}</span>
+      <input type="file" id="video_file_input" name="video_file" accept="video/*"
+             onchange="this.previousElementSibling.textContent = this.files[0]?.name || 'Choose Video…'">
+    </label>
+
+    {% if topic and topic.video_file %}
+      <div class="mt-2 d-flex align-items-center gap-2 small text-muted">
+        <i class="fas fa-film text-warning"></i>
+        <span class="text-truncate" style="max-width:220px;">{{ topic.video_file.name }}</span>
+        <label class="ms-auto text-danger d-flex align-items-center gap-1" style="cursor:pointer;">
+          <input type="checkbox" name="clear_video" value="true" class="form-check-input mt-0"> Remove
+        </label>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- ── Action bar ─────────────────────────────────────────────────────── -->
+  <div class="lm-action-bar">
+    <button type="submit" class="btn btn-primary flex-grow-1">
+      <i class="fas fa-save me-1"></i>{% trans "Save Topic" %}
+    </button>
+    {% if not is_new %}
+      <button type="button" class="btn btn-outline-danger"
+              onclick="confirmDelete('topic', {{ topic.pk }}, '{{ topic.name|escapejs }}')">
+        <i class="fas fa-trash"></i>
+      </button>
+    {% endif %}
+  </div>
+
+</form>

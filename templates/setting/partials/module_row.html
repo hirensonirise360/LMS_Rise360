@@ -1,0 +1,67 @@
+{% load i18n %}
+<div class="lm-module-card card mb-2 shadow-none {% if not module.is_active %}lm-inactive{% endif %}"
+     data-module-id="{{ module.pk }}"
+     id="module-card-{{ module.pk }}">
+
+  {# Module header #}
+  <div class="lm-module-header d-flex align-items-center gap-2 py-2 px-2"
+       role="button"
+       data-bs-toggle="collapse"
+       data-bs-target="#module-body-{{ module.pk }}"
+       aria-expanded="true">
+
+    <i class="fas fa-chevron-down lm-chevron me-1"></i>
+
+    {# Active / Inactive status dot #}
+    {% if module.is_active %}
+      <span class="lm-status-dot bg-success" title="{% trans 'Active' %}"></span>
+    {% else %}
+      <span class="lm-status-dot bg-danger" title="{% trans 'Inactive' %}"></span>
+    {% endif %}
+
+    {# Module name #}
+    <span class="lm-module-name flex-grow-1 text-truncate"
+          data-module-id="{{ module.pk }}"
+          title="{{ module.name }}">
+      {{ module.number }}. {{ module.name }}
+    </span>
+
+    {# Count badge #}
+    <span class="badge bg-secondary-subtle text-secondary border lm-count-badge"
+          title="{% trans 'Domains count' %}">
+      {{ module.domains.count }}D
+    </span>
+
+    {# Action buttons #}
+    <span class="lm-actions d-flex gap-1" onclick="event.stopPropagation()">
+      <button class="btn btn-xs lm-icon-btn text-primary"
+              title="{% trans 'Edit module' %}"
+              onclick="openModuleEditModal({{ module.pk }}, '{{ module.name|escapejs }}', {{ module.number }}, '{{ module.description|escapejs }}', {{ module.is_active|lower }})">
+        <i class="fas fa-pencil-alt"></i>
+      </button>
+      <button class="btn btn-xs lm-icon-btn text-danger"
+              title="{% trans 'Delete module' %}"
+              onclick="confirmDelete('module', {{ module.pk }}, '{{ module.name|escapejs }}')">
+        <i class="fas fa-trash"></i>
+      </button>
+    </span>
+  </div>
+
+  {# Module body — domains #}
+  <div class="collapse show" id="module-body-{{ module.pk }}">
+    <div class="card-body p-1 pt-2" id="module-domains-{{ module.pk }}">
+      {% for domain in module.domains.all %}
+        {% include "setting/partials/domain_row.html" with domain=domain %}
+      {% empty %}
+        <p class="text-muted small ms-2 mb-1">{% trans "No domains yet." %}</p>
+      {% endfor %}
+
+      {# Add Domain button #}
+      <button class="btn btn-xs text-primary lm-add-btn mt-1 ms-1"
+              onclick="addDomain({{ module.pk }})">
+        <i class="fas fa-plus me-1"></i>{% trans "Add Domain" %}
+      </button>
+    </div>
+  </div>
+
+</div>

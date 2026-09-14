@@ -9,9 +9,11 @@
 
 {% if user.is_authenticated %}
 
-<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+<nav style="--bs-breadcrumb-divider: '›';" aria-label="breadcrumb">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="/">{% trans 'Home' %}</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'ea_home' %}">{% trans 'Portal' %}</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'admin_panel' %}">{% trans 'Admin Panel' %}</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'student_list' %}">{% trans 'Learners' %}</a></li>
       <li class="breadcrumb-item active" aria-current="page">{{ user.get_full_name }}</li>
     </ol>
 </nav>

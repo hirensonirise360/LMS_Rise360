@@ -43,5 +43,4 @@ supabase
 setuptools
 
 # Security & Rate Limiting
-django-axes==7.0.0
 django-ratelimit==4.1.0

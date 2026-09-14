@@ -73,16 +73,7 @@ if RENDER_EXTERNAL_HOSTNAME:
 # change the default user models to our custom model
 AUTH_USER_MODEL = "accounts.User"
 
-AUTHENTICATION_BACKENDS = [
-    "axes.backends.AxesBackend",
-    "accounts.backends.CaseInsensitiveEmailBackend",
-    "django.contrib.auth.backends.ModelBackend",
-]
 
-AXES_AUTHENTICATION_BACKENDS = [
-    "accounts.backends.CaseInsensitiveEmailBackend",
-    "django.contrib.auth.backends.ModelBackend",
-]
 
 # Application definition
 
@@ -104,7 +95,6 @@ THIRD_PARTY_APPS = [
     "django_filters",
     "import_export",
     "anymail",
-    "axes",
 ]
 
 # Custom apps
@@ -371,15 +361,10 @@ SEMESTER_CHOICES = (
     (THIRD, _("Third")),
 )
 
-# Brute Force Protection (django-axes)
 AUTHENTICATION_BACKENDS = [
-    'axes.backends.AxesStandaloneBackend',
-    'django.contrib.auth.backends.ModelBackend',
+    "accounts.backends.CaseInsensitiveEmailBackend",
+    "django.contrib.auth.backends.ModelBackend",
 ]
-AXES_FAILURE_LIMIT = 5
-AXES_COOLOFF_TIME = 1
-AXES_LOCKOUT_PARAMETERS = ['ip_address', 'username']
-AXES_RESET_ON_SUCCESS = True
 
 # Razorpay Credentials
 RAZORPAY_KEY_ID = config("RAZORPAY_KEY_ID", default="rzp_test_1234567890abcdef")
@@ -420,7 +405,7 @@ JAZZMIN_SETTINGS = {
     "navigation_expanded": True,
 
     # Hide apps we don't want staff to see in the sidebar
-    "hide_apps": ["auth", "axes"],
+    "hide_apps": ["auth"],
 
     # Hide proxy models from sidebar (accessed via Admin Panel page links)
     "hide_models": [

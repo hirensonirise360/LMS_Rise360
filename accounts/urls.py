@@ -32,6 +32,13 @@ from .views import (
     render_student_pdf_list,
     registration_success,
 )
+from .views_content_manager import (
+    learning_manager,
+    module_add, module_save, module_delete,
+    domain_add, domain_save, domain_delete,
+    topic_editor, topic_editor_new, topic_save, topic_create, topic_delete,
+)
+
 
 # from .forms import EmailValidationOnForgotPassword
 
@@ -92,4 +99,22 @@ urlpatterns = [
         template_name='registration/password_reset_complete.html'
     ),
          name='password_reset_complete'),
+
+    # ── Learning Content Manager ──────────────────────────────────────────────
+    path("learning-manager/",                              learning_manager,    name="learning_manager"),
+    # Module CRUD
+    path("learning-manager/module/add/",                  module_add,          name="lm_module_add"),
+    path("learning-manager/module/<int:pk>/save/",        module_save,         name="lm_module_save"),
+    path("learning-manager/module/<int:pk>/delete/",      module_delete,       name="lm_module_delete"),
+    # Domain CRUD
+    path("learning-manager/domain/add/",                  domain_add,          name="lm_domain_add"),
+    path("learning-manager/domain/<int:pk>/save/",        domain_save,         name="lm_domain_save"),
+    path("learning-manager/domain/<int:pk>/delete/",      domain_delete,       name="lm_domain_delete"),
+    # Topic CRUD
+    path("learning-manager/topic/new/",                   topic_editor_new,    name="lm_topic_new"),
+    path("learning-manager/topic/create/",                topic_create,        name="lm_topic_create"),
+    path("learning-manager/topic/<int:pk>/",              topic_editor,        name="lm_topic_editor"),
+    path("learning-manager/topic/<int:pk>/save/",         topic_save,          name="lm_topic_save"),
+    path("learning-manager/topic/<int:pk>/delete/",       topic_delete,        name="lm_topic_delete"),
 ]
+

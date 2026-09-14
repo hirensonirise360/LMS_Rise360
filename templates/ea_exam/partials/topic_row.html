@@ -75,10 +75,10 @@
       <span class="ec-chip not-started disabled"><i class="fas fa-video"></i> Video</span>
     {% endif %}
 
-    <!-- Upload Answer (Excel) Chip -->
-    <div class="ec-chip primary-action" style="background: #10B981; border-color: #10B981; color: white; cursor: pointer;" 
+    <!-- Answer Chip -->
+    <div class="ec-chip not-started" style="cursor: pointer;" 
          onclick="openAnswerUploadModal({{ topic.id }}, '{{ topic.name|escapejs }}')">
-      <i class="fas fa-file-excel me-1"></i> Upload Answer (Excel)
+      <i class="fas fa-check-circle"></i> Answer
     </div>
   </div>
 </div>

@@ -1,0 +1,43 @@
+{% load i18n %}
+<div class="lm-domain-block mb-1" data-domain-id="{{ domain.pk }}" data-module-id="{{ domain.part_id }}">
+
+  {# Domain header row #}
+  <div class="lm-domain-header d-flex align-items-center gap-1 py-1 rounded px-1"
+       role="button"
+       onclick="toggleDomain(this)">
+    <i class="fas fa-chevron-down lm-chevron me-1"></i>
+
+    {# Inline-editable domain name #}
+    <span class="lm-domain-name flex-grow-1 text-truncate"
+          data-domain-id="{{ domain.pk }}"
+          title="{{ domain.name }}">{{ domain.name }}</span>
+
+    {# Action icons #}
+    <span class="lm-actions d-flex gap-1 ms-auto">
+      <button class="btn btn-xs lm-icon-btn text-primary"
+              title="{% trans 'Rename domain' %}"
+              onclick="event.stopPropagation(); startInlineEdit('domain', {{ domain.pk }}, this)">
+        <i class="fas fa-pencil-alt"></i>
+      </button>
+      <button class="btn btn-xs lm-icon-btn text-danger"
+              title="{% trans 'Delete domain' %}"
+              onclick="event.stopPropagation(); confirmDelete('domain', {{ domain.pk }}, '{{ domain.name|escapejs }}')">
+        <i class="fas fa-trash"></i>
+      </button>
+    </span>
+  </div>
+
+  {# Topics list #}
+  <ul class="lm-topics-list ms-2 mb-1" id="domain-topics-{{ domain.pk }}">
+    {% for topic in domain.topics.all %}
+      {% include "setting/partials/topic_row.html" with topic=topic %}
+    {% endfor %}
+    {# Add topic row #}
+    <li class="lm-add-topic-row py-1 px-1">
+      <button class="btn btn-xs text-primary lm-add-btn"
+              onclick="loadNewTopicEditor({{ domain.pk }})">
+        <i class="fas fa-plus me-1"></i>{% trans "Add Topic" %}
+      </button>
+    </li>
+  </ul>
+</div>
