@@ -38,7 +38,10 @@ def learning_manager(request):
 
     modules = (
         EAPart.objects
-        .prefetch_related("domains__topics")
+        .prefetch_related(
+            "domains__topics__ebook_files",
+            "domains__topics__resources",
+        )
         .order_by("number")
     )
     return render(request, "setting/learning_manager.html", {
@@ -373,7 +376,8 @@ def topic_save(request, pk):
     # Handle multiple / single E-Book file uploads
     uploaded_pdf_files = request.FILES.getlist("pdf_files") or request.FILES.getlist("pdf_file")
     for f in uploaded_pdf_files:
-        EATopicEbookFile.objects.create(topic=topic, pdf_file=f, title=f.name)
+        if not EATopicEbookFile.objects.filter(topic=topic, title=f.name).exists():
+            EATopicEbookFile.objects.create(topic=topic, pdf_file=f, title=f.name)
 
     # Handle deleted ebook file IDs
     delete_ebook_ids = request.POST.getlist("delete_ebook_ids")
@@ -468,7 +472,8 @@ def topic_create(request):
 
     uploaded_pdf_files = request.FILES.getlist("pdf_files")
     for f in uploaded_pdf_files:
-        EATopicEbookFile.objects.create(topic=topic, pdf_file=f, title=f.name)
+        if not EATopicEbookFile.objects.filter(topic=topic, title=f.name).exists():
+            EATopicEbookFile.objects.create(topic=topic, pdf_file=f, title=f.name)
 
     row_html = render(request, "setting/partials/topic_row.html", {"topic": topic}).content.decode()
     return JsonResponse({

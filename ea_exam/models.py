@@ -107,6 +107,16 @@ class EATopic(models.Model):
         return items
 
     @property
+    def has_ebook(self):
+        """Returns True if any study material, ebook, or resource is attached to this topic."""
+        return bool(
+            self.pdf_file
+            or self.supabase_pdf_path
+            or self.ebook_files.exists()
+            or (hasattr(self, 'resources') and self.resources.exists())
+        )
+
+    @property
     def ebook_count(self):
         cnt = self.ebook_files.count()
         if self.pdf_file or self.supabase_pdf_path:

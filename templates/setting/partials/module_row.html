@@ -7,11 +7,11 @@
      draggable="true">
 
   {# Module header #}
-  <div class="lm-module-header d-flex align-items-center gap-2 py-2 px-2"
+  <div class="lm-module-header collapsed d-flex align-items-center gap-2 py-2 px-2"
        role="button"
        data-bs-toggle="collapse"
        data-bs-target="#module-body-{{ module.pk }}"
-       aria-expanded="true">
+       aria-expanded="false">
 
     <span class="lm-drag-handle text-muted" title="{% trans 'Drag to reorder' %}" onclick="event.stopPropagation()">
       <i class="fas fa-grip-vertical"></i>
@@ -55,7 +55,7 @@
   </div>
 
   {# Module body — domains #}
-  <div class="collapse show" id="module-body-{{ module.pk }}">
+  <div class="collapse" id="module-body-{{ module.pk }}">
     <div class="card-body p-1 pt-2" id="module-domains-{{ module.pk }}">
       {% for domain in module.domains.all %}
         {% include "setting/partials/domain_row.html" with domain=domain %}

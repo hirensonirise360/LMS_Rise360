@@ -19,8 +19,8 @@
 
   {# Media indicators #}
   <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-1">
-    {% if topic.pdf_file or topic.supabase_pdf_path %}
-      <i class="fas fa-file-pdf text-danger" style="font-size: 0.75rem;" title="{% trans 'E-Book PDF Available' %}"></i>
+    {% if topic.has_ebook or topic.pdf_file or topic.supabase_pdf_path or topic.ebook_files.exists or topic.resources.exists %}
+      <i class="fas fa-file-pdf text-danger" style="font-size: 0.75rem;" title="{% trans 'E-Book / Study Material Available' %}"></i>
     {% else %}
       <i class="fas fa-file-pdf text-muted opacity-25" style="font-size: 0.75rem;" title="{% trans 'No E-Book' %}"></i>
     {% endif %}

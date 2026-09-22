@@ -9,7 +9,7 @@
       <i class="fas fa-grip-vertical"></i>
     </span>
 
-    <i class="fas fa-chevron-down lm-chevron me-1"></i>
+    <i class="fas fa-chevron-down lm-chevron rotated me-1"></i>
 
     {# Inline-editable domain name #}
     <span class="lm-domain-name flex-grow-1 text-truncate"
@@ -32,7 +32,7 @@
   </div>
 
   {# Topics list #}
-  <ul class="lm-topics-list ms-2 mb-1" id="domain-topics-{{ domain.pk }}">
+  <ul class="lm-topics-list ms-2 mb-1" id="domain-topics-{{ domain.pk }}" style="display: none;">
     {% for topic in domain.topics.all %}
       {% include "setting/partials/topic_row.html" with topic=topic %}
     {% endfor %}

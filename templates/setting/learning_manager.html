@@ -165,6 +165,30 @@
   font-family: inherit;
 }
 
+/* ── Reset legacy LMS global icon styling (removes 34px round grey circle) ── */
+.lm-shell .fas,
+.lm-shell .fa,
+.lm-shell .far,
+.lm-shell .fal,
+.lm-shell .fab,
+.lm-shell i.fas,
+.lm-shell i.fa,
+.lm-shell i,
+#moduleModal .fas,
+#moduleModal .fa,
+#moduleModal i,
+#deleteModal .fas,
+#deleteModal .fa,
+#deleteModal i {
+  background-color: transparent !important;
+  border-radius: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  display: inline-block !important;
+  box-shadow: none !important;
+  line-height: inherit !important;
+}
+
 /* ── Top bar ── */
 .lm-topbar {
   display: flex;
@@ -224,9 +248,9 @@
 
 /* ── Left tree sidebar ── */
 .lm-sidebar {
-  width: 290px;
-  min-width: 200px;
-  max-width: 460px;
+  width: 380px;
+  min-width: 260px;
+  max-width: 650px;
   flex-shrink: 0;
   overflow-y: auto;
   overflow-x: hidden;
@@ -254,7 +278,7 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 26px 30px;
+  padding: 12px 18px;
   background: #fff;
 }
 .lm-editor-panel::-webkit-scrollbar { width: 4px; }
@@ -302,52 +326,52 @@
 /* ── Editor title bar ── */
 .lm-editor-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 22px;
-  padding-bottom: 16px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
   border-bottom: 1.5px solid #f1f5f9;
-  gap: 12px;
+  gap: 8px;
 }
 .lm-editor-title-text {
-  font-size: .95rem;
+  font-size: .88rem;
   font-weight: 700;
   color: #0f172a;
 }
 .lm-editor-breadcrumb {
-  font-size: .72rem;
+  font-size: .7rem;
   color: #94a3b8;
-  margin-top: 3px;
-  line-height: 1.4;
+  margin-top: 1px;
+  line-height: 1.2;
 }
 
 /* ── Form sections in editor ── */
 .lm-section {
   background: #fff;
   border: 1.5px solid #eaecf0;
-  border-radius: 12px;
-  padding: 18px 20px;
-  margin-bottom: 14px;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
   transition: border-color .2s, box-shadow .2s;
 }
 .lm-section:hover {
   border-color: #c7d2fe;
-  box-shadow: 0 2px 12px rgba(99,102,241,.06);
+  box-shadow: 0 2px 10px rgba(99,102,241,.05);
 }
 .lm-section-title {
   font-size: .72rem;
   font-weight: 700;
-  letter-spacing: .07em;
+  letter-spacing: .05em;
   text-transform: uppercase;
   color: #64748b;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 .lm-section-title .lm-status-pill {
-  font-size: .65rem;
-  padding: 2px 8px;
+  font-size: .62rem;
+  padding: 1px 7px;
   border-radius: 20px;
   font-weight: 600;
   text-transform: none;
@@ -360,10 +384,10 @@
 .lm-or {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: #adb5bd;
-  font-size: .72rem;
-  margin: 10px 0;
+  font-size: .66rem;
+  margin: 5px 0;
 }
 .lm-or::before, .lm-or::after {
   content: '';
@@ -512,8 +536,18 @@
 }
 
 /* ── Chevron ── */
-.lm-chevron { transition: transform .2s; font-size: .58rem; color: #b0b8c1; }
-.lm-chevron.rotated { transform: rotate(-90deg); }
+.lm-chevron {
+  transition: transform .2s;
+  font-size: .58rem;
+  color: #b0b8c1;
+  display: inline-block;
+  transform: rotate(0deg);
+}
+.lm-module-header.collapsed .lm-chevron,
+.lm-module-header[aria-expanded="false"] .lm-chevron,
+.lm-chevron.rotated {
+  transform: rotate(-90deg);
+}
 
 /* ── Toast ── */
 .lm-toast {
@@ -557,13 +591,13 @@
 
 /* ── File input ── */
 .lm-file-btn {
-  display: flex; align-items: center; gap: 9px;
+  display: flex; align-items: center; gap: 7px;
   border: 1.5px dashed #d1d5db;
-  border-radius: 9px;
-  padding: 10px 14px;
+  border-radius: 8px;
+  padding: 6px 10px;
   cursor: pointer;
   transition: border-color .18s, background .18s, color .18s;
-  font-size: .81rem;
+  font-size: .74rem;
   color: #6b7280;
   background: #fafafa;
 }
@@ -643,34 +677,19 @@ function setEditorLoading() {
 }
 
 /* ── Load existing topic into editor ─────────────────────────────────────── */
-function loadTopicEditor(topicId) {
-  document.querySelectorAll('.lm-topic-item').forEach(el => el.classList.remove('lm-active-topic'));
-  const row = document.querySelector(`.lm-topic-item[data-topic-id="${topicId}"]`);
-  if (row) row.classList.add('lm-active-topic');
-  setEditorLoading();
-  fetch(`/en/accounts/learning-manager/topic/${topicId}/`)
-    .then(r => r.json())
-    .then(d => {
-      if (d.ok) document.getElementById('lm-editor').innerHTML = d.html;
-      else showToast(d.error || 'Failed to load.', 'err');
-    })
-    .catch(() => showToast('Network error.', 'err'));
-}
+/* ── Topic Form Dirty Tracking ────────────────────────────────────────────── */
+let isTopicFormDirty = false;
 
-/* ── Load new topic form ─────────────────────────────────────────────────── */
-function loadNewTopicEditor(domainId) {
-  setEditorLoading();
-  fetch(`/en/accounts/learning-manager/topic/new/?domain=${domainId}`)
-    .then(r => r.json())
-    .then(d => {
-      if (d.ok) document.getElementById('lm-editor').innerHTML = d.html;
-      else showToast(d.error || 'Failed.', 'err');
-    })
-    .catch(() => showToast('Network error.', 'err'));
+function markTopicFormDirty() {
+  isTopicFormDirty = true;
+  const icon = document.getElementById('lm-autosave-icon');
+  const text = document.getElementById('lm-autosave-text');
+  if (icon && text) {
+    icon.className = 'fas fa-pen text-warning';
+    text.className = 'text-warning fw-semibold';
+    text.textContent = 'Unsaved';
+  }
 }
-
-/* ── Auto-save System for Topic Editor ────────────────────────────────────── */
-let autoSaveTimer = null;
 
 function setAutoSaveStatus(status, message) {
   const icon = document.getElementById('lm-autosave-icon');
@@ -678,9 +697,14 @@ function setAutoSaveStatus(status, message) {
   if (!icon || !text) return;
 
   if (status === 'saved') {
+    isTopicFormDirty = false;
     icon.className = 'fas fa-check-circle text-success';
     text.className = 'text-success fw-semibold';
     text.textContent = 'Saved';
+  } else if (status === 'saving') {
+    icon.className = 'fas fa-spinner fa-spin text-primary';
+    text.className = 'text-primary fw-semibold';
+    text.textContent = 'Saving…';
   } else if (status === 'error') {
     icon.className = 'fas fa-exclamation-triangle text-danger';
     text.className = 'text-danger fw-semibold';
@@ -688,62 +712,210 @@ function setAutoSaveStatus(status, message) {
   }
 }
 
-function triggerAutoSave(immediate = false, reloadEditor = false) {
+/* ── Silent Auto-Save when leaving topic / field ───────────────────────── */
+function saveCurrentTopicSilent() {
+  const form = document.getElementById('topic-editor-form');
+  if (!form) return Promise.resolve();
+  const topicId = form.querySelector('[name="topic_id"]')?.value;
+  if (!topicId) return Promise.resolve(); // New topic waits for explicit creation
+
+  const nameInput = form.querySelector('[name="name"]');
+  if (!nameInput || !nameInput.value.trim()) return Promise.resolve();
+
+  setAutoSaveStatus('saving');
+  const data = new FormData(form);
+  data.append('csrfmiddlewaretoken', getCsrfToken());
+
+  return fetch(`/en/accounts/learning-manager/topic/${topicId}/save/`, {
+    method: 'POST',
+    body: data,
+    headers: { 'X-CSRFToken': getCsrfToken() }
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (res.ok) {
+        setAutoSaveStatus('saved');
+        const existingRow = document.querySelector(`.lm-topic-item[data-topic-id="${res.id}"]`);
+        if (existingRow && res.row_html) {
+          existingRow.outerHTML = res.row_html;
+          const updatedRow = document.querySelector(`.lm-topic-item[data-topic-id="${res.id}"]`);
+          if (updatedRow && updatedRow.getAttribute('data-topic-id') == topicId) {
+            updatedRow.classList.add('lm-active-topic');
+          }
+          initAllDragAndDrop();
+        }
+      } else {
+        setAutoSaveStatus('error', res.error || 'Save failed');
+      }
+    })
+    .catch(() => setAutoSaveStatus('error', 'Network error'));
+}
+
+/* ── Manual Save Button Click ─────────────────────────────────────────── */
+function saveCurrentTopicManual(btn) {
   const form = document.getElementById('topic-editor-form');
   if (!form) return;
   const topicId = form.querySelector('[name="topic_id"]')?.value;
-  if (!topicId) return; // New topic — waits for creation
-
-  clearTimeout(autoSaveTimer);
-
-  const doSave = () => {
-    const nameInput = form.querySelector('[name="name"]');
-    if (nameInput && !nameInput.value.trim()) {
-      setAutoSaveStatus('error', 'Name required');
-      return;
-    }
-
-    // Silent save — NO loading indicator shown
-    const data = new FormData(form);
-    data.append('csrfmiddlewaretoken', getCsrfToken());
-
-    fetch(`/en/accounts/learning-manager/topic/${topicId}/save/`, {
-      method: 'POST',
-      body: data,
-      headers: { 'X-CSRFToken': getCsrfToken() }
-    })
-      .then(r => r.json())
-      .then(res => {
-        if (res.ok) {
-          setAutoSaveStatus('saved');
-          const existingRow = document.querySelector(`.lm-topic-item[data-topic-id="${res.id}"]`);
-          if (existingRow && res.row_html) {
-            existingRow.outerHTML = res.row_html;
-            const updatedRow = document.querySelector(`.lm-topic-item[data-topic-id="${res.id}"]`);
-            if (updatedRow) updatedRow.classList.add('lm-active-topic');
-            initAllDragAndDrop();
-          }
-          if (reloadEditor) {
-            loadTopicEditor(res.id);
-          }
-        } else {
-          setAutoSaveStatus('error', res.error || 'Save failed');
-          showToast(res.error || 'Save failed.', 'err');
-        }
-      })
-      .catch(() => setAutoSaveStatus('error', 'Network error'));
-  };
-
-  if (immediate) {
-    doSave();
-  } else {
-    // Debounce 800ms — no status change while waiting
-    autoSaveTimer = setTimeout(doSave, 800);
+  if (!topicId) {
+    form.requestSubmit();
+    return;
   }
+
+  const nameInput = form.querySelector('[name="name"]');
+  if (nameInput && !nameInput.value.trim()) {
+    showToast('Topic name is required.', 'err');
+    nameInput.focus();
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" style="width:10px;height:10px;"></span>Saving…';
+  }
+  setAutoSaveStatus('saving');
+
+  const data = new FormData(form);
+  data.append('csrfmiddlewaretoken', getCsrfToken());
+
+  fetch(`/en/accounts/learning-manager/topic/${topicId}/save/`, {
+    method: 'POST',
+    body: data,
+    headers: { 'X-CSRFToken': getCsrfToken() }
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save" style="font-size:0.7rem;"></i><span style="font-size:0.72rem;font-weight:600;">Save</span>';
+      }
+      if (res.ok) {
+        setAutoSaveStatus('saved');
+        showToast('Topic saved!');
+        const existingRow = document.querySelector(`.lm-topic-item[data-topic-id="${res.id}"]`);
+        if (existingRow && res.row_html) {
+          existingRow.outerHTML = res.row_html;
+          const updatedRow = document.querySelector(`.lm-topic-item[data-topic-id="${res.id}"]`);
+          if (updatedRow) updatedRow.classList.add('lm-active-topic');
+          initAllDragAndDrop();
+        }
+      } else {
+        setAutoSaveStatus('error', res.error || 'Save failed');
+        showToast(res.error || 'Save failed.', 'err');
+      }
+    })
+    .catch(() => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save" style="font-size:0.7rem;"></i><span style="font-size:0.72rem;font-weight:600;">Save</span>';
+      }
+      setAutoSaveStatus('error', 'Network error');
+      showToast('Network error.', 'err');
+    });
 }
 
-function handleAutoUpload(inputEl) {
+/* ── Load existing topic into editor ─────────────────────────────────────── */
+function loadTopicEditor(topicId) {
+  // If user has unsaved changes on current topic, auto-save before leaving it
+  if (isTopicFormDirty) {
+    saveCurrentTopicSilent();
+  }
+
+  document.querySelectorAll('.lm-topic-item').forEach(el => el.classList.remove('lm-active-topic'));
+  const row = document.querySelector(`.lm-topic-item[data-topic-id="${topicId}"]`);
+  if (row) {
+    row.classList.add('lm-active-topic');
+    const domainBlock = row.closest('.lm-domain-block');
+    if (domainBlock) {
+      const list = domainBlock.querySelector('.lm-topics-list');
+      const chev = domainBlock.querySelector('.lm-chevron');
+      if (list) list.style.display = '';
+      if (chev) chev.classList.remove('rotated');
+    }
+    const moduleBody = row.closest('.collapse');
+    if (moduleBody && !moduleBody.classList.contains('show')) {
+      bootstrap.Collapse.getOrCreateInstance(moduleBody).show();
+    }
+  }
+  setEditorLoading();
+  fetch(`/en/accounts/learning-manager/topic/${topicId}/`)
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) {
+        document.getElementById('lm-editor').innerHTML = d.html;
+        isTopicFormDirty = false;
+      } else {
+        showToast(d.error || 'Failed to load.', 'err');
+      }
+    })
+    .catch(() => showToast('Network error.', 'err'));
+}
+
+/* ── Load new topic form ─────────────────────────────────────────────────── */
+function loadNewTopicEditor(domainId) {
+  if (isTopicFormDirty) {
+    saveCurrentTopicSilent();
+  }
+  setEditorLoading();
+  fetch(`/en/accounts/learning-manager/topic/new/?domain=${domainId}`)
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) {
+        document.getElementById('lm-editor').innerHTML = d.html;
+        isTopicFormDirty = false;
+      } else {
+        showToast(d.error || 'Failed.', 'err');
+      }
+    })
+    .catch(() => showToast('Network error.', 'err'));
+}
+
+/* ── Auto-save System for File Uploads ───────────────────────────────────── */
+function triggerAutoSave(immediate = false, reloadEditor = false) {
+  if (!immediate) {
+    saveCurrentTopicSilent();
+    return;
+  }
+  const form = document.getElementById('topic-editor-form');
+  if (!form) return;
+  const topicId = form.querySelector('[name="topic_id"]')?.value;
+  if (!topicId) return;
+
+  const data = new FormData(form);
+  data.append('csrfmiddlewaretoken', getCsrfToken());
+
+  fetch(`/en/accounts/learning-manager/topic/${topicId}/save/`, {
+    method: 'POST',
+    body: data,
+    headers: { 'X-CSRFToken': getCsrfToken() }
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (res.ok) {
+        setAutoSaveStatus('saved');
+        const existingRow = document.querySelector(`.lm-topic-item[data-topic-id="${res.id}"]`);
+        if (existingRow && res.row_html) {
+          existingRow.outerHTML = res.row_html;
+          const updatedRow = document.querySelector(`.lm-topic-item[data-topic-id="${res.id}"]`);
+          if (updatedRow) updatedRow.classList.add('lm-active-topic');
+          initAllDragAndDrop();
+        }
+        if (reloadEditor) {
+          loadTopicEditor(res.id);
+        }
+      } else {
+        setAutoSaveStatus('error', res.error || 'Save failed');
+        showToast(res.error || 'Save failed.', 'err');
+      }
+    })
+    .catch(() => setAutoSaveStatus('error', 'Network error'));
+}
+
+function handleAutoUpload(inputEl, event) {
+  if (event) {
+    event.stopPropagation();
+  }
   if (!inputEl || !inputEl.files || inputEl.files.length === 0) return;
+
   if (inputEl.previousElementSibling) {
     if (inputEl.files.length === 1) {
       inputEl.previousElementSibling.textContent = inputEl.files[0].name;
@@ -751,8 +923,37 @@ function handleAutoUpload(inputEl) {
       inputEl.previousElementSibling.textContent = `${inputEl.files.length} files selected`;
     }
   }
+
+  // Trigger immediate upload and reload editor to display the new material item
   triggerAutoSave(true, true);
+
+  setTimeout(() => {
+    inputEl.value = '';
+  }, 50);
 }
+
+// Auto-save when user leaves topic editor form
+document.addEventListener('focusout', function(e) {
+  if (e.target && e.target.closest('#topic-editor-form')) {
+    setTimeout(() => {
+      const form = document.getElementById('topic-editor-form');
+      if (form && !form.contains(document.activeElement) && isTopicFormDirty) {
+        saveCurrentTopicSilent();
+      }
+    }, 120);
+  }
+});
+
+// Ctrl+S / Cmd+S save shortcut
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    const saveBtn = document.getElementById('lm-save-topic-btn');
+    if (saveBtn) {
+      e.preventDefault();
+      saveCurrentTopicManual(saveBtn);
+    }
+  }
+});
 
 /* ── Submit topic form (save/create) ─────────────────────────────────────── */
 function submitTopicForm(event) {
@@ -1048,12 +1249,23 @@ function lmSearch(query) {
     const n  = b.querySelector('.lm-domain-name')?.textContent.toLowerCase() || '';
     const ok = [...b.querySelectorAll('.lm-topic-item')].some(t => !t.classList.contains('lm-hidden'));
     b.classList.toggle('lm-hidden', q && !n.includes(q) && !ok);
-    if (q && ok) b.querySelector('.lm-topics-list').style.display = '';
+    if (q && ok) {
+      const list = b.querySelector('.lm-topics-list');
+      const chev = b.querySelector('.lm-chevron');
+      if (list) list.style.display = '';
+      if (chev) chev.classList.remove('rotated');
+    }
   });
   document.querySelectorAll('.lm-module-card').forEach(c => {
     const n  = c.querySelector('.lm-module-name')?.textContent.toLowerCase() || '';
     const ok = [...c.querySelectorAll('.lm-domain-block')].some(d => !d.classList.contains('lm-hidden'));
     c.classList.toggle('lm-hidden', q && !n.includes(q) && !ok);
+    if (q && ok) {
+      const bodyEl = c.querySelector('.collapse');
+      if (bodyEl && !bodyEl.classList.contains('show')) {
+        bootstrap.Collapse.getOrCreateInstance(bodyEl).show();
+      }
+    }
   });
 }
 
@@ -1072,7 +1284,7 @@ function lmSearch(query) {
   });
   document.addEventListener('mousemove', e => {
     if (!dragging) return;
-    const w = Math.min(500, Math.max(200, w0 + e.clientX - x0));
+    const w = Math.min(650, Math.max(240, w0 + e.clientX - x0));
     sidebar.style.width = w + 'px';
   });
   document.addEventListener('mouseup', () => {
