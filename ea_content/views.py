@@ -1,3 +1,4 @@
+import json
 from datetime import date
 
 from django.contrib.auth.decorators import login_required
@@ -5,16 +6,19 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Count, Prefetch
 from django.http import HttpResponse, Http404, HttpResponseForbidden
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.clickjacking import xframe_options_sameorigin
+import mimetypes
+import os
 from . import supabase_storage
 
-from ea_exam.models import EAPart, EADomain, EATopic
+from ea_exam.models import EAPart, EADomain, EATopic, EATopicResource, EATopicEbookFile
 from .models import (
     EANote, Flashcard, FlashcardSRS
 )
+
 
 
 # ─── eBook Library (Direct PDF Access) ──────────────────────────────────────
@@ -474,3 +478,319 @@ def admin_delete_pdf(request, topic_id):
             
     return redirect("admin_ebook_manager")
 
+
+# ─── Topic Resources — Student Views ─────────────────────────────────────────
+
+@login_required
+def topic_resources_json(request, topic_id):
+    """
+    AJAX endpoint: returns JSON list of resources/materials for a topic.
+    Includes both EATopicResource records and EATopicEbookFile / PDF documents.
+    """
+    from django.urls import reverse
+    topic = get_object_or_404(
+        EATopic.objects.prefetch_related("resources", "ebook_files"),
+        id=topic_id
+    )
+    data = []
+
+    # 1. EATopicResource items
+    for r in topic.resources.all():
+        data.append({
+            "id": f"res_{r.id}",
+            "title": r.title,
+            "resource_type": r.resource_type,
+            "icon_class": r.icon_class,
+            "original_filename": r.original_filename or r.title,
+            "file_size_display": r.file_size_display,
+            "view_url": reverse("serve_topic_resource", kwargs={"resource_id": r.id}),
+            "download_url": reverse("serve_topic_resource", kwargs={"resource_id": r.id}) + "?download=1",
+        })
+
+    # 2. EATopicEbookFile and topic.pdf_file (All attached materials)
+    for ef in topic.all_ebook_files:
+        meta = _get_document_meta(ef.get("title"))
+        view_u = ef.get("url")
+        if not view_u:
+            if ef.get("is_main"):
+                view_u = reverse("serve_ebook_pdf", kwargs={"topic_id": topic.id})
+            elif ef.get("file_id"):
+                view_u = reverse("serve_ebook_file_pdf", kwargs={"file_id": ef.get("file_id")})
+            else:
+                view_u = "#"
+
+        dl_u = view_u + ("&download=1" if "?" in str(view_u) else "?download=1") if view_u != "#" else "#"
+
+        data.append({
+            "id": ef.get("id"),
+            "title": ef.get("title"),
+            "resource_type": meta["ext"],
+            "icon_class": meta["icon"],
+            "original_filename": ef.get("title"),
+            "file_size_display": "",
+            "view_url": view_u,
+            "download_url": dl_u,
+        })
+
+    return JsonResponse({"topic_name": topic.name, "resources": data})
+
+
+@login_required
+def serve_topic_resource(request, resource_id):
+    """
+    Securely stream a topic resource file from the private Supabase bucket.
+    ?download=1  → triggers file download attachment
+    ?download=0  → inline (default; PDF will open in browser)
+    """
+    resource = get_object_or_404(EATopicResource, id=resource_id)
+
+    try:
+        file_bytes = supabase_storage.download_topic_resource(resource.supabase_path)
+
+        # Determine content type from original filename
+        content_type, _ = mimetypes.guess_type(resource.original_filename or resource.title)
+        if not content_type:
+            content_type = "application/octet-stream"
+
+        response = HttpResponse(file_bytes, content_type=content_type)
+
+        safe_name = "".join(c for c in resource.original_filename if c.isprintable()).strip()
+        download_mode = request.GET.get("download", "0") == "1"
+
+        if download_mode or resource.resource_type != "pdf":
+            response["Content-Disposition"] = f'attachment; filename="{safe_name}"'
+        else:
+            response["Content-Disposition"] = f'inline; filename="{safe_name}"'
+
+        return response
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return HttpResponseForbidden(f"Unable to retrieve resource. Error: {e}")
+
+
+# ─── Topic Resources — Admin CRUD Views ──────────────────────────────────────
+
+@staff_member_required
+def admin_resource_manager(request):
+    """
+    Admin dashboard to manage resources (upload / rename / delete) per topic.
+    Groups topics by Part → Domain → Topic with resource counts.
+    """
+    part_filter   = request.GET.get("part")
+    domain_filter = request.GET.get("domain")
+
+    topics_qs = EATopic.objects.select_related(
+        "domain", "domain__part"
+    ).prefetch_related(
+        Prefetch("resources", queryset=EATopicResource.objects.order_by("resource_type", "title"))
+    ).order_by(
+        "domain__part__number", "domain__order", "order"
+    )
+
+    if part_filter:
+        topics_qs = topics_qs.filter(domain__part__number=part_filter)
+    if domain_filter:
+        topics_qs = topics_qs.filter(domain_id=domain_filter)
+
+    parts   = EAPart.objects.all()
+    domains = EADomain.objects.select_related("part").order_by("part", "order")
+
+    # Group by part for template rendering
+    from collections import defaultdict
+    grouped = defaultdict(lambda: defaultdict(list))
+    for topic in topics_qs:
+        grouped[topic.domain.part][topic.domain].append(topic)
+
+    return render(request, "ea_content/admin_resource_manager.html", {
+        "title":         "Topic Resource Manager",
+        "grouped":       dict(grouped),
+        "parts":         parts,
+        "domains":       domains,
+        "part_filter":   part_filter,
+        "domain_filter": domain_filter,
+    })
+
+
+ALLOWED_RESOURCE_EXTENSIONS = {
+    "pdf", "xls", "xlsx", "csv", "ppt", "pptx",
+    "doc", "docx", "txt", "md",
+}
+
+
+@staff_member_required
+@require_POST
+def admin_resource_upload(request, topic_id):
+    """Upload one or more resources for a topic to the Supabase bucket."""
+    topic    = get_object_or_404(EATopic, id=topic_id)
+    file_obj = request.FILES.get("resource_file")
+    title    = request.POST.get("title", "").strip()
+
+    if not file_obj:
+        messages.error(request, "No file selected.")
+        return redirect("admin_resource_manager")
+
+    ext = os.path.splitext(file_obj.name)[1].lstrip(".").lower()
+    if ext not in ALLOWED_RESOURCE_EXTENSIONS:
+        messages.error(request, f"File type '.{ext}' is not allowed. Permitted: {', '.join(sorted(ALLOWED_RESOURCE_EXTENSIONS))}.")
+        return redirect("admin_resource_manager")
+
+    if not title:
+        title = os.path.splitext(file_obj.name)[0].replace("_", " ").replace("-", " ").title()
+
+    try:
+        storage_path, file_size = supabase_storage.upload_topic_resource(topic, file_obj, title)
+        resource_type = EATopicResource.detect_type(file_obj.name)
+
+        EATopicResource.objects.create(
+            topic             = topic,
+            title             = title,
+            resource_type     = resource_type,
+            supabase_path     = storage_path,
+            original_filename = file_obj.name,
+            file_size_bytes   = file_size,
+        )
+        messages.success(request, f"✅ '{title}' uploaded successfully for '{topic.name}'.")
+    except Exception as e:
+        messages.error(request, f"Upload failed: {e}")
+
+    return redirect(f"{request.META.get('HTTP_REFERER', '')}#{topic_id}" or "admin_resource_manager")
+
+
+@staff_member_required
+@require_POST
+def admin_resource_delete(request, resource_id):
+    """Delete a resource from DB and Supabase bucket."""
+    resource = get_object_or_404(EATopicResource, id=resource_id)
+    title    = resource.title
+    topic    = resource.topic
+
+    deleted_from_bucket = supabase_storage.delete_topic_resource(resource.supabase_path)
+    resource.delete()
+
+    if deleted_from_bucket:
+        messages.success(request, f"🗑️ '{title}' deleted successfully.")
+    else:
+        messages.warning(request, f"'{title}' removed from database but could not be deleted from storage (may not exist).")
+
+    return redirect("admin_resource_manager")
+
+
+@staff_member_required
+@require_POST
+def admin_resource_rename(request, resource_id):
+    """Rename (update title) of a resource — no re-upload needed."""
+    resource  = get_object_or_404(EATopicResource, id=resource_id)
+    new_title = request.POST.get("title", "").strip()
+
+    if not new_title:
+        messages.error(request, "Title cannot be empty.")
+        return redirect("admin_resource_manager")
+
+    old_title = resource.title
+    resource.title = new_title
+    resource.save(update_fields=["title", "updated_at"])
+    messages.success(request, f"Renamed '{old_title}' → '{new_title}'.")
+    return redirect("admin_resource_manager")
+
+
+def _get_document_meta(filename):
+    """Helper to detect file type, icon, badge color, and previewability."""
+    fn = (filename or "").lower()
+    ext = fn.split(".")[-1] if "." in fn else ""
+    if ext == "pdf":
+        return {"ext": "pdf", "label": "PDF", "icon": "fas fa-file-pdf", "color": "#ef4444", "can_preview": True}
+    elif ext in ("ppt", "pptx"):
+        return {"ext": ext, "label": "PowerPoint", "icon": "fas fa-file-powerpoint", "color": "#f59e0b", "can_preview": False}
+    elif ext in ("xls", "xlsx", "csv"):
+        return {"ext": ext, "label": "Excel", "icon": "fas fa-file-excel", "color": "#22c55e", "can_preview": False}
+    elif ext in ("doc", "docx"):
+        return {"ext": ext, "label": "Word", "icon": "fas fa-file-word", "color": "#3b82f6", "can_preview": False}
+    elif ext in ("txt", "text", "md"):
+        return {"ext": ext, "label": "Text", "icon": "fas fa-file-alt", "color": "#64748b", "can_preview": False}
+    else:
+        return {"ext": ext, "label": ext.upper() if ext else "File", "icon": "fas fa-file", "color": "#94a3b8", "can_preview": False}
+
+
+@login_required
+def topic_ebooks_json(request, topic_id):
+    """Return JSON list of all E-Book / Study Material documents for a topic."""
+    topic = get_object_or_404(EATopic.objects.prefetch_related("ebook_files"), id=topic_id)
+    ebook_list = []
+    
+    # Primary / legacy file
+    if topic.supabase_pdf_path:
+        from django.urls import reverse
+        title = topic.supabase_pdf_path.split("/")[-1]
+        meta = _get_document_meta(title)
+        ebook_list.append({
+            "id": f"main_{topic.pk}",
+            "title": title,
+            "view_url": reverse("serve_ebook_pdf", kwargs={"topic_id": topic.id}),
+            "download_url": reverse("serve_ebook_pdf", kwargs={"topic_id": topic.id}) + "?download=1",
+            "is_main": True,
+            **meta,
+        })
+    elif topic.pdf_file:
+        title = topic.pdf_file.name.split("/")[-1]
+        meta = _get_document_meta(title)
+        ebook_list.append({
+            "id": f"main_{topic.pk}",
+            "title": title,
+            "view_url": topic.pdf_file.url,
+            "download_url": topic.pdf_file.url,
+            "is_main": True,
+            **meta,
+        })
+
+    # Additional ebook / material files
+    for ef in topic.ebook_files.all():
+        from django.urls import reverse
+        meta = _get_document_meta(ef.display_name)
+        if ef.supabase_pdf_path:
+            url = reverse("serve_ebook_file_pdf", kwargs={"file_id": ef.id})
+            dl_url = url + "?download=1"
+        elif ef.pdf_file:
+            url = ef.pdf_file.url
+            dl_url = ef.pdf_file.url
+        else:
+            url = ""
+            dl_url = ""
+        
+        ebook_list.append({
+            "id": ef.id,
+            "title": ef.display_name,
+            "view_url": url,
+            "download_url": dl_url,
+            "is_main": False,
+            **meta,
+        })
+
+    return JsonResponse({"topic_name": topic.name, "topic_id": topic.id, "ebooks": ebook_list})
+
+
+@login_required
+def serve_ebook_file_pdf(request, file_id):
+    """Serve a specific EATopicEbookFile from Supabase or local storage."""
+    import mimetypes
+    ebook_file = get_object_or_404(EATopicEbookFile, id=file_id)
+    
+    if ebook_file.supabase_pdf_path:
+        try:
+            file_bytes = supabase_storage.get_ebook_pdf_bytes(ebook_file.supabase_pdf_path)
+            content_type, _ = mimetypes.guess_type(ebook_file.display_name)
+            content_type = content_type or "application/octet-stream"
+            response = HttpResponse(file_bytes, content_type=content_type)
+            response["X-Frame-Options"] = "SAMEORIGIN"
+            safe_name = "".join(c for c in ebook_file.display_name if c.isprintable()).strip()
+            if request.GET.get("download", "0") == "1" or not safe_name.lower().endswith(".pdf"):
+                response["Content-Disposition"] = f'attachment; filename="{safe_name}"'
+            else:
+                response["Content-Disposition"] = f'inline; filename="{safe_name}"'
+            return response
+        except Exception as e:
+            return HttpResponseForbidden(f"Unable to retrieve file: {e}")
+    elif ebook_file.pdf_file:
+        return redirect(ebook_file.pdf_file.url)
+    else:
+        raise Http404("File not found.")

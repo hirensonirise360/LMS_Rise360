@@ -82,7 +82,7 @@ def part_study(request, part_number):
         return redirect("part_study", part_number=active_part)
     current_part = get_object_or_404(EAPart, number=part_number)
 
-    domains = current_part.domains.prefetch_related("topics").all()
+    domains = current_part.domains.prefetch_related("topics", "topics__ebook_files", "topics__resources").all()
     progress = StudentEAProgress.objects.filter(user=request.user, part_number=part_number).first()
     domain_accuracies = DomainAccuracy.objects.filter(user=request.user, part_number=part_number)
     domain_acc_map = {da.domain_name: da for da in domain_accuracies}

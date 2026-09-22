@@ -1,4 +1,4 @@
-{% load ea_extras %}
+{% load i18n ea_extras %}
 {# Requires: topic, domain, current_part, stats (may be None), chip_state #}
 
 <div class="ec-topic-row">
@@ -6,18 +6,18 @@
     <!-- Status dot -->
     <div class="d-flex align-items-center gap-2">
       {% if chip_state == "done" %}
-        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--ec-emerald); flex-shrink: 0; display: inline-block;"></span>
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--ec-emerald); flex-shrink: 0; display: inline-block;" id="status-dot-{{ topic.id }}"></span>
       {% elif chip_state == "in-progress" %}
-        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--ec-amber); flex-shrink: 0; display: inline-block;"></span>
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--ec-amber); flex-shrink: 0; display: inline-block;" id="status-dot-{{ topic.id }}"></span>
       {% else %}
         <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--ec-gray-light); border: 1.5px solid var(--ec-gray); flex-shrink: 0; display: inline-block;" id="status-dot-{{ topic.id }}"></span>
       {% endif %}
       
       <i class="{% if read_statuses|get_item:topic.id %}fas fa-eye text-primary{% else %}far fa-eye text-muted{% endif %} cursor-pointer topic-read-toggle" 
-         title="Mark as Read" 
+         title="{% if read_statuses|get_item:topic.id %}Mark as Unread{% else %}Mark as Read{% endif %}" 
          onclick="toggleReadStatus({{ topic.id }}, this)"
          data-topic-id="{{ topic.id }}"
-         style="font-size: 14px;"></i>
+         style="font-size: 14px; transition: transform 0.15s ease, color 0.15s ease; user-select: none;"></i>
     </div>
     
     <span class="ec-topic-name {% if read_statuses|get_item:topic.id %}text-decoration-line-through opacity-50{% endif %}" id="topic-name-{{ topic.id }}">
@@ -36,22 +36,33 @@
     </span>
     {% endif %}
 
+    <!-- Resources Chip -->
+    {% with resource_count=topic.resources.count|add:topic.ebook_count %}
+    <div class="ec-chip position-relative {% if chip_state == 'done' %}done{% elif chip_state == 'in-progress' %}in-progress{% else %}not-started{% endif %}" style="cursor: pointer;"
+         onclick="openResourcesModal({{ topic.id }}, '{{ topic.name|escapejs }}')">
+      <i class="fas fa-folder-open"></i> Resources
+      {% if resource_count > 0 %}
+        <span style="
+          position: absolute; top: -6px; right: -6px;
+          background: var(--ec-emerald); color: #fff;
+          font-size: 9px; font-weight: 700;
+          border-radius: 50%; width: 16px; height: 16px;
+          display: flex; align-items: center; justify-content: center;
+          line-height: 1;">{{ resource_count }}</span>
+      {% endif %}
+    </div>
+    {% endwith %}
+
     <!-- Question Chip -->
-    {% if topic.supabase_pdf_path %}
-      <div style="cursor:pointer;" 
-           class="ec-chip {% if chip_state == 'done' %}done{% elif chip_state == 'in-progress' %}in-progress{% else %}not-started{% endif %}"
-           data-bs-toggle="modal" data-bs-target="#pdfViewerModal"
-           data-pdf-url="{% url 'serve_ebook_pdf' topic.id %}" data-pdf-title="{{ topic.name }}">
-        <i class="fas fa-file-alt"></i> Question
-      </div>
-    {% elif topic.pdf_file or topic.ebook_external_url %}
-      <a href="{% if topic.pdf_file %}{{ topic.pdf_file.url }}{% else %}{{ topic.ebook_external_url }}{% endif %}"
-         target="_blank"
-         class="ec-chip {% if chip_state == 'done' %}done{% elif chip_state == 'in-progress' %}in-progress{% else %}not-started{% endif %}">
+    {% if topic.question_file %}
+      <a href="{{ topic.question_file.url }}"
+         target="_blank" download
+         class="ec-chip {% if chip_state == 'done' %}done{% elif chip_state == 'in-progress' %}in-progress{% else %}not-started{% endif %}"
+         title="{% trans 'Download Question File' %}">
         <i class="fas fa-file-alt"></i> Question
       </a>
     {% else %}
-      <span class="ec-chip not-started disabled"><i class="fas fa-file-alt"></i> Question</span>
+      <span class="ec-chip not-started disabled" title="No Question file uploaded"><i class="fas fa-file-alt"></i> Question</span>
     {% endif %}
 
     <!-- Video Chip -->

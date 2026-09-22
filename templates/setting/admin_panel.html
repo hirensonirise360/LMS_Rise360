@@ -87,6 +87,17 @@
     <i class="fas fa-chevron-right ap-card-arrow text-muted"></i>
   </a>
 
+  <a href="{% url 'admin_resource_manager' %}" class="ap-card">
+    <div class="ap-card-icon" style="background: #fef9c3;">
+      <i class="fas fa-folder-open" style="color: #d97706;"></i>
+    </div>
+    <div class="ap-card-body">
+      <span class="ap-card-title">{% trans 'Topic Resources' %}</span>
+      <span class="ap-card-desc">Upload Excel, PPT, PDF, Word &amp; Text materials per topic</span>
+    </div>
+    <i class="fas fa-chevron-right ap-card-arrow text-muted"></i>
+  </a>
+
   <a href="{% url 'admin:ea_content_eanote_changelist' %}" class="ap-card">
     <div class="ap-card-icon bg-teal-subtle">
       <i class="fas fa-sticky-note text-teal"></i>

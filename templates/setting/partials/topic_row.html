@@ -3,7 +3,12 @@
     data-topic-id="{{ topic.pk }}"
     data-domain-id="{{ topic.domain_id }}"
     role="button"
+    draggable="true"
     onclick="loadTopicEditor({{ topic.pk }})">
+
+  <span class="lm-drag-handle text-muted me-1" title="{% trans 'Drag to reorder' %}" onclick="event.stopPropagation()">
+    <i class="fas fa-grip-vertical"></i>
+  </span>
 
   {# Clickable name — loads editor in right panel #}
   <span class="lm-topic-name flex-grow-1 text-truncate"
@@ -24,6 +29,12 @@
       <i class="fas fa-video text-primary" style="font-size: 0.75rem;" title="{% trans 'Video Available' %}"></i>
     {% else %}
       <i class="fas fa-video text-muted opacity-25" style="font-size: 0.75rem;" title="{% trans 'No Video' %}"></i>
+    {% endif %}
+
+    {% if topic.question_file or topic.supabase_question_path %}
+      <i class="fas fa-file-alt text-success" style="font-size: 0.75rem;" title="{% trans 'Question File Available' %}"></i>
+    {% else %}
+      <i class="fas fa-file-alt text-muted opacity-25" style="font-size: 0.75rem;" title="{% trans 'No Question File' %}"></i>
     {% endif %}
   </div>
 

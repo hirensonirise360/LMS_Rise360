@@ -13,16 +13,19 @@
   <!-- ══ TOP BAR ══════════════════════════════════════════════════════════════ -->
   <div class="lm-topbar">
     <div class="lm-topbar-left">
-      <nav style="--bs-breadcrumb-divider:'›';" aria-label="breadcrumb" class="mb-0">
-        <ol class="breadcrumb mb-0">
-          <li class="breadcrumb-item"><a href="{% url 'ea_home' %}">{% trans "Portal" %}</a></li>
-          <li class="breadcrumb-item"><a href="{% url 'admin_panel' %}">{% trans "Admin Panel" %}</a></li>
-          <li class="breadcrumb-item active">{% trans "Content Manager" %}</li>
-        </ol>
-      </nav>
-      <h5 class="lm-topbar-title mb-0">
-        <i class="fas fa-graduation-cap text-primary me-2"></i>{% trans "Learning Content Manager" %}
-      </h5>
+      <div class="lm-topbar-icon">
+        <i class="fas fa-graduation-cap"></i>
+      </div>
+      <div class="lm-topbar-text">
+        <div class="lm-topbar-title">{% trans "Learning Content Manager" %}</div>
+        <div class="lm-topbar-sub">
+          <a href="{% url 'ea_home' %}" class="text-decoration-none text-reset">{% trans "Portal" %}</a>
+          <span class="mx-1 opacity-50">›</span>
+          <a href="{% url 'admin_panel' %}" class="text-decoration-none text-reset">{% trans "Admin Panel" %}</a>
+          <span class="mx-1 opacity-50">›</span>
+          {% trans "Content Manager" %}
+        </div>
+      </div>
     </div>
     <div class="lm-topbar-right">
       <div class="lm-search-wrap">
@@ -31,7 +34,7 @@
                placeholder="{% trans 'Search modules, domains, topics…' %}"
                oninput="lmSearch(this.value)">
       </div>
-      <button class="btn btn-primary btn-sm" onclick="openModuleAddModal()">
+      <button class="btn btn-primary btn-sm px-3 rounded-pill" onclick="openModuleAddModal()">
         <i class="fas fa-plus me-1"></i>{% trans "Add Module" %}
       </button>
     </div>
@@ -62,12 +65,13 @@
     <main class="lm-editor-panel" id="lm-editor">
       <div class="lm-editor-placeholder">
         <div class="lm-placeholder-icon"><i class="fas fa-hand-pointer"></i></div>
-        <h6 class="mt-3 mb-1 text-dark">{% trans "Select a topic to edit" %}</h6>
-        <p class="text-muted small mb-3">{% trans "Click any topic in the tree, or use + Add Topic under a domain." %}</p>
+        <h6 class="mt-4 mb-1 fw-bold" style="color:#1e293b;">{% trans "Select a topic to edit" %}</h6>
+        <p class="text-muted small mb-4" style="max-width:300px;line-height:1.6;">{% trans "Click any topic in the tree on the left, or use + Add Topic under a domain to create one." %}</p>
         <div class="d-flex gap-2 justify-content-center flex-wrap">
-          <span class="lm-hint-chip"><kbd>Click</kbd> topic → edit details</span>
-          <span class="lm-hint-chip"><kbd>✏</kbd> next to name → rename inline</span>
-          <span class="lm-hint-chip"><kbd>+</kbd> under domain → new topic</span>
+          <span class="lm-hint-chip"><kbd class="bg-white border rounded px-1">Click</kbd> topic → edit</span>
+          <span class="lm-hint-chip"><i class="fas fa-pencil-alt text-muted" style="font-size:.65rem;"></i> rename inline</span>
+          <span class="lm-hint-chip"><i class="fas fa-plus text-muted" style="font-size:.65rem;"></i> add topic</span>
+          <span class="lm-hint-chip"><i class="fas fa-grip-vertical text-muted" style="font-size:.65rem;"></i> drag to reorder</span>
         </div>
       </div>
     </main>
@@ -155,9 +159,10 @@
 .lm-shell {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 56px);   /* navbar height ≈ 56px */
-  margin: 0 -12px;              /* bleed to edge of container padding */
+  height: calc(100vh - 56px);
+  margin: 0 -12px;
   overflow: hidden;
+  font-family: inherit;
 }
 
 /* ── Top bar ── */
@@ -166,34 +171,48 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 20px;
+  padding: 10px 22px;
   background: #fff;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #eaecf0;
   flex-shrink: 0;
   flex-wrap: wrap;
 }
-.lm-topbar-left { display: flex; flex-direction: column; gap: 2px; }
-.lm-topbar-title { font-size: .95rem; font-weight: 700; color: #111827; }
+.lm-topbar-left { display: flex; align-items: center; gap: 14px; }
+.lm-topbar-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: .9rem;
+  box-shadow: 0 2px 8px rgba(99,102,241,.3);
+  flex-shrink: 0;
+}
+.lm-topbar-text {}
+.lm-topbar-title { font-size: .92rem; font-weight: 700; color: #0f172a; line-height: 1.2; }
+.lm-topbar-sub { font-size: .72rem; color: #94a3b8; margin-top: 1px; }
 .lm-topbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
 /* ── Search ── */
 .lm-search-wrap { position: relative; }
 .lm-search-icon {
-  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
-  color: #9ca3af; font-size: .75rem; pointer-events: none;
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  color: #adb5bd; font-size: .73rem; pointer-events: none;
 }
 .lm-search-input {
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 6px 10px 6px 30px;
+  border: 1.5px solid #eaecf0;
+  border-radius: 8px;
+  padding: 7px 12px 7px 32px;
   font-size: .82rem;
   width: 220px;
   outline: none;
-  transition: border-color .15s, box-shadow .15s;
+  background: #f8f9fa;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+  color: #212529;
 }
 .lm-search-input:focus {
   border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(99,102,241,.1);
 }
 
 /* ── Body: side-by-side panels ── */
@@ -205,22 +224,23 @@
 
 /* ── Left tree sidebar ── */
 .lm-sidebar {
-  width: 320px;
+  width: 290px;
   min-width: 200px;
-  max-width: 500px;
+  max-width: 460px;
   flex-shrink: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 12px 10px 12px 14px;
-  background: #f9fafb;
-  border-right: 1px solid #e5e7eb;
+  padding: 12px 8px 12px 10px;
+  background: #f8fafc;
+  border-right: 1px solid #eaecf0;
 }
-.lm-sidebar::-webkit-scrollbar { width: 4px; }
-.lm-sidebar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+.lm-sidebar::-webkit-scrollbar { width: 3px; }
+.lm-sidebar::-webkit-scrollbar-thumb { background: #dde1e7; border-radius: 2px; }
+.lm-sidebar::-webkit-scrollbar-track { background: transparent; }
 
 /* ── Resize handle ── */
 .lm-resizer {
-  width: 5px;
+  width: 4px;
   flex-shrink: 0;
   cursor: col-resize;
   background: transparent;
@@ -234,11 +254,11 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 24px 28px;
+  padding: 26px 30px;
   background: #fff;
 }
-.lm-editor-panel::-webkit-scrollbar { width: 5px; }
-.lm-editor-panel::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+.lm-editor-panel::-webkit-scrollbar { width: 4px; }
+.lm-editor-panel::-webkit-scrollbar-thumb { background: #dde1e7; border-radius: 3px; }
 
 /* ── Placeholder state ── */
 .lm-editor-placeholder {
@@ -251,20 +271,22 @@
   text-align: center;
 }
 .lm-placeholder-icon {
-  width: 64px; height: 64px;
-  border-radius: 50%;
-  background: #eef2ff;
+  width: 70px; height: 70px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #eef2ff 0%, #f0f9ff 100%);
   display: flex; align-items: center; justify-content: center;
   font-size: 1.5rem;
   color: #6366f1;
+  box-shadow: 0 4px 20px rgba(99,102,241,.12);
+  margin-bottom: 4px;
 }
 .lm-hint-chip {
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
+  background: #f1f5f9;
+  border: 1.5px solid #e2e8f0;
   border-radius: 20px;
   font-size: .72rem;
-  padding: 3px 10px;
-  color: #6b7280;
+  padding: 4px 12px;
+  color: #64748b;
 }
 
 /* ── Empty state ── */
@@ -280,201 +302,245 @@
 /* ── Editor title bar ── */
 .lm-editor-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #f3f4f6;
+  margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1.5px solid #f1f5f9;
+  gap: 12px;
 }
 .lm-editor-title-text {
   font-size: .95rem;
   font-weight: 700;
-  color: #111827;
+  color: #0f172a;
 }
 .lm-editor-breadcrumb {
-  font-size: .75rem;
-  color: #9ca3af;
-  margin-top: 2px;
+  font-size: .72rem;
+  color: #94a3b8;
+  margin-top: 3px;
+  line-height: 1.4;
 }
 
 /* ── Form sections in editor ── */
 .lm-section {
-  background: #f9fafb;
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
+  background: #fff;
+  border: 1.5px solid #eaecf0;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.lm-section:hover {
+  border-color: #c7d2fe;
+  box-shadow: 0 2px 12px rgba(99,102,241,.06);
 }
 .lm-section-title {
-  font-size: .75rem;
+  font-size: .72rem;
   font-weight: 700;
-  letter-spacing: .05em;
+  letter-spacing: .07em;
   text-transform: uppercase;
-  color: #6b7280;
-  margin-bottom: 12px;
+  color: #64748b;
+  margin-bottom: 14px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 .lm-section-title .lm-status-pill {
   font-size: .65rem;
-  padding: 1px 7px;
+  padding: 2px 8px;
   border-radius: 20px;
   font-weight: 600;
   text-transform: none;
   letter-spacing: 0;
 }
-.lm-status-pill.ok  { background: #dcfce7; color: #16a34a; }
-.lm-status-pill.miss { background: #fee2e2; color: #dc2626; }
+.lm-status-pill.ok  { background: #dcfce7; color: #15803d; }
+.lm-status-pill.miss { background: #fee2e2; color: #b91c1c; }
 
 /* ── Or separator ── */
 .lm-or {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #9ca3af;
+  color: #adb5bd;
   font-size: .72rem;
-  margin: 8px 0;
+  margin: 10px 0;
 }
 .lm-or::before, .lm-or::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: #e5e7eb;
+  background: #eaecf0;
 }
 
-/* ── Action bar (save/delete) ── */
+/* ── Action bar ── */
 .lm-action-bar {
   display: flex;
+  align-items: center;
   gap: 10px;
-  padding-top: 16px;
-  border-top: 1px solid #f3f4f6;
-  margin-top: 16px;
+  padding-top: 18px;
+  border-top: 1.5px solid #f1f5f9;
+  margin-top: 18px;
 }
 
-/* ── Tree: Module card ── */
+/* ═══════════════════════════════════════
+   SIDEBAR TREE REDESIGN
+═══════════════════════════════════════ */
+
+/* ── Module card ── */
 .lm-module-card {
-  border-radius: 8px;
-  border: 1px solid #e0e4ea;
-  overflow: hidden;
-  margin-bottom: 8px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  overflow: visible;
+  margin-bottom: 6px;
   background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  transition: border-color .15s;
 }
-.lm-module-card.lm-inactive { opacity: .55; }
+.lm-module-card.lm-inactive { opacity: .5; }
 .lm-module-header {
-  background: #f1f5f9;
+  background: transparent;
   cursor: pointer;
   user-select: none;
-  transition: background .12s;
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 8px 10px;
+  border-radius: 9px;
+  transition: background .12s;
 }
-.lm-module-header:hover { background: #e8edf5; }
-.lm-status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.lm-module-name { font-size: .82rem; font-weight: 600; color: #1e293b; }
+.lm-module-header:hover { background: #f1f5f9; }
+.lm-status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.lm-module-name {
+  font-size: .82rem;
+  font-weight: 600;
+  color: #1e293b;
+  letter-spacing: -.01em;
+}
 
-/* ── Tree: Domain ── */
+/* ── Domain block ── */
 .lm-domain-block {
   border-left: 2px solid #e2e8f0;
-  margin-left: 8px;
-  padding-left: 6px;
+  margin-left: 10px;
+  margin-top: 1px;
+  padding-left: 7px;
   margin-bottom: 2px;
+  transition: border-color .15s;
 }
+.lm-domain-block:hover { border-color: #a5b4fc; }
 .lm-domain-header {
   display: flex;
   align-items: center;
   gap: 4px;
   cursor: pointer;
   user-select: none;
-  border-radius: 5px;
-  padding: 4px 4px;
-  transition: background .1s;
+  border-radius: 7px;
+  padding: 5px 6px;
+  transition: background .12s;
 }
 .lm-domain-header:hover { background: #eef2ff; }
-.lm-domain-name { font-size: .78rem; font-weight: 600; color: #374151; flex: 1; min-width: 0; }
+.lm-domain-name {
+  font-size: .78rem;
+  font-weight: 600;
+  color: #374151;
+  flex: 1;
+  min-width: 0;
+}
 
-/* ── Tree: Topic ── */
-.lm-topics-list { list-style: none; padding: 0; margin: 0; }
+/* ── Topic item ── */
+.lm-topics-list { list-style: none; padding: 0; margin: 0 0 0 2px; }
 .lm-topic-item {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 4px;
-  border-radius: 5px;
+  padding: 4px 6px;
+  border-radius: 7px;
   cursor: pointer;
-  font-size: .75rem;
+  font-size: .76rem;
   transition: background .1s;
+  margin-bottom: 1px;
+  position: relative;
 }
 .lm-topic-item:hover { background: #f1f5f9; }
 .lm-topic-item.lm-active-topic {
   background: #eef2ff;
-  border-left: 2px solid #6366f1;
-  padding-left: 6px;
+  border-left: 3px solid #6366f1;
+  padding-left: 7px;
   font-weight: 600;
 }
-.lm-topic-name { color: #4b5563; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lm-topic-name {
+  color: #4b5563;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* ── Badges ── */
-.lm-badge-ok   { color: #16a34a; font-size: .68rem; }
-.lm-badge-miss { color: #dc2626; font-size: .68rem; opacity: .4; }
-.lm-count-badge { font-size: .62rem; }
+.lm-badge-ok   { color: #16a34a; font-size: .65rem; }
+.lm-badge-miss { color: #dc2626; font-size: .65rem; opacity: .3; }
+.lm-count-badge { font-size: .6rem; }
 
 /* ── Buttons ── */
-.btn-xs { padding: 1px 5px; font-size: .68rem; }
+.btn-xs { padding: 2px 7px; font-size: .7rem; }
 .lm-icon-btn {
   background: none; border: none;
-  padding: 2px 4px; border-radius: 4px;
+  padding: 3px 5px; border-radius: 5px;
   opacity: 0; transition: opacity .12s, background .12s;
-  font-size: .68rem; line-height: 1;
+  font-size: .68rem; line-height: 1; color: inherit;
 }
 .lm-module-header:hover .lm-icon-btn,
 .lm-domain-header:hover .lm-icon-btn { opacity: .6; }
-.lm-icon-btn:hover { opacity: 1 !important; background: rgba(0,0,0,.06); }
-.lm-add-btn { font-size: .72rem; padding: 2px 6px; border-radius: 4px; }
+.lm-icon-btn:hover { opacity: 1 !important; background: rgba(0,0,0,.07); }
+.lm-add-btn {
+  font-size: .72rem;
+  padding: 3px 9px;
+  border-radius: 6px;
+  transition: background .12s;
+}
 
 /* ── Inline edit ── */
 .lm-inline-input {
-  font-size: .78rem;
-  padding: 2px 6px;
-  height: 24px;
-  border-radius: 4px;
-  border: 1px solid #6366f1;
+  font-size: .79rem;
+  padding: 2px 8px;
+  height: 26px;
+  border-radius: 5px;
+  border: 1.5px solid #6366f1;
   outline: none;
   width: 130px;
   max-width: 100%;
 }
 
 /* ── Chevron ── */
-.lm-chevron { transition: transform .18s; font-size: .6rem; color: #9ca3af; }
+.lm-chevron { transition: transform .2s; font-size: .58rem; color: #b0b8c1; }
 .lm-chevron.rotated { transform: rotate(-90deg); }
 
 /* ── Toast ── */
 .lm-toast {
   position: fixed;
-  bottom: 28px; right: 28px;
-  padding: 10px 20px;
-  border-radius: 8px;
+  bottom: 24px; right: 24px;
+  padding: 11px 20px;
+  border-radius: 10px;
   font-size: .83rem;
   font-weight: 500;
   color: #fff;
   display: none;
   z-index: 9999;
-  box-shadow: 0 4px 20px rgba(0,0,0,.18);
-  animation: lm-pop .2s cubic-bezier(.175,.885,.32,1.275);
+  box-shadow: 0 8px 30px rgba(0,0,0,.18);
+  animation: lm-pop .22s cubic-bezier(.175,.885,.32,1.275);
+  max-width: 320px;
 }
-.lm-toast.ok  { background: #16a34a; }
-.lm-toast.err { background: #dc2626; }
+.lm-toast.ok  { background: linear-gradient(135deg, #16a34a, #15803d); }
+.lm-toast.err { background: linear-gradient(135deg, #dc2626, #b91c1c); }
 @keyframes lm-pop {
-  from { opacity:0; transform: translateY(10px) scale(.95); }
+  from { opacity:0; transform: translateY(12px) scale(.93); }
   to   { opacity:1; transform: translateY(0) scale(1); }
 }
 
 /* ── Spinner ── */
 .lm-spinner {
   display: flex; align-items: center; justify-content: center;
-  height: 200px; color: #9ca3af; font-size: .85rem;
+  height: 200px; color: #9ca3af; font-size: .85rem; gap: 8px;
 }
 
 /* ── Hidden ── */
@@ -484,35 +550,83 @@
 @media (max-width: 768px) {
   .lm-shell { height: auto; }
   .lm-body  { flex-direction: column; }
-  .lm-sidebar { width: 100%; max-width: none; border-right: none; border-bottom: 1px solid #e5e7eb; max-height: 50vh; }
+  .lm-sidebar { width: 100%; max-width: none; border-right: none; border-bottom: 1px solid #eaecf0; max-height: 50vh; }
   .lm-resizer { display: none; }
   .lm-editor-panel { padding: 16px; }
 }
 
 /* ── File input ── */
 .lm-file-btn {
-  display: flex; align-items: center; gap: 8px;
-  border: 1px dashed #d1d5db;
-  border-radius: 6px;
-  padding: 8px 12px;
+  display: flex; align-items: center; gap: 9px;
+  border: 1.5px dashed #d1d5db;
+  border-radius: 9px;
+  padding: 10px 14px;
   cursor: pointer;
-  transition: border-color .15s, background .15s;
-  font-size: .8rem;
+  transition: border-color .18s, background .18s, color .18s;
+  font-size: .81rem;
   color: #6b7280;
+  background: #fafafa;
 }
 .lm-file-btn:hover { border-color: #6366f1; background: #f5f3ff; color: #6366f1; }
 .lm-file-btn input[type=file] { display: none; }
+
+/* ── Drag handle ── */
+.lm-drag-handle {
+  cursor: grab;
+  padding: 2px 3px;
+  font-size: .7rem;
+  opacity: .2;
+  transition: opacity .15s, color .15s;
+  user-select: none;
+  color: #94a3b8;
+}
+.lm-drag-handle:hover { opacity: 1 !important; color: #6366f1 !important; }
+.lm-module-header:hover .lm-drag-handle,
+.lm-domain-header:hover .lm-drag-handle,
+.lm-topic-item:hover .lm-drag-handle { opacity: .6; }
+
+/* ── Dragging states ── */
+.lm-module-card[draggable="true"],
+.lm-domain-block[draggable="true"],
+.lm-topic-item[draggable="true"] {
+  transition: transform .12s, box-shadow .12s, opacity .12s;
+}
+.lm-module-card.lm-dragging,
+.lm-domain-block.lm-dragging,
+.lm-topic-item.lm-dragging {
+  opacity: .3 !important;
+  border: 2px dashed #6366f1 !important;
+  transform: scale(0.97);
+}
+.lm-module-card.lm-drag-over-top,
+.lm-domain-block.lm-drag-over-top,
+.lm-topic-item.lm-drag-over-top { border-top: 2.5px solid #6366f1 !important; }
+.lm-module-card.lm-drag-over-bottom,
+.lm-domain-block.lm-drag-over-bottom,
+.lm-topic-item.lm-drag-over-bottom { border-bottom: 2.5px solid #6366f1 !important; }
+.lm-topics-list.lm-drag-over-container,
+.card-body.lm-drag-over-container {
+  background: #eff6ff !important;
+  border-radius: 6px;
+}
 
 </style>
 
 
 <!-- ══ JAVASCRIPT ═════════════════════════════════════════════════════════════ -->
 <script>
-const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+/* ── CSRF Token Helper ────────────────────────────────────────────────────── */
+function getCsrfToken() {
+  const metaToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+  if (metaToken) return metaToken;
+  const match = document.cookie.match(/csrftoken=([^;]+)/);
+  return match ? match[1] : '';
+}
 
 /* ── Toast ───────────────────────────────────────────────────────────────── */
 function showToast(msg, type='ok') {
   const t = document.getElementById('lm-toast');
+  if (!t) return;
   t.textContent = (type==='ok'?'✓ ':'✗ ') + msg;
   t.className = 'lm-toast ' + type;
   t.style.display = 'block';
@@ -522,8 +636,10 @@ function showToast(msg, type='ok') {
 
 /* ── Editor: loading spinner ─────────────────────────────────────────────── */
 function setEditorLoading() {
-  document.getElementById('lm-editor').innerHTML =
-    '<div class="lm-spinner"><div class="spinner-border spinner-border-sm me-2 text-primary"></div>Loading…</div>';
+  const ed = document.getElementById('lm-editor');
+  if (ed) {
+    ed.innerHTML = '<div class="lm-spinner"><div class="spinner-border spinner-border-sm me-2 text-primary"></div>Loading…</div>';
+  }
 }
 
 /* ── Load existing topic into editor ─────────────────────────────────────── */
@@ -553,26 +669,112 @@ function loadNewTopicEditor(domainId) {
     .catch(() => showToast('Network error.', 'err'));
 }
 
+/* ── Auto-save System for Topic Editor ────────────────────────────────────── */
+let autoSaveTimer = null;
+
+function setAutoSaveStatus(status, message) {
+  const icon = document.getElementById('lm-autosave-icon');
+  const text = document.getElementById('lm-autosave-text');
+  if (!icon || !text) return;
+
+  if (status === 'saved') {
+    icon.className = 'fas fa-check-circle text-success';
+    text.className = 'text-success fw-semibold';
+    text.textContent = 'Saved';
+  } else if (status === 'error') {
+    icon.className = 'fas fa-exclamation-triangle text-danger';
+    text.className = 'text-danger fw-semibold';
+    text.textContent = message || 'Save failed';
+  }
+}
+
+function triggerAutoSave(immediate = false, reloadEditor = false) {
+  const form = document.getElementById('topic-editor-form');
+  if (!form) return;
+  const topicId = form.querySelector('[name="topic_id"]')?.value;
+  if (!topicId) return; // New topic — waits for creation
+
+  clearTimeout(autoSaveTimer);
+
+  const doSave = () => {
+    const nameInput = form.querySelector('[name="name"]');
+    if (nameInput && !nameInput.value.trim()) {
+      setAutoSaveStatus('error', 'Name required');
+      return;
+    }
+
+    // Silent save — NO loading indicator shown
+    const data = new FormData(form);
+    data.append('csrfmiddlewaretoken', getCsrfToken());
+
+    fetch(`/en/accounts/learning-manager/topic/${topicId}/save/`, {
+      method: 'POST',
+      body: data,
+      headers: { 'X-CSRFToken': getCsrfToken() }
+    })
+      .then(r => r.json())
+      .then(res => {
+        if (res.ok) {
+          setAutoSaveStatus('saved');
+          const existingRow = document.querySelector(`.lm-topic-item[data-topic-id="${res.id}"]`);
+          if (existingRow && res.row_html) {
+            existingRow.outerHTML = res.row_html;
+            const updatedRow = document.querySelector(`.lm-topic-item[data-topic-id="${res.id}"]`);
+            if (updatedRow) updatedRow.classList.add('lm-active-topic');
+            initAllDragAndDrop();
+          }
+          if (reloadEditor) {
+            loadTopicEditor(res.id);
+          }
+        } else {
+          setAutoSaveStatus('error', res.error || 'Save failed');
+          showToast(res.error || 'Save failed.', 'err');
+        }
+      })
+      .catch(() => setAutoSaveStatus('error', 'Network error'));
+  };
+
+  if (immediate) {
+    doSave();
+  } else {
+    // Debounce 800ms — no status change while waiting
+    autoSaveTimer = setTimeout(doSave, 800);
+  }
+}
+
+function handleAutoUpload(inputEl) {
+  if (!inputEl || !inputEl.files || inputEl.files.length === 0) return;
+  if (inputEl.previousElementSibling) {
+    if (inputEl.files.length === 1) {
+      inputEl.previousElementSibling.textContent = inputEl.files[0].name;
+    } else {
+      inputEl.previousElementSibling.textContent = `${inputEl.files.length} files selected`;
+    }
+  }
+  triggerAutoSave(true, true);
+}
+
 /* ── Submit topic form (save/create) ─────────────────────────────────────── */
 function submitTopicForm(event) {
   event.preventDefault();
   const btn = event.submitter;
-  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Saving…'; }
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Creating…'; }
 
   const form    = event.target;
   const data    = new FormData(form);
   const topicId = data.get('topic_id');
   const isNew   = !topicId;
+  data.append('csrfmiddlewaretoken', getCsrfToken());
   const url     = isNew
     ? '/en/accounts/learning-manager/topic/create/'
     : `/en/accounts/learning-manager/topic/${topicId}/save/`;
 
-  fetch(url, { method: 'POST', body: data, headers: { 'X-CSRFToken': CSRF } })
+  fetch(url, { method: 'POST', body: data, headers: { 'X-CSRFToken': getCsrfToken() } })
     .then(r => r.json())
     .then(res => {
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save me-1"></i>Save Topic'; }
+      if (btn) { btn.disabled = false; btn.innerHTML = isNew ? '<i class="fas fa-plus-circle me-1"></i>Create Topic' : '<i class="fas fa-save me-1"></i>Save Topic'; }
       if (res.ok) {
-        showToast('Topic saved!');
+        showToast(isNew ? 'Topic created!' : 'Topic saved!');
         const domainId = res.domain_id || data.get('domain_id');
         const existingRow = document.querySelector(`.lm-topic-item[data-topic-id="${res.id}"]`);
         if (existingRow) {
@@ -581,15 +783,41 @@ function submitTopicForm(event) {
           const addBtn = document.querySelector(`#domain-topics-${domainId} .lm-add-topic-row`);
           if (addBtn) addBtn.insertAdjacentHTML('beforebegin', res.row_html);
         }
+        initAllDragAndDrop();
         loadTopicEditor(res.id);
       } else {
         showToast(res.error || 'Save failed.', 'err');
       }
     })
     .catch(() => {
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save me-1"></i>Save Topic'; }
+      if (btn) { btn.disabled = false; btn.innerHTML = isNew ? '<i class="fas fa-plus-circle me-1"></i>Create Topic' : '<i class="fas fa-save me-1"></i>Save Topic'; }
       showToast('Network error.', 'err');
     });
+}
+
+/* ── Delete single ebook file from topic ──────────────────────────────────── */
+function deleteEbookFile(fileId, domId) {
+  if (!confirm('Are you sure you want to delete this E-Book document?')) return;
+  const fd = new FormData();
+  fd.append('csrfmiddlewaretoken', getCsrfToken());
+  fetch(`/en/accounts/learning-manager/topic/ebook/${fileId}/delete/`, {
+    method: 'POST',
+    body: fd,
+    headers: { 'X-CSRFToken': getCsrfToken() }
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (res.ok) {
+        document.getElementById(`ebook-item-${domId}`)?.remove();
+        showToast('E-Book document deleted.');
+        if (res.topic_id) {
+          loadTopicEditor(res.topic_id);
+        }
+      } else {
+        showToast(res.error || 'Failed to delete file.', 'err');
+      }
+    })
+    .catch(() => showToast('Network error.', 'err'));
 }
 
 /* ── Delete confirmation ─────────────────────────────────────────────────── */
@@ -607,14 +835,27 @@ function confirmDelete(type, id, name) {
 }
 
 function doDelete(type, id) {
-  fetch(`/en/accounts/learning-manager/${type}/${id}/delete/`, { method:'POST', headers:{'X-CSRFToken':CSRF} })
+  const fd = new FormData();
+  fd.append('csrfmiddlewaretoken', getCsrfToken());
+  fetch(`/en/accounts/learning-manager/${type}/${id}/delete/`, { method:'POST', body: fd, headers:{'X-CSRFToken': getCsrfToken()} })
     .then(r => r.json())
     .then(res => {
       if (res.ok) {
         showToast(`${type.charAt(0).toUpperCase()+type.slice(1)} deleted.`);
-        if (type==='module') document.getElementById(`module-card-${id}`)?.remove();
-        else if (type==='domain') document.querySelector(`.lm-domain-block[data-domain-id="${id}"]`)?.remove();
-        else if (type==='topic') {
+        if (type==='module') {
+          document.getElementById(`module-card-${id}`)?.remove();
+        } else if (type==='domain') {
+          const domainBlock = document.querySelector(`.lm-domain-block[data-domain-id="${id}"]`);
+          const moduleId = res.module_id || domainBlock?.getAttribute('data-module-id');
+          domainBlock?.remove();
+          if (moduleId) {
+            const countBadge = document.querySelector(`#module-card-${moduleId} .lm-count-badge`);
+            if (countBadge && res.domain_count !== undefined) {
+              countBadge.textContent = `${res.domain_count}D`;
+            }
+          }
+          document.querySelector(`#topic-editor-form select[name="domain_id"] option[value="${id}"]`)?.remove();
+        } else if (type==='topic') {
           document.querySelector(`.lm-topic-item[data-topic-id="${id}"]`)?.remove();
           document.getElementById('lm-editor').innerHTML = '<div class="lm-editor-placeholder"><div class="lm-placeholder-icon"><i class="fas fa-trash-alt"></i></div><h6 class="mt-3 text-muted">Topic deleted.</h6></div>';
         }
@@ -648,7 +889,8 @@ function startInlineEdit(type, id, btnEl) {
     if (!newName || newName === original) { nameEl.textContent = original; return; }
     const fd = new FormData();
     fd.append('name', newName);
-    fetch(`/en/accounts/learning-manager/domain/${id}/save/`, { method:'POST', body:fd, headers:{'X-CSRFToken':CSRF} })
+    fd.append('csrfmiddlewaretoken', getCsrfToken());
+    fetch(`/en/accounts/learning-manager/domain/${id}/save/`, { method:'POST', body:fd, headers:{'X-CSRFToken': getCsrfToken()} })
       .then(r => r.json())
       .then(res => {
         nameEl.textContent = res.ok ? res.name : original;
@@ -670,17 +912,33 @@ function startInlineEdit(type, id, btnEl) {
 
 /* ── Add domain inline ───────────────────────────────────────────────────── */
 function addDomain(moduleId) {
+  const bodyEl = document.getElementById(`module-body-${moduleId}`);
+  if (bodyEl && !bodyEl.classList.contains('show')) {
+    const bsCollapse = bootstrap.Collapse.getOrCreateInstance(bodyEl);
+    bsCollapse.show();
+  }
+
   const container = document.getElementById(`module-domains-${moduleId}`);
-  const addBtn    = container.querySelector('.lm-add-btn');
-  if (container.querySelector('.lm-new-domain-input')) return;
+  if (!container) return;
+  const addBtn    = container.querySelector('.lm-add-domain-btn') || container.querySelector('.lm-add-btn');
+  const existingInput = container.querySelector('.lm-new-domain-input input');
+  if (existingInput) {
+    existingInput.focus();
+    return;
+  }
 
   const wrap = document.createElement('div');
   wrap.className = 'd-flex gap-1 mb-1 lm-new-domain-input';
   wrap.innerHTML = `
     <input type="text" class="lm-inline-input flex-grow-1" placeholder="Domain name…" style="width:auto">
-    <button class="btn btn-xs btn-success">✓</button>
-    <button class="btn btn-xs btn-secondary">✗</button>`;
-  container.insertBefore(wrap, addBtn);
+    <button type="button" class="btn btn-xs btn-success" title="Save">✓</button>
+    <button type="button" class="btn btn-xs btn-secondary" title="Cancel">✗</button>`;
+  
+  if (addBtn) {
+    addBtn.insertAdjacentElement('beforebegin', wrap);
+  } else {
+    container.appendChild(wrap);
+  }
 
   const inp     = wrap.querySelector('input');
   const saveB   = wrap.querySelectorAll('button')[0];
@@ -689,18 +947,50 @@ function addDomain(moduleId) {
   const doSave = () => {
     const name = inp.value.trim();
     if (!name) { wrap.remove(); return; }
+    saveB.disabled = true;
     const fd = new FormData();
-    fd.append('module_id', moduleId); fd.append('name', name);
-    fetch('/en/accounts/learning-manager/domain/add/', { method:'POST', body:fd, headers:{'X-CSRFToken':CSRF} })
+    fd.append('module_id', moduleId);
+    fd.append('name', name);
+    fd.append('csrfmiddlewaretoken', getCsrfToken());
+    fetch('/en/accounts/learning-manager/domain/add/', { method:'POST', body:fd, headers:{'X-CSRFToken': getCsrfToken()} })
       .then(r => r.json())
       .then(res => {
-        if (res.ok) { wrap.remove(); addBtn.insertAdjacentHTML('beforebegin', res.html); showToast('Domain added!'); }
-        else showToast(res.error||'Failed.', 'err');
+        if (res.ok) {
+          wrap.remove();
+          container.querySelector('.lm-no-domains')?.remove();
+          if (addBtn) {
+            addBtn.insertAdjacentHTML('beforebegin', res.html);
+          } else {
+            container.insertAdjacentHTML('beforeend', res.html);
+          }
+          const countBadge = document.querySelector(`#module-card-${moduleId} .lm-count-badge`);
+          if (countBadge && res.domain_count !== undefined) {
+            countBadge.textContent = `${res.domain_count}D`;
+          }
+          const domainSelect = document.querySelector('#topic-editor-form select[name="domain_id"]');
+          if (domainSelect) {
+            const opt = document.createElement('option');
+            opt.value = res.id;
+            opt.textContent = `${res.module_name || ''} › ${res.name}`;
+            domainSelect.appendChild(opt);
+          }
+          initAllDragAndDrop();
+          showToast('Domain added!');
+        } else {
+          saveB.disabled = false;
+          showToast(res.error||'Failed.', 'err');
+        }
       })
-      .catch(() => showToast('Network error.', 'err'));
+      .catch(() => {
+        saveB.disabled = false;
+        showToast('Network error.', 'err');
+      });
   };
 
-  inp.addEventListener('keydown', e => { if(e.key==='Enter') doSave(); if(e.key==='Escape') wrap.remove(); });
+  inp.addEventListener('keydown', e => {
+    if(e.key==='Enter') { e.preventDefault(); doSave(); }
+    if(e.key==='Escape') { e.preventDefault(); wrap.remove(); }
+  });
   saveB.addEventListener('click', doSave);
   cancelB.addEventListener('click', () => wrap.remove());
   inp.focus();
@@ -730,9 +1020,10 @@ function submitModuleForm(event) {
   const moduleId = data.get('module_id');
   const isNew    = !moduleId;
   data.set('is_active', document.getElementById('module-form-active').checked ? 'true' : 'false');
+  data.append('csrfmiddlewaretoken', getCsrfToken());
   const url = isNew ? '/en/accounts/learning-manager/module/add/' : `/en/accounts/learning-manager/module/${moduleId}/save/`;
 
-  fetch(url, { method:'POST', body:data, headers:{'X-CSRFToken':CSRF} })
+  fetch(url, { method:'POST', body:data, headers:{'X-CSRFToken': getCsrfToken()} })
     .then(r => r.json())
     .then(res => {
       if (res.ok) {
@@ -740,6 +1031,7 @@ function submitModuleForm(event) {
         showToast(isNew ? 'Module added!' : 'Module updated!');
         if (isNew) document.getElementById('lm-tree').insertAdjacentHTML('beforeend', res.html);
         else { const el = document.getElementById(`module-card-${moduleId}`); if(el) el.outerHTML = res.html; }
+        initAllDragAndDrop();
       } else showToast(res.error||'Save failed.', 'err');
     })
     .catch(() => showToast('Network error.', 'err'));
@@ -769,6 +1061,7 @@ function lmSearch(query) {
 (function() {
   const resizer = document.getElementById('lm-resizer');
   const sidebar = document.querySelector('.lm-sidebar');
+  if (!resizer || !sidebar) return;
   let x0, w0, dragging = false;
 
   resizer.addEventListener('mousedown', e => {
@@ -789,6 +1082,421 @@ function lmSearch(query) {
     document.body.style.userSelect = '';
   });
 })();
+
+/* ── Unified Drag & Drop System (Modules, Domains, Topics) ─────────────────── */
+let currentDragType = null;
+let currentDraggedEl = null;
+let dragSourceParent = null;
+
+function clearAllDragStates() {
+  document.querySelectorAll('.lm-dragging').forEach(el => el.classList.remove('lm-dragging'));
+  document.querySelectorAll('.lm-drag-over-top').forEach(el => el.classList.remove('lm-drag-over-top'));
+  document.querySelectorAll('.lm-drag-over-bottom').forEach(el => el.classList.remove('lm-drag-over-bottom'));
+  document.querySelectorAll('.lm-drag-over-container').forEach(el => el.classList.remove('lm-drag-over-container'));
+  currentDragType = null;
+  currentDraggedEl = null;
+  dragSourceParent = null;
+}
+
+/* 1. Module Drag & Drop */
+function initModuleDragAndDrop() {
+  const tree = document.getElementById('lm-tree');
+  if (!tree) return;
+
+  tree.querySelectorAll('.lm-module-card').forEach(card => {
+    card.setAttribute('draggable', 'true');
+
+    card.ondragstart = function(e) {
+      if (e.target.closest('.lm-domain-block, .lm-topic-item, .lm-actions, .btn, input, textarea, select, .lm-add-btn')) {
+        return;
+      }
+      currentDragType = 'module';
+      currentDraggedEl = card;
+      card.classList.add('lm-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', 'module:' + card.getAttribute('data-module-id'));
+    };
+
+    card.ondragend = function() {
+      clearAllDragStates();
+    };
+
+    card.ondragover = function(e) {
+      if (currentDragType !== 'module' || currentDraggedEl === card) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const rect = card.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      if (e.clientY < mid) {
+        card.classList.add('lm-drag-over-top');
+        card.classList.remove('lm-drag-over-bottom');
+      } else {
+        card.classList.add('lm-drag-over-bottom');
+        card.classList.remove('lm-drag-over-top');
+      }
+    };
+
+    card.ondragleave = function(e) {
+      if (card.contains(e.relatedTarget)) return;
+      card.classList.remove('lm-drag-over-top', 'lm-drag-over-bottom');
+    };
+
+    card.ondrop = function(e) {
+      if (currentDragType !== 'module' || currentDraggedEl === card) return;
+      e.preventDefault();
+      e.stopPropagation();
+      card.classList.remove('lm-drag-over-top', 'lm-drag-over-bottom');
+      const rect = card.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      if (e.clientY < mid) {
+        card.parentNode.insertBefore(currentDraggedEl, card);
+      } else {
+        card.parentNode.insertBefore(currentDraggedEl, card.nextSibling);
+      }
+      saveModuleOrder();
+    };
+  });
+}
+
+function saveModuleOrder() {
+  const tree = document.getElementById('lm-tree');
+  if (!tree) return;
+  const cards = tree.querySelectorAll('.lm-module-card');
+  const order = [];
+  cards.forEach((c, idx) => {
+    const id = c.getAttribute('data-module-id');
+    const nameEl = c.querySelector('.lm-module-name');
+    const modName = c.getAttribute('data-module-name') || nameEl?.textContent.replace(/^\d+\.\s*/, '').trim() || '';
+    if (id) {
+      order.push(id);
+      if (nameEl) {
+        nameEl.textContent = `${idx + 1}. ${modName}`;
+      }
+      c.setAttribute('data-module-number', idx + 1);
+    }
+  });
+
+  if (order.length === 0) return;
+
+  fetch('/en/accounts/learning-manager/module/reorder/', {
+    method: 'POST',
+    body: JSON.stringify({ order: order }),
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCsrfToken()
+    }
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (res.ok) {
+        showToast('Module order updated!');
+      } else {
+        showToast(res.error || 'Failed to reorder modules.', 'err');
+      }
+    })
+    .catch(() => showToast('Network error while saving order.', 'err'));
+}
+
+
+/* 2. Domain Drag & Drop */
+function initDomainDragAndDrop() {
+  const tree = document.getElementById('lm-tree');
+  if (!tree) return;
+
+  tree.querySelectorAll('.lm-domain-block').forEach(domainBlock => {
+    domainBlock.setAttribute('draggable', 'true');
+
+    domainBlock.ondragstart = function(e) {
+      if (e.target.closest('.lm-topic-item, .lm-actions, .btn, input, textarea, select, .lm-add-btn')) {
+        return;
+      }
+      e.stopPropagation();
+      currentDragType = 'domain';
+      currentDraggedEl = domainBlock;
+      dragSourceParent = domainBlock.closest('[id^="module-domains-"]');
+      domainBlock.classList.add('lm-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', 'domain:' + domainBlock.getAttribute('data-domain-id'));
+    };
+
+    domainBlock.ondragend = function(e) {
+      e.stopPropagation();
+      clearAllDragStates();
+    };
+
+    domainBlock.ondragover = function(e) {
+      if (currentDragType !== 'domain' || currentDraggedEl === domainBlock) return;
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = 'move';
+      const rect = domainBlock.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      if (e.clientY < mid) {
+        domainBlock.classList.add('lm-drag-over-top');
+        domainBlock.classList.remove('lm-drag-over-bottom');
+      } else {
+        domainBlock.classList.add('lm-drag-over-bottom');
+        domainBlock.classList.remove('lm-drag-over-top');
+      }
+    };
+
+    domainBlock.ondragleave = function(e) {
+      if (domainBlock.contains(e.relatedTarget)) return;
+      domainBlock.classList.remove('lm-drag-over-top', 'lm-drag-over-bottom');
+    };
+
+    domainBlock.ondrop = function(e) {
+      if (currentDragType !== 'domain' || currentDraggedEl === domainBlock) return;
+      e.preventDefault();
+      e.stopPropagation();
+      domainBlock.classList.remove('lm-drag-over-top', 'lm-drag-over-bottom');
+
+      const prevModuleCard = dragSourceParent ? dragSourceParent.closest('.lm-module-card') : null;
+      const targetModuleCard = domainBlock.closest('.lm-module-card');
+      const prevModuleId = prevModuleCard ? prevModuleCard.getAttribute('data-module-id') : null;
+      const targetModuleId = targetModuleCard ? targetModuleCard.getAttribute('data-module-id') : null;
+
+      const rect = domainBlock.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      if (e.clientY < mid) {
+        domainBlock.parentNode.insertBefore(currentDraggedEl, domainBlock);
+      } else {
+        domainBlock.parentNode.insertBefore(currentDraggedEl, domainBlock.nextSibling);
+      }
+
+      currentDraggedEl.setAttribute('data-module-id', targetModuleId);
+      saveDomainOrder(targetModuleId, prevModuleId);
+    };
+  });
+
+  tree.querySelectorAll('[id^="module-domains-"]').forEach(container => {
+    container.ondragover = function(e) {
+      if (currentDragType !== 'domain') return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      container.classList.add('lm-drag-over-container');
+    };
+
+    container.ondragleave = function(e) {
+      if (container.contains(e.relatedTarget)) return;
+      container.classList.remove('lm-drag-over-container');
+    };
+
+    container.ondrop = function(e) {
+      if (currentDragType !== 'domain' || !currentDraggedEl) return;
+      if (e.target.closest('.lm-domain-block')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      container.classList.remove('lm-drag-over-container');
+
+      const prevModuleCard = dragSourceParent ? dragSourceParent.closest('.lm-module-card') : null;
+      const targetModuleCard = container.closest('.lm-module-card');
+      const prevModuleId = prevModuleCard ? prevModuleCard.getAttribute('data-module-id') : null;
+      const targetModuleId = targetModuleCard ? targetModuleCard.getAttribute('data-module-id') : null;
+
+      const addBtn = container.querySelector('.lm-add-domain-btn');
+      if (addBtn) {
+        container.insertBefore(currentDraggedEl, addBtn);
+      } else {
+        container.appendChild(currentDraggedEl);
+      }
+
+      currentDraggedEl.setAttribute('data-module-id', targetModuleId);
+      saveDomainOrder(targetModuleId, prevModuleId);
+    };
+  });
+}
+
+function saveDomainOrder(targetModuleId, prevModuleId) {
+  const container = document.getElementById(`module-domains-${targetModuleId}`);
+  if (!container) return;
+
+  const domainBlocks = container.querySelectorAll('.lm-domain-block');
+  const order = [];
+  domainBlocks.forEach(b => {
+    const id = b.getAttribute('data-domain-id');
+    if (id) order.push(id);
+  });
+
+  const targetBadge = document.querySelector(`#module-card-${targetModuleId} .lm-count-badge`);
+  if (targetBadge) targetBadge.textContent = `${domainBlocks.length}D`;
+  if (prevModuleId && prevModuleId !== targetModuleId) {
+    const prevContainer = document.getElementById(`module-domains-${prevModuleId}`);
+    const prevCount = prevContainer ? prevContainer.querySelectorAll('.lm-domain-block').length : 0;
+    const prevBadge = document.querySelector(`#module-card-${prevModuleId} .lm-count-badge`);
+    if (prevBadge) prevBadge.textContent = `${prevCount}D`;
+  }
+
+  fetch('/en/accounts/learning-manager/domain/reorder/', {
+    method: 'POST',
+    body: JSON.stringify({ order: order, module_id: targetModuleId }),
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCsrfToken()
+    }
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (res.ok) {
+        showToast('Domain order updated!');
+      } else {
+        showToast(res.error || 'Failed to reorder domains.', 'err');
+      }
+    })
+    .catch(() => showToast('Network error while saving domain order.', 'err'));
+}
+
+
+/* 3. Topic Drag & Drop */
+function initTopicDragAndDrop() {
+  const tree = document.getElementById('lm-tree');
+  if (!tree) return;
+
+  tree.querySelectorAll('.lm-topic-item').forEach(topicItem => {
+    topicItem.setAttribute('draggable', 'true');
+
+    topicItem.ondragstart = function(e) {
+      if (e.target.closest('.lm-actions, .btn, input, textarea, select')) {
+        return;
+      }
+      e.stopPropagation();
+      currentDragType = 'topic';
+      currentDraggedEl = topicItem;
+      dragSourceParent = topicItem.closest('.lm-topics-list');
+      topicItem.classList.add('lm-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', 'topic:' + topicItem.getAttribute('data-topic-id'));
+    };
+
+    topicItem.ondragend = function(e) {
+      e.stopPropagation();
+      clearAllDragStates();
+    };
+
+    topicItem.ondragover = function(e) {
+      if (currentDragType !== 'topic' || currentDraggedEl === topicItem) return;
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = 'move';
+      const rect = topicItem.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      if (e.clientY < mid) {
+        topicItem.classList.add('lm-drag-over-top');
+        topicItem.classList.remove('lm-drag-over-bottom');
+      } else {
+        topicItem.classList.add('lm-drag-over-bottom');
+        topicItem.classList.remove('lm-drag-over-top');
+      }
+    };
+
+    topicItem.ondragleave = function(e) {
+      if (topicItem.contains(e.relatedTarget)) return;
+      topicItem.classList.remove('lm-drag-over-top', 'lm-drag-over-bottom');
+    };
+
+    topicItem.ondrop = function(e) {
+      if (currentDragType !== 'topic' || currentDraggedEl === topicItem) return;
+      e.preventDefault();
+      e.stopPropagation();
+      topicItem.classList.remove('lm-drag-over-top', 'lm-drag-over-bottom');
+
+      const prevDomainBlock = dragSourceParent ? dragSourceParent.closest('.lm-domain-block') : null;
+      const targetDomainBlock = topicItem.closest('.lm-domain-block');
+      const prevDomainId = prevDomainBlock ? prevDomainBlock.getAttribute('data-domain-id') : null;
+      const targetDomainId = targetDomainBlock ? targetDomainBlock.getAttribute('data-domain-id') : null;
+
+      const rect = topicItem.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      if (e.clientY < mid) {
+        topicItem.parentNode.insertBefore(currentDraggedEl, topicItem);
+      } else {
+        topicItem.parentNode.insertBefore(currentDraggedEl, topicItem.nextSibling);
+      }
+
+      currentDraggedEl.setAttribute('data-domain-id', targetDomainId);
+      saveTopicOrder(targetDomainId, prevDomainId);
+    };
+  });
+
+  tree.querySelectorAll('.lm-topics-list').forEach(list => {
+    list.ondragover = function(e) {
+      if (currentDragType !== 'topic') return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      list.classList.add('lm-drag-over-container');
+    };
+
+    list.ondragleave = function(e) {
+      if (list.contains(e.relatedTarget)) return;
+      list.classList.remove('lm-drag-over-container');
+    };
+
+    list.ondrop = function(e) {
+      if (currentDragType !== 'topic' || !currentDraggedEl) return;
+      if (e.target.closest('.lm-topic-item')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      list.classList.remove('lm-drag-over-container');
+
+      const prevDomainBlock = dragSourceParent ? dragSourceParent.closest('.lm-domain-block') : null;
+      const targetDomainBlock = list.closest('.lm-domain-block');
+      const prevDomainId = prevDomainBlock ? prevDomainBlock.getAttribute('data-domain-id') : null;
+      const targetDomainId = targetDomainBlock ? targetDomainBlock.getAttribute('data-domain-id') : null;
+
+      const addRow = list.querySelector('.lm-add-topic-row');
+      if (addRow) {
+        list.insertBefore(currentDraggedEl, addRow);
+      } else {
+        list.appendChild(currentDraggedEl);
+      }
+
+      currentDraggedEl.setAttribute('data-domain-id', targetDomainId);
+      saveTopicOrder(targetDomainId, prevDomainId);
+    };
+  });
+}
+
+function saveTopicOrder(targetDomainId, prevDomainId) {
+  const list = document.getElementById(`domain-topics-${targetDomainId}`);
+  if (!list) return;
+
+  const topicItems = list.querySelectorAll('.lm-topic-item');
+  const order = [];
+  topicItems.forEach(t => {
+    const id = t.getAttribute('data-topic-id');
+    if (id) order.push(id);
+  });
+
+  fetch('/en/accounts/learning-manager/topic/reorder/', {
+    method: 'POST',
+    body: JSON.stringify({ order: order, domain_id: targetDomainId }),
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCsrfToken()
+    }
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (res.ok) {
+        showToast('Topic order updated!');
+      } else {
+        showToast(res.error || 'Failed to reorder topics.', 'err');
+      }
+    })
+    .catch(() => showToast('Network error while saving topic order.', 'err'));
+}
+
+/* Master initializer */
+function initAllDragAndDrop() {
+  initModuleDragAndDrop();
+  initDomainDragAndDrop();
+  initTopicDragAndDrop();
+}
+
+// Initialize drag and drop on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initAllDragAndDrop();
+});
 </script>
 
 {% endblock %}

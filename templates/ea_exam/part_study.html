@@ -124,13 +124,126 @@
   {% endfor %}
 
   {% include "ea_exam/snippets/create_session_modal.html" %}
-  
+
+  <!-- ── RESOURCES MODAL ── -->
+<div class="modal fade" id="resourcesModal" tabindex="-1" aria-labelledby="resourcesModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content uea-theme border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+
+      <!-- Header -->
+      <div class="modal-header border-bottom-0 pb-2" style="background: linear-gradient(135deg, #0A1128 0%, #1a2f5e 100%); color: #fff;">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center;">
+            <i class="fas fa-folder-open" style="font-size: 18px; color: #fbbf24;"></i>
+          </div>
+          <div>
+            <h5 class="modal-title fw-bold mb-0 text-white" id="resourcesModalLabel">Learning Resources</h5>
+            <div class="text-white-50" id="resourcesTopicName" style="font-size: 12px; margin-top: 2px;"></div>
+          </div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body p-4">
+        <!-- Loading spinner -->
+        <div id="resourcesSpinner" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status" style="width: 2rem; height: 2rem;">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <div class="text-muted mt-2 small">Loading resources…</div>
+        </div>
+
+        <!-- Empty state -->
+        <div id="resourcesEmpty" class="text-center py-5 d-none">
+          <div style="width: 60px; height: 60px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+            <i class="fas fa-folder-open" style="font-size: 24px; color: #94a3b8;"></i>
+          </div>
+          <div class="fw-bold text-navy mb-1">No Resources Yet</div>
+          <div class="text-muted small">No materials have been uploaded for this topic.</div>
+        </div>
+
+        <!-- Resource list -->
+        <div id="resourcesList" class="d-none">
+          <div class="mb-3 d-flex align-items-center justify-content-between">
+            <span class="text-muted small" id="resourcesCount"></span>
+          </div>
+          <div id="resourcesItems" class="d-flex flex-column gap-2"></div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer border-top-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+  <!-- ── E-BOOKS LIST MODAL ── -->
+<div class="modal fade" id="ebookListModal" tabindex="-1" aria-labelledby="ebookListModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content uea-theme border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+
+      <!-- Header -->
+      <div class="modal-header border-bottom-0 pb-2" style="background: linear-gradient(135deg, #0A1128 0%, #1a2f5e 100%); color: #fff;">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center;">
+            <i class="fas fa-book-open" style="font-size: 18px; color: #60a5fa;"></i>
+          </div>
+          <div>
+            <h5 class="modal-title fw-bold mb-0 text-white" id="ebookListModalLabel">Topic E-Books &amp; Documents</h5>
+            <div class="text-white-50" id="ebooksTopicName" style="font-size: 12px; margin-top: 2px;"></div>
+          </div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body p-4">
+        <!-- Loading spinner -->
+        <div id="ebooksSpinner" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status" style="width: 2rem; height: 2rem;">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <div class="text-muted mt-2 small">Loading E-Books…</div>
+        </div>
+
+        <!-- Empty state -->
+        <div id="ebooksEmpty" class="text-center py-5 d-none">
+          <div style="width: 60px; height: 60px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+            <i class="fas fa-book-open" style="font-size: 24px; color: #94a3b8;"></i>
+          </div>
+          <div class="fw-bold text-navy mb-1">No E-Books Yet</div>
+          <div class="text-muted small">No E-Book documents have been uploaded for this topic.</div>
+        </div>
+
+        <!-- Ebook list -->
+        <div id="ebooksList" class="d-none">
+          <div class="mb-3 d-flex align-items-center justify-content-between">
+            <span class="text-muted small" id="ebooksCount"></span>
+          </div>
+          <div id="ebooksItems" class="d-flex flex-column gap-2"></div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer border-top-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
   <!-- Secure PDF Viewer Modal -->
+
 <div class="modal fade" id="pdfViewerModal" tabindex="-1" aria-labelledby="pdfViewerModalLabel" aria-hidden="true" data-bs-backdrop="static">
   <div class="modal-dialog modal-fullscreen">
     <div class="modal-content uea-theme bg-light">
       <div class="modal-header border-bottom-0 shadow-sm d-flex align-items-center justify-content-between" style="z-index: 10;">
-        <h5 class="modal-title fw-bold" id="pdfViewerModalLabel"><i class="fas fa-file-alt text-primary me-2"></i><span id="pdfModalTitle">Question Viewer</span></h5>
+        <h5 class="modal-title fw-bold" id="pdfViewerModalLabel"><i class="fas fa-book-open text-primary me-2"></i><span id="pdfModalTitle">E-Book Viewer</span></h5>
         <div class="d-flex align-items-center gap-3">
           <a href="#" id="pdfDownloadBtn" class="btn btn-outline-success btn-sm px-3 fw-bold" target="_blank" download>
             <i class="fas fa-download me-1"></i> Download
@@ -154,8 +267,9 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-0 bg-black">
-        <div class="ratio ratio-16x9">
+        <div class="ratio ratio-16x9 position-relative">
           <iframe id="videoIframe" src="" title="Lecture Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="border: none;"></iframe>
+          <video id="html5VideoPlayer" controls autoplay style="display:none; width: 100%; height: 100%; object-fit: contain; background: #000;"></video>
         </div>
       </div>
     </div>
@@ -214,6 +328,211 @@
 
 {% block js %}
 <script>
+
+// ── Resources Modal ─────────────────────────────────────────────────────────
+const RESOURCES_JSON_URL_TPL = "{% url 'topic_resources_json' topic_id=999999 %}";
+
+function openResourcesModal(topicId, topicName) {
+  // Reset state
+  document.getElementById('resourcesTopicName').textContent = topicName;
+  document.getElementById('resourcesSpinner').classList.remove('d-none');
+  document.getElementById('resourcesEmpty').classList.add('d-none');
+  document.getElementById('resourcesList').classList.add('d-none');
+  document.getElementById('resourcesItems').innerHTML = '';
+
+  // Show modal
+  var modal = new bootstrap.Modal(document.getElementById('resourcesModal'));
+  modal.show();
+
+  // Fetch resources
+  fetch(RESOURCES_JSON_URL_TPL.replace('999999', topicId), {
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('resourcesSpinner').classList.add('d-none');
+    const resources = data.resources || [];
+
+    if (resources.length === 0) {
+      document.getElementById('resourcesEmpty').classList.remove('d-none');
+    } else {
+      document.getElementById('resourcesCount').textContent =
+        resources.length + ' material' + (resources.length !== 1 ? 's' : '') + ' available';
+
+      const typeLabels = {
+        pdf: 'PDF', excel: 'Excel', ppt: 'PowerPoint', word: 'Word', text: 'Text', other: 'File'
+      };
+      const typeBadgeColors = {
+        pdf: '#ef4444', excel: '#22c55e', ppt: '#f59e0b', word: '#3b82f6', text: '#64748b', other: '#94a3b8'
+      };
+
+      const container = document.getElementById('resourcesItems');
+      resources.forEach(r => {
+        const badgeColor = typeBadgeColors[r.resource_type] || '#94a3b8';
+        const typeLabel  = typeLabels[r.resource_type]    || 'File';
+
+        const isPdf = r.resource_type === 'pdf';
+        const viewUrl     = r.view_url;
+        const downloadUrl = r.view_url + '?download=1';
+
+        const card = document.createElement('div');
+        card.style.cssText = `
+          display:flex; align-items:center; gap:16px;
+          padding:14px 18px; border-radius:12px;
+          border:1.5px solid #e2e8f0; background:#fff;
+          transition: box-shadow .15s ease;
+        `;
+        card.onmouseenter = () => card.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
+        card.onmouseleave = () => card.style.boxShadow = 'none';
+
+        card.innerHTML = `
+          <div style="width:44px;height:44px;border-radius:10px;background:${badgeColor}18;
+                      display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="${r.icon_class}" style="font-size:20px;"></i>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div class="fw-bold text-navy text-truncate" style="font-size:14px;">${r.title}</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:3px;">
+              <span style="background:${badgeColor}18;color:${badgeColor};font-weight:700;font-size:10px;
+                           padding:2px 7px;border-radius:20px;margin-right:6px;">${typeLabel}</span>
+              ${r.original_filename}
+              ${r.file_size_display ? '&bull; ' + r.file_size_display : ''}
+            </div>
+          </div>
+          <div class="d-flex gap-2 flex-shrink-0">
+            ${isPdf ? `
+              <a href="${viewUrl}" target="_blank"
+                 class="btn btn-sm fw-bold rounded-pill px-3"
+                 style="background:#0A1128;color:#fff;font-size:12px;">
+                <i class="fas fa-eye me-1"></i>View
+              </a>` : ''}
+            <a href="${downloadUrl}"
+               class="btn btn-sm fw-bold rounded-pill px-3"
+               style="background:#10b981;color:#fff;font-size:12px;">
+              <i class="fas fa-download me-1"></i>Download
+            </a>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('resourcesList').classList.remove('d-none');
+    }
+  })
+  .catch(err => {
+    document.getElementById('resourcesSpinner').classList.add('d-none');
+    document.getElementById('resourcesEmpty').classList.remove('d-none');
+    document.getElementById('resourcesEmpty').querySelector('.text-muted').textContent =
+      'Failed to load resources. Please try again.';
+    console.error('Resources fetch error:', err);
+  });
+}
+// ── E-Books Modal ───────────────────────────────────────────────────────────
+const EBOOKS_JSON_URL_TPL = "{% url 'topic_ebooks_json' topic_id=999999 %}";
+
+function openEbooksModal(topicId, topicName) {
+  document.getElementById('ebooksTopicName').textContent = topicName;
+  document.getElementById('ebooksSpinner').classList.remove('d-none');
+  document.getElementById('ebooksEmpty').classList.add('d-none');
+  document.getElementById('ebooksList').classList.add('d-none');
+  document.getElementById('ebooksItems').innerHTML = '';
+
+  var modal = new bootstrap.Modal(document.getElementById('ebookListModal'));
+  modal.show();
+
+  fetch(EBOOKS_JSON_URL_TPL.replace('999999', topicId), {
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('ebooksSpinner').classList.add('d-none');
+    const ebooks = data.ebooks || [];
+
+    if (ebooks.length === 0) {
+      document.getElementById('ebooksEmpty').classList.remove('d-none');
+    } else {
+      document.getElementById('ebooksCount').textContent =
+        ebooks.length + ' document' + (ebooks.length !== 1 ? 's' : '') + ' available';
+
+      const container = document.getElementById('ebooksItems');
+      ebooks.forEach(eb => {
+        const card = document.createElement('div');
+        card.style.cssText = `
+          display:flex; align-items:center; gap:16px;
+          padding:14px 18px; border-radius:12px;
+          border:1.5px solid #e2e8f0; background:#fff;
+          transition: box-shadow .15s ease;
+        `;
+        card.onmouseenter = () => card.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
+        card.onmouseleave = () => card.style.boxShadow = 'none';
+
+        const safeTitle = (eb.title || 'Document').replace(/'/g, "\\'");
+        const badgeColor = eb.color || '#ef4444';
+        const typeLabel = eb.label || 'File';
+        const iconClass = eb.icon || 'fas fa-file';
+        const isPdf = eb.can_preview || (eb.ext === 'pdf');
+
+        card.innerHTML = `
+          <div style="width:44px;height:44px;border-radius:10px;background:${badgeColor}18;
+                      display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="${iconClass}" style="font-size:22px;color:${badgeColor};"></i>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div class="fw-bold text-navy text-truncate" style="font-size:14px;">${eb.title}</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:3px;">
+              <span style="background:${badgeColor}18;color:${badgeColor};font-weight:700;font-size:10px;
+                           padding:2px 7px;border-radius:20px;margin-right:6px;">${typeLabel}</span>
+              ${eb.is_main ? 'Primary Document' : 'Study Material'}
+            </div>
+          </div>
+          <div class="d-flex gap-2 flex-shrink-0">
+            ${isPdf ? `
+              <button type="button" class="btn btn-sm fw-bold rounded-pill px-3"
+                      style="background:#0A1128;color:#fff;font-size:12px;"
+                      onclick="viewEbookPdf('${eb.view_url}', '${safeTitle}')">
+                <i class="fas fa-book-open me-1"></i> Read
+              </button>
+            ` : ''}
+            <a href="${eb.download_url}"
+               class="btn btn-sm fw-bold rounded-pill px-3"
+               style="background:#10b981;color:#fff;font-size:12px;" download>
+              <i class="fas fa-download me-1"></i> Download
+            </a>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('ebooksList').classList.remove('d-none');
+    }
+  })
+  .catch(err => {
+    document.getElementById('ebooksSpinner').classList.add('d-none');
+    document.getElementById('ebooksEmpty').classList.remove('d-none');
+    document.getElementById('ebooksEmpty').querySelector('.text-muted').textContent =
+      'Failed to load E-Books. Please try again.';
+    console.error('E-Books fetch error:', err);
+  });
+}
+
+function viewEbookPdf(url, title) {
+  const listModalEl = document.getElementById('ebookListModal');
+  const listModal = bootstrap.Modal.getInstance(listModalEl);
+  if (listModal) listModal.hide();
+
+  const pdfTitle = document.getElementById('pdfModalTitle');
+  const pdfIframe = document.getElementById('pdfIframe');
+  const pdfDownloadBtn = document.getElementById('pdfDownloadBtn');
+  
+  if (pdfTitle) pdfTitle.textContent = title;
+  if (pdfIframe) pdfIframe.src = url + "#toolbar=0&navpanes=0&scrollbar=0";
+  if (pdfDownloadBtn) pdfDownloadBtn.href = url + (url.indexOf('?') !== -1 ? '&' : '?') + 'download=1';
+
+  var pdfModal = new bootstrap.Modal(document.getElementById('pdfViewerModal'));
+  pdfModal.show();
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 function toggleDomain(domainId) {
   var body = document.getElementById('domain-body-' + domainId);
   var chevron = document.getElementById('chevron-' + domainId);
@@ -227,11 +546,40 @@ function toggleDomain(domainId) {
 }
 
 function toggleReadStatus(topicId, iconEl) {
-  const isRead = iconEl.classList.contains('far'); // if far, we are marking as read
-  
+  // Determine target state
+  const willBeRead = iconEl.classList.contains('far');
+  const topicName = document.getElementById('topic-name-' + topicId);
+  const statusDot = document.getElementById('status-dot-' + topicId);
+
+  // 1. INSTANT UI UPDATE (0ms delay)
+  if (willBeRead) {
+    iconEl.classList.remove('far', 'text-muted');
+    iconEl.classList.add('fas', 'text-primary');
+    iconEl.setAttribute('title', 'Mark as Unread');
+    if (topicName) topicName.classList.add('text-decoration-line-through', 'opacity-50');
+    if (statusDot) {
+      statusDot.style.background = 'var(--ec-emerald)';
+      statusDot.style.borderColor = 'var(--ec-emerald)';
+    }
+  } else {
+    iconEl.classList.remove('fas', 'text-primary');
+    iconEl.classList.add('far', 'text-muted');
+    iconEl.setAttribute('title', 'Mark as Read');
+    if (topicName) topicName.classList.remove('text-decoration-line-through', 'opacity-50');
+    if (statusDot) {
+      statusDot.style.background = 'var(--ec-gray-light)';
+      statusDot.style.borderColor = 'var(--ec-gray)';
+    }
+  }
+
+  // Tactile click pop effect
+  iconEl.style.transform = 'scale(1.25)';
+  setTimeout(() => { iconEl.style.transform = 'scale(1)'; }, 150);
+
+  // 2. Background AJAX update
   const formData = new FormData();
   formData.append('topic_id', topicId);
-  formData.append('is_read', isRead);
+  formData.append('is_read', willBeRead);
   formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
   fetch('{% url "toggle_topic_read_status" %}', {
@@ -241,19 +589,29 @@ function toggleReadStatus(topicId, iconEl) {
   })
   .then(r => r.json())
   .then(data => {
-    if (data.status === 'ok') {
-      const topicName = document.getElementById('topic-name-' + topicId);
-      if (data.is_read) {
-        iconEl.classList.remove('far', 'text-muted');
-        iconEl.classList.add('fas', 'text-primary');
-        if (topicName) topicName.classList.add('text-decoration-line-through', 'opacity-50');
-      } else {
-        iconEl.classList.remove('fas', 'text-primary');
-        iconEl.classList.add('far', 'text-muted');
-        if (topicName) topicName.classList.remove('text-decoration-line-through', 'opacity-50');
-      }
+    if (data.status !== 'ok') {
+      revertReadState(topicId, iconEl, !willBeRead);
     }
+  })
+  .catch(() => {
+    revertReadState(topicId, iconEl, !willBeRead);
   });
+}
+
+function revertReadState(topicId, iconEl, wasRead) {
+  const topicName = document.getElementById('topic-name-' + topicId);
+  const statusDot = document.getElementById('status-dot-' + topicId);
+  if (wasRead) {
+    iconEl.classList.remove('far', 'text-muted');
+    iconEl.classList.add('fas', 'text-primary');
+    if (topicName) topicName.classList.add('text-decoration-line-through', 'opacity-50');
+    if (statusDot) statusDot.style.background = 'var(--ec-emerald)';
+  } else {
+    iconEl.classList.remove('fas', 'text-primary');
+    iconEl.classList.add('far', 'text-muted');
+    if (topicName) topicName.classList.remove('text-decoration-line-through', 'opacity-50');
+    if (statusDot) statusDot.style.background = 'var(--ec-gray-light)';
+  }
 }
 
 // Set chevron for first domain (already open)
@@ -298,35 +656,55 @@ document.addEventListener("DOMContentLoaded", function() {
     // Video modal handling
     var videoModal = document.getElementById('videoPlayerModal');
     var videoIframe = document.getElementById('videoIframe');
+    var html5Video = document.getElementById('html5VideoPlayer');
     var videoTitle = document.getElementById('videoModalTitle');
 
     if (videoModal) {
         videoModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
-            var rawUrl = button.getAttribute('data-video-url');
-            var title = button.getAttribute('data-video-title');
-            if (videoTitle) videoTitle.textContent = title;
+            var rawUrl = (button ? button.getAttribute('data-video-url') || '' : '').trim();
+            var title = button ? button.getAttribute('data-video-title') : '';
+            if (videoTitle) videoTitle.textContent = title || 'Lecture Video';
             
-            // Helper to parse youtube URLs to embed format
-            let embedUrl = rawUrl;
-            if (rawUrl) {
-                let videoId = '';
-                if (rawUrl.indexOf('watch?v=') !== -1) {
-                    videoId = rawUrl.split('v=')[1].split('&')[0];
-                } else if (rawUrl.indexOf('youtu.be/') !== -1) {
-                    videoId = rawUrl.split('youtu.be/')[1].split('?')[0];
-                } else if (rawUrl.indexOf('youtube.com/embed/') !== -1) {
-                    videoId = rawUrl.split('youtube.com/embed/')[1].split('?')[0];
+            if (!rawUrl) {
+                if (videoIframe) { videoIframe.style.display = 'none'; videoIframe.src = 'about:blank'; }
+                if (html5Video) { html5Video.style.display = 'none'; html5Video.pause(); }
+                return;
+            }
+
+            // Check if it is a direct video file
+            var isFile = /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(rawUrl) || rawUrl.startsWith('/media/');
+            if (isFile) {
+                if (videoIframe) { videoIframe.style.display = 'none'; videoIframe.src = 'about:blank'; }
+                if (html5Video) {
+                    html5Video.style.display = 'block';
+                    html5Video.src = rawUrl;
+                    html5Video.play().catch(function(){});
                 }
-                
-                if (videoId) {
-                    embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&enablejsapi=1&rel=0&modestbranding=1';
+            } else {
+                if (html5Video) { html5Video.style.display = 'none'; html5Video.pause(); html5Video.src = ''; }
+                if (videoIframe) {
+                    videoIframe.style.display = 'block';
+                    let embedUrl = rawUrl;
+                    
+                    // YouTube formats (watch, youtu.be, embed, shorts, live)
+                    let ytMatch = rawUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/|live\/))([\w-]{11})/);
+                    if (ytMatch && ytMatch[1]) {
+                        embedUrl = 'https://www.youtube.com/embed/' + ytMatch[1] + '?autoplay=1&enablejsapi=1&rel=0&modestbranding=1';
+                    } else {
+                        // Vimeo format
+                        let vimeoMatch = rawUrl.match(/(?:vimeo\.com\/)(?:video\/)?([0-9]+)/);
+                        if (vimeoMatch && vimeoMatch[1]) {
+                            embedUrl = 'https://player.vimeo.com/video/' + vimeoMatch[1] + '?autoplay=1';
+                        }
+                    }
+                    videoIframe.src = embedUrl;
                 }
             }
-            if (videoIframe) videoIframe.src = embedUrl;
         });
         videoModal.addEventListener('hidden.bs.modal', function () {
             if (videoIframe) videoIframe.src = "about:blank";
+            if (html5Video) { html5Video.pause(); html5Video.src = ''; }
         });
     }
 });

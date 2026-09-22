@@ -34,9 +34,9 @@ from .views import (
 )
 from .views_content_manager import (
     learning_manager,
-    module_add, module_save, module_delete,
-    domain_add, domain_save, domain_delete,
-    topic_editor, topic_editor_new, topic_save, topic_create, topic_delete,
+    module_add, module_save, module_delete, module_reorder,
+    domain_add, domain_save, domain_delete, domain_reorder,
+    topic_editor, topic_editor_new, topic_save, topic_create, topic_delete, topic_ebook_delete, topic_reorder,
 )
 
 
@@ -104,17 +104,21 @@ urlpatterns = [
     path("learning-manager/",                              learning_manager,    name="learning_manager"),
     # Module CRUD
     path("learning-manager/module/add/",                  module_add,          name="lm_module_add"),
+    path("learning-manager/module/reorder/",              module_reorder,      name="lm_module_reorder"),
     path("learning-manager/module/<int:pk>/save/",        module_save,         name="lm_module_save"),
     path("learning-manager/module/<int:pk>/delete/",      module_delete,       name="lm_module_delete"),
     # Domain CRUD
     path("learning-manager/domain/add/",                  domain_add,          name="lm_domain_add"),
+    path("learning-manager/domain/reorder/",              domain_reorder,      name="lm_domain_reorder"),
     path("learning-manager/domain/<int:pk>/save/",        domain_save,         name="lm_domain_save"),
     path("learning-manager/domain/<int:pk>/delete/",      domain_delete,       name="lm_domain_delete"),
     # Topic CRUD
     path("learning-manager/topic/new/",                   topic_editor_new,    name="lm_topic_new"),
     path("learning-manager/topic/create/",                topic_create,        name="lm_topic_create"),
+    path("learning-manager/topic/reorder/",               topic_reorder,       name="lm_topic_reorder"),
     path("learning-manager/topic/<int:pk>/",              topic_editor,        name="lm_topic_editor"),
     path("learning-manager/topic/<int:pk>/save/",         topic_save,          name="lm_topic_save"),
     path("learning-manager/topic/<int:pk>/delete/",       topic_delete,        name="lm_topic_delete"),
+    path("learning-manager/topic/ebook/<int:file_id>/delete/", topic_ebook_delete, name="lm_topic_ebook_delete"),
 ]
 

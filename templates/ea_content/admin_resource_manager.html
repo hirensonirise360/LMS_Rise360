@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Topic Resource Manager | RISE360 Institute{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4" style="max-width: 1200px;">
+
+  <!-- ── Header ── -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; color: #64748b;">Admin Panel</div>
+      <h4 class="fw-bold mb-0" style="color: #0A1128;">
+        <i class="fas fa-folder-open text-warning me-2"></i>Topic Resource Manager
+      </h4>
+      <div class="text-muted small mt-1">Upload, rename, and delete supplementary learning materials per topic. Files are stored securely in Supabase Storage.</div>
+    </div>
+    <a href="{% url 'admin_panel' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-4 fw-bold">
+      <i class="fas fa-arrow-left me-1"></i> Back to Admin
+    </a>
+  </div>
+
+  {% include 'snippets/messages.html' %}
+
+  <!-- ── Bucket Info Bar ── -->
+  <div class="alert border-0 mb-4 d-flex align-items-center gap-3" style="background: #f0fdf4; border-radius: 12px;">
+    <i class="fas fa-cloud text-success fs-5"></i>
+    <div class="small">
+      <strong>Supabase Bucket:</strong> <code>topic-resources</code> &bull;
+      <strong>Path format:</strong> <code>topic_resources/{part}/{domain}/{topic_id}/{filename}</code>
+    </div>
+  </div>
+
+  <!-- ── Filters ── -->
+  <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+    <div class="card-body py-3 px-4">
+      <form method="get" class="d-flex gap-3 flex-wrap align-items-end">
+        <div>
+          <label class="form-label fw-bold small mb-1">Part / Module</label>
+          <select name="part" class="form-select form-select-sm" style="min-width: 160px;" onchange="this.form.submit()">
+            <option value="">All Parts</option>
+            {% for part in parts %}
+            <option value="{{ part.number }}" {% if part_filter == part.number|stringformat:"s" %}selected{% endif %}>
+              {{ part.name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="form-label fw-bold small mb-1">Domain</label>
+          <select name="domain" class="form-select form-select-sm" style="min-width: 200px;" onchange="this.form.submit()">
+            <option value="">All Domains</option>
+            {% for domain in domains %}
+            <option value="{{ domain.id }}" {% if domain_filter == domain.id|stringformat:"s" %}selected{% endif %}>
+              {{ domain.part.name }} &rsaquo; {{ domain.name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        {% if part_filter or domain_filter %}
+        <a href="{% url 'admin_resource_manager' %}" class="btn btn-outline-danger btn-sm rounded-pill align-self-end px-3 fw-bold">
+          <i class="fas fa-times me-1"></i>Clear
+        </a>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Topics Grouped by Part then Domain ── -->
+  {% for part, domains_dict in grouped.items %}
+  <div class="mb-4">
+    <!-- Part Header -->
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <div class="fw-bold text-white px-3 py-1 rounded-pill small" style="background: #0A1128;">
+        <i class="fas fa-layer-group me-1"></i>{{ part.name }}
+      </div>
+      <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
+    </div>
+
+    {% for domain, topics in domains_dict.items %}
+    <div class="card border-0 shadow-sm mb-3" style="border-radius: 12px; overflow: hidden;">
+
+      <!-- Domain Header (accordion) -->
+      <div class="card-header bg-light border-0 py-3 px-4 d-flex align-items-center justify-content-between"
+           style="cursor: pointer;" onclick="toggleAdminDomain('{{ domain.id }}')">
+        <div class="d-flex align-items-center gap-2">
+          <i class="fas fa-sitemap text-primary"></i>
+          <span class="fw-bold text-navy" style="font-size: 14px;">{{ domain.name }}</span>
+          <span class="badge bg-secondary-subtle text-secondary ms-1" style="font-size: 11px;">
+            {{ topics|length }} topic{{ topics|length|pluralize }}
+          </span>
+        </div>
+        <i class="fas fa-chevron-down text-muted" id="admin-chevron-{{ domain.id }}"
+           style="transition: transform .2s ease;"></i>
+      </div>
+
+      <!-- Domain Body -->
+      <div id="admin-domain-{{ domain.id }}" style="display: none;">
+        {% for topic in topics %}
+        <div class="px-4 py-4 border-top" id="topic-{{ topic.id }}">
+          <div class="d-flex align-items-start justify-content-between gap-4 flex-wrap">
+
+            <!-- LEFT: Topic info + existing resources -->
+            <div style="flex: 1; min-width: 300px;">
+              <div class="fw-bold mb-2" style="font-size: 14px; color: #0A1128;">
+                {{ topic.name }}
+                {% with rc=topic.resources.count %}
+                <span class="badge ms-2" style="background: {% if rc > 0 %}#dcfce7;color:#16a34a{% else %}#f1f5f9;color:#64748b{% endif %}; font-size: 10px;">
+                  {{ rc }} resource{{ rc|pluralize }}
+                </span>
+                {% endwith %}
+              </div>
+
+              {% if topic.resources.all %}
+              <div class="d-flex flex-column gap-2">
+                {% for resource in topic.resources.all %}
+                <div class="d-flex align-items-center gap-3 p-2 rounded-3"
+                     style="border: 1.5px solid #e2e8f0; background: #fafafa;">
+
+                  <!-- Type icon -->
+                  <i class="{{ resource.icon_class }}" style="font-size: 20px; flex-shrink: 0;"></i>
+
+                  <!-- Title (rename-in-place) + meta -->
+                  <div style="flex: 1; min-width: 0;">
+                    <form method="post" action="{% url 'admin_resource_rename' resource.id %}"
+                          id="rename-form-{{ resource.id }}"
+                          class="d-flex align-items-center gap-1">
+                      {% csrf_token %}
+                      <input type="text" name="title" value="{{ resource.title }}"
+                             class="form-control form-control-sm border-0 bg-transparent fw-bold px-1"
+                             style="font-size: 13px; color: #0A1128; max-width: 260px;"
+                             title="Edit title and press Enter to save"
+                             onkeydown="if(event.key==='Enter'){event.preventDefault();this.form.submit();}">
+                      <button type="submit" class="btn btn-link btn-sm p-0 text-primary ms-1" title="Save rename">
+                        <i class="fas fa-check" style="font-size: 11px;"></i>
+                      </button>
+                    </form>
+                    <div class="text-muted mt-1" style="font-size: 10px; line-height: 1.4;">
+                      <span class="badge me-1"
+                            style="font-size: 9px; background: #f1f5f9; color: #64748b; border-radius: 4px;">
+                        {{ resource.get_resource_type_display }}
+                      </span>
+                      {{ resource.original_filename }} &bull; {{ resource.file_size_display }}
+                      &bull; {{ resource.uploaded_at|date:"M d, Y" }}
+                    </div>
+                    <div class="mt-1" style="font-size: 9px; color: #94a3b8;">
+                      <i class="fas fa-database me-1"></i><code>{{ resource.supabase_path }}</code>
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="d-flex gap-1 flex-shrink-0">
+                    <a href="{% url 'serve_topic_resource' resource.id %}?download=1"
+                       class="btn btn-outline-success btn-sm" title="Download file">
+                      <i class="fas fa-download"></i>
+                    </a>
+                    <form method="post" action="{% url 'admin_resource_delete' resource.id %}" class="d-inline"
+                          onsubmit="return confirm('Permanently delete \'{{ resource.title|escapejs }}\' from the bucket?');">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete">
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              {% else %}
+              <div class="text-muted small fst-italic">No resources yet — upload using the form.</div>
+              {% endif %}
+            </div>
+
+            <!-- RIGHT: Upload form -->
+            <div style="min-width: 260px; max-width: 300px; flex-shrink: 0;">
+              <form method="post" action="{% url 'admin_resource_upload' topic.id %}"
+                    enctype="multipart/form-data">
+                {% csrf_token %}
+                <label class="form-label fw-bold small mb-1 text-navy">
+                  <i class="fas fa-cloud-upload-alt text-primary me-1"></i>Upload Resource
+                </label>
+                <input type="text" name="title"
+                       placeholder="Display title (auto-detected if empty)"
+                       class="form-control form-control-sm mb-2 rounded-3"
+                       style="font-size: 12px;">
+                <div class="border border-2 border-dashed rounded-3 p-3 text-center bg-white"
+                     style="border-color: #cbd5e1 !important; cursor: pointer;"
+                     onclick="this.querySelector('input[type=file]').click()">
+                  <i class="fas fa-file-upload text-primary mb-1" style="font-size: 20px;"></i>
+                  <div class="fw-bold small text-navy">Click to select file</div>
+                  <div class="text-muted" style="font-size: 10px;">PDF &bull; Excel &bull; PPT &bull; Word &bull; Text</div>
+                  <input type="file" name="resource_file" class="d-none"
+                         accept=".pdf,.xls,.xlsx,.csv,.ppt,.pptx,.doc,.docx,.txt,.md"
+                         required onchange="this.closest('form').submit()">
+                </div>
+              </form>
+            </div>
+
+          </div>
+        </div>
+        {% endfor %}
+      </div><!-- /domain body -->
+    </div><!-- /card -->
+    {% endfor %}
+  </div>
+  {% empty %}
+  <div class="card border-0 shadow-sm text-center py-5">
+    <div class="text-muted">
+      <i class="fas fa-folder-open fa-3x mb-3 opacity-25"></i>
+      <div class="fw-bold">No topics found.</div>
+      <div class="small">Try clearing filters or adding topics.</div>
+    </div>
+  </div>
+  {% endfor %}
+
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+function toggleAdminDomain(domainId) {
+  const body    = document.getElementById('admin-domain-' + domainId);
+  const chevron = document.getElementById('admin-chevron-' + domainId);
+  if (!body) return;
+  const open = body.style.display === 'block';
+  body.style.display   = open ? 'none'  : 'block';
+  chevron.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+
+// After upload redirect with anchor, auto-open the domain that contains the topic
+document.addEventListener('DOMContentLoaded', function() {
+  const hash = window.location.hash;
+  if (hash) {
+    const topicEl = document.getElementById('topic-' + hash.replace('#', ''));
+    if (topicEl) {
+      const domainBody = topicEl.closest('[id^="admin-domain-"]');
+      if (domainBody) {
+        const domainId = domainBody.id.replace('admin-domain-', '');
+        domainBody.style.display = 'block';
+        const chevron = document.getElementById('admin-chevron-' + domainId);
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+        setTimeout(() => topicEl.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+      }
+    }
+  }
+});
+</script>
+{% endblock %}
+

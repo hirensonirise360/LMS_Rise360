@@ -1,7 +1,10 @@
 {% load i18n %}
 <div class="lm-module-card card mb-2 shadow-none {% if not module.is_active %}lm-inactive{% endif %}"
      data-module-id="{{ module.pk }}"
-     id="module-card-{{ module.pk }}">
+     data-module-name="{{ module.name }}"
+     data-module-number="{{ module.number }}"
+     id="module-card-{{ module.pk }}"
+     draggable="true">
 
   {# Module header #}
   <div class="lm-module-header d-flex align-items-center gap-2 py-2 px-2"
@@ -9,6 +12,10 @@
        data-bs-toggle="collapse"
        data-bs-target="#module-body-{{ module.pk }}"
        aria-expanded="true">
+
+    <span class="lm-drag-handle text-muted" title="{% trans 'Drag to reorder' %}" onclick="event.stopPropagation()">
+      <i class="fas fa-grip-vertical"></i>
+    </span>
 
     <i class="fas fa-chevron-down lm-chevron me-1"></i>
 
@@ -53,11 +60,11 @@
       {% for domain in module.domains.all %}
         {% include "setting/partials/domain_row.html" with domain=domain %}
       {% empty %}
-        <p class="text-muted small ms-2 mb-1">{% trans "No domains yet." %}</p>
+        <p class="text-muted small ms-2 mb-1 lm-no-domains">{% trans "No domains yet." %}</p>
       {% endfor %}
 
       {# Add Domain button #}
-      <button class="btn btn-xs text-primary lm-add-btn mt-1 ms-1"
+      <button class="btn btn-xs text-primary lm-add-btn lm-add-domain-btn mt-1 ms-1"
               onclick="addDomain({{ module.pk }})">
         <i class="fas fa-plus me-1"></i>{% trans "Add Domain" %}
       </button>

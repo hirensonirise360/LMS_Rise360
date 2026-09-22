@@ -124,16 +124,36 @@ class HasVideoFilter(admin.SimpleListFilter):
         return queryset
 
 
+class HasQuestionFilter(admin.SimpleListFilter):
+    title = "Question File"
+    parameter_name = "has_question"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("yes", "Has Question File"),
+            ("no",  "Missing Question File"),
+        )
+
+    def queryset(self, request, queryset):
+        has_file = Q(question_file__isnull=False) & ~Q(question_file="")
+        supabase = ~Q(supabase_question_path="")
+        if self.value() == "yes":
+            return queryset.filter(has_file | supabase)
+        if self.value() == "no":
+            return queryset.exclude(has_file | supabase)
+        return queryset
+
+
 # ── EATopic Admin ─────────────────────────────────────────────────────────────
 
 @admin.register(EATopic)
 class EATopicAdmin(admin.ModelAdmin):
     list_display = (
         "name", "domain", "order",
-        "has_ebook", "has_video",
-        "ebook_source", "video_source",
+        "has_ebook", "has_video", "has_question",
+        "ebook_source", "video_source", "question_source",
     )
-    list_filter = ("domain__part", "domain", HasEbookFilter, HasVideoFilter)
+    list_filter = ("domain__part", "domain", HasEbookFilter, HasVideoFilter, HasQuestionFilter)
     search_fields = ("name", "domain__name", "domain__part__name")
     list_editable = ("order",)
     list_select_related = ("domain", "domain__part")
@@ -151,6 +171,10 @@ class EATopicAdmin(admin.ModelAdmin):
             "description": "Upload a video file OR paste a YouTube / Vimeo URL.",
             "fields": ("video_file", "video_external_url"),
         }),
+        ("Question File Content", {
+            "description": "Upload a question file in any format (Excel, Word, Text, PDF, etc.) OR paste the Supabase path.",
+            "fields": ("question_file", "supabase_question_path"),
+        }),
     )
 
     def has_ebook(self, obj):
@@ -162,6 +186,11 @@ class EATopicAdmin(admin.ModelAdmin):
         return bool(obj.video_file or obj.video_external_url)
     has_video.boolean = True
     has_video.short_description = "Video ✓"
+
+    def has_question(self, obj):
+        return bool(obj.question_file or obj.supabase_question_path)
+    has_question.boolean = True
+    has_question.short_description = "Question ✓"
 
     def ebook_source(self, obj):
         if obj.supabase_pdf_path:
@@ -178,6 +207,14 @@ class EATopicAdmin(admin.ModelAdmin):
             return "📁 File"
         return "—"
     video_source.short_description = "Video Source"
+
+    def question_source(self, obj):
+        if obj.supabase_question_path:
+            return "☁ Supabase"
+        if obj.question_file:
+            return "📁 File"
+        return "—"
+    question_source.short_description = "Question Source"
 
 
 # ── E-Book Admin (proxy) ─────────────────────────────────────────────────────
