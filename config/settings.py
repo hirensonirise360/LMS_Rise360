@@ -231,14 +231,29 @@ STATICFILES_FINDERS = [
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-# Supabase Storage bucket name for user-uploaded media
+# Supabase Storage Config
+SUPABASE_URL = config("SUPABASE_URL", default="")
+SUPABASE_SERVICE_KEY = config("SUPABASE_SERVICE_KEY", default="")
 SUPABASE_MEDIA_BUCKET = config("SUPABASE_MEDIA_BUCKET", default="media-files")
 
 # In production/serverless the filesystem is read-only (Vercel / Render).
 # Route all media uploads through Supabase Storage when running in serverless OR when DEBUG is False,
-# provided SUPABASE_URL is configured.
-if (IS_SERVERLESS or not DEBUG) and config("SUPABASE_URL", default=""):
-    DEFAULT_FILE_STORAGE = "core.storage.SupabaseMediaStorage"
+# or whenever SUPABASE_URL is configured.
+USE_SUPABASE_STORAGE = bool(SUPABASE_URL or IS_SERVERLESS or not DEBUG)
+
+STORAGES = {
+    "default": {
+        "BACKEND": "core.storage.SupabaseMediaStorage" if USE_SUPABASE_STORAGE else "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
+
+
+# On serverless (Vercel/Lambda), write temporary file upload chunks to /tmp (the only writable directory)
+if IS_SERVERLESS:
+    FILE_UPLOAD_TEMP_DIR = "/tmp"
 
 # -----------------------------------
 # E-mail configuration (Brevo HTTP API - works on Railway)
@@ -278,9 +293,6 @@ SITE_DOMAIN = config('SITE_DOMAIN', default='uea.up.railway.app')
 STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
 STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY", default="")
 
-# Supabase Storage Config for Private Ebooks
-SUPABASE_URL = config("SUPABASE_URL", default="")
-SUPABASE_SERVICE_KEY = config("SUPABASE_SERVICE_KEY", default="")
 
 # LOGGING
 # ------------------------------------------------------------------------------
@@ -330,9 +342,6 @@ SESSION_COOKIE_AGE = 28800  # 8 hours
 
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
-# WhiteNoise configuration
-# Use CompressedStaticFilesStorage (no manifest) to avoid missing-file errors on Vercel
-STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 STUDENT_ID_PREFIX = config("STUDENT_ID_PREFIX", "ugr")
 LECTURER_ID_PREFIX = config("LECTURER_ID_PREFIX", "lec")

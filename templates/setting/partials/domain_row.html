@@ -16,8 +16,16 @@
           data-domain-id="{{ domain.pk }}"
           title="{{ domain.name }}">{{ domain.name }}</span>
 
+    {# Completed / total topics — filled in by refreshTreeCounts() #}
+    <span class="lm-domain-count" title="{% trans 'Topics with both an e-book and a video' %}"></span>
+
     {# Action icons #}
     <span class="lm-actions d-flex gap-1 ms-auto">
+      <button class="btn btn-xs lm-icon-btn text-primary"
+              title="{% trans 'Add topic' %}"
+              onclick="event.stopPropagation(); loadNewTopicEditor({{ domain.pk }})">
+        <i class="fas fa-plus"></i>
+      </button>
       <button class="btn btn-xs lm-icon-btn text-primary"
               title="{% trans 'Rename domain' %}"
               onclick="event.stopPropagation(); startInlineEdit('domain', {{ domain.pk }}, this)">

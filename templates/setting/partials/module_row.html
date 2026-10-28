@@ -33,11 +33,8 @@
       {{ module.number }}. {{ module.name }}
     </span>
 
-    {# Count badge #}
-    <span class="badge bg-secondary-subtle text-secondary border lm-count-badge"
-          title="{% trans 'Domains count' %}">
-      {{ module.domains.count }}D
-    </span>
+    {# Domain / topic counts — filled in by refreshTreeCounts() #}
+    <span class="lm-count-badge"></span>
 
     {# Action buttons #}
     <span class="lm-actions d-flex gap-1" onclick="event.stopPropagation()">
@@ -53,6 +50,9 @@
       </button>
     </span>
   </div>
+
+  {# Content completeness bar — width set by refreshTreeCounts() #}
+  <div class="lm-module-progress"><span></span></div>
 
   {# Module body — domains #}
   <div class="collapse" id="module-body-{{ module.pk }}">

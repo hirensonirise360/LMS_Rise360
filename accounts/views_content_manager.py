@@ -342,8 +342,12 @@ def topic_editor_new(request):
     domain_id = request.GET.get("domain")
     domain = get_object_or_404(EADomain, pk=domain_id) if domain_id else None
     domains = EADomain.objects.select_related("part").order_by("part__number", "order")
+    next_order = 1
+    if domain:
+        next_order = (domain.topics.aggregate(m=Max("order"))["m"] or 0) + 1
     html = render(request, "setting/partials/topic_editor.html", {
         "topic": None,
+        "next_order": next_order,
         "selected_domain": domain,
         "domains": domains,
         "is_new": True,

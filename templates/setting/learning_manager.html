@@ -32,7 +32,13 @@
         <i class="fas fa-search lm-search-icon"></i>
         <input type="text" id="lm-search" class="lm-search-input"
                placeholder="{% trans 'Search modules, domains, topics…' %}"
-               oninput="lmSearch(this.value)">
+               title="{% trans 'Press / to search, Esc to clear' %}"
+               oninput="applyTreeFilter()"
+               onkeydown="if(event.key==='Escape'){clearSearch();this.blur();}">
+        <button type="button" class="lm-search-clear lm-hidden" id="lm-search-clear"
+                title="{% trans 'Clear search' %}" onclick="clearSearch()">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
       <button class="btn btn-primary btn-sm px-3 rounded-pill" onclick="openModuleAddModal()">
         <i class="fas fa-plus me-1"></i>{% trans "Add Module" %}
@@ -44,18 +50,41 @@
   <div class="lm-body">
 
     <!-- LEFT: Module › Domain › Topic tree -->
-    <aside class="lm-sidebar" id="lm-tree">
-      {% for module in modules %}
-        {% include "setting/partials/module_row.html" with module=module %}
-      {% empty %}
-        <div class="lm-empty-state">
-          <i class="fas fa-folder-open fa-2x mb-2 d-block text-muted"></i>
-          <p class="text-muted small mb-2">{% trans "No modules yet." %}</p>
-          <button class="btn btn-primary btn-sm" onclick="openModuleAddModal()">
-            <i class="fas fa-plus me-1"></i>{% trans "Add First Module" %}
+    <aside class="lm-sidebar">
+      <div class="lm-tree-toolbar">
+        <div class="lm-tree-summary" id="lm-tree-summary"></div>
+        <div class="d-flex align-items-center gap-1">
+          <button type="button" class="lm-tool-btn" id="lm-filter-missing"
+                  title="{% trans 'Show only topics missing an e-book or video' %}"
+                  aria-pressed="false" onclick="toggleMissingFilter(this)">
+            <i class="fas fa-filter"></i> {% trans "Missing content" %}
+          </button>
+          <button type="button" class="lm-tool-btn" title="{% trans 'Expand all' %}" onclick="setTreeExpanded(true)">
+            <i class="fas fa-angles-down"></i>
+          </button>
+          <button type="button" class="lm-tool-btn" title="{% trans 'Collapse all' %}" onclick="setTreeExpanded(false)">
+            <i class="fas fa-angles-up"></i>
           </button>
         </div>
-      {% endfor %}
+      </div>
+      <div id="lm-tree">
+        {% for module in modules %}
+          {% include "setting/partials/module_row.html" with module=module %}
+        {% empty %}
+          <div class="lm-empty-state">
+            <i class="fas fa-folder-open fa-2x mb-2 d-block text-muted"></i>
+            <p class="text-muted small mb-2">{% trans "No modules yet." %}</p>
+            <button class="btn btn-primary btn-sm" onclick="openModuleAddModal()">
+              <i class="fas fa-plus me-1"></i>{% trans "Add First Module" %}
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="lm-no-results lm-hidden" id="lm-no-results">
+        <i class="fas fa-search d-block mb-2"></i>
+        <span id="lm-no-results-text">{% trans "Nothing matches your search." %}</span>
+        <button type="button" class="btn btn-link btn-sm d-block mx-auto" onclick="resetTreeFilters()">{% trans "Clear filters" %}</button>
+      </div>
     </aside>
 
     <!-- RESIZER handle -->
@@ -644,11 +673,84 @@
   border-radius: 6px;
 }
 
+/* ── Search clear button ── */
+.lm-search-clear {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: #94a3b8;
+  padding: 2px 6px; font-size: .72rem; border-radius: 4px;
+}
+.lm-search-clear:hover { color: #475569; background: #eef2ff; }
+
+/* ── Tree toolbar ── */
+.lm-tree-toolbar {
+  position: sticky; top: -12px; z-index: 2; /* offsets the sidebar's top padding */
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  margin: -12px -8px 8px -10px;
+  padding: 8px 8px 8px 12px;
+  background: #f8fafc;
+  border-bottom: 1px solid #eaecf0;
+}
+.lm-tree-summary { font-size: .7rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lm-tree-summary strong { color: #1e293b; }
+.lm-tool-btn {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 6px;
+  padding: 3px 8px; font-size: .68rem; color: #475569; white-space: nowrap;
+  transition: background .12s, border-color .12s, color .12s;
+}
+.lm-tool-btn:hover { border-color: #a5b4fc; color: #4f46e5; }
+.lm-tool-btn[aria-pressed="true"] { background: #fef2f2; border-color: #fca5a5; color: #b91c1c; }
+
+/* ── No-results message ── */
+.lm-no-results { text-align: center; color: #94a3b8; font-size: .78rem; padding: 32px 12px; }
+.lm-no-results .fa-search { font-size: 1.3rem; }
+
+/* ── Counts & completeness ── */
+.lm-count-badge { font-size: .64rem; color: #64748b; white-space: nowrap; display: flex; gap: 8px; }
+.lm-count-badge i { font-size: .6rem; opacity: .7; margin-right: 2px; }
+.lm-domain-count {
+  font-size: .62rem; font-weight: 600; padding: 1px 7px; border-radius: 20px;
+  background: #f1f5f9; color: #64748b; white-space: nowrap;
+}
+.lm-domain-count.done { background: #dcfce7; color: #15803d; }
+.lm-domain-count:empty { display: none; }
+.lm-module-progress { height: 3px; margin: 0 12px 6px; background: #f1f5f9; border-radius: 2px; overflow: hidden; }
+.lm-module-progress span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #6366f1, #22c55e); transition: width .3s; }
+.lm-topic-item[data-complete="0"] .lm-topic-name .fa-circle { color: #f59e0b !important; }
+.lm-topic-item:focus-visible { outline: 2px solid #6366f1; outline-offset: -2px; }
+
+/* ── Domain actions overlay the row on hover instead of reserving space ── */
+.lm-domain-header { position: relative; }
+.lm-domain-header .lm-actions {
+  position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+  border-radius: 6px;
+  pointer-events: none;
+}
+.lm-domain-header:hover .lm-actions,
+.lm-domain-header:focus-within .lm-actions { pointer-events: auto; background: #eef2ff; }
+@media (hover: none) {
+  .lm-domain-header .lm-actions { position: static; transform: none; pointer-events: auto; }
+}
+
+/* ── Action buttons reachable by keyboard and on touch screens ── */
+.lm-icon-btn:focus-visible,
+.lm-module-header:focus-within .lm-icon-btn,
+.lm-domain-header:focus-within .lm-icon-btn { opacity: .8; }
+@media (hover: none) {
+  .lm-icon-btn, .lm-drag-handle { opacity: .6; }
+}
+
+/* ── File drop zones ── */
+.lm-file-btn.lm-drop-active { border-color: #6366f1; border-style: solid; background: #eef2ff; color: #4f46e5; }
+.lm-file-btn.lm-uploading { pointer-events: none; opacity: .7; border-style: solid; }
+
 </style>
 
 
 <!-- ══ JAVASCRIPT ═════════════════════════════════════════════════════════════ -->
 <script>
+/* Base URL of the content manager, resolved by Django so the language prefix is always right */
+const LM_BASE = "{% url 'learning_manager' %}";
+
 /* ── CSRF Token Helper ────────────────────────────────────────────────────── */
 function getCsrfToken() {
   const metaToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
@@ -735,7 +837,7 @@ function saveCurrentTopicSilent() {
   const data = new FormData(form);
   data.append('csrfmiddlewaretoken', getCsrfToken());
 
-  return fetch(`/en/accounts/learning-manager/topic/${topicId}/save/`, {
+  return fetch(`${LM_BASE}topic/${topicId}/save/`, {
     method: 'POST',
     body: data,
     headers: { 'X-CSRFToken': getCsrfToken() }
@@ -786,7 +888,7 @@ function saveCurrentTopicManual(btn) {
   const data = new FormData(form);
   data.append('csrfmiddlewaretoken', getCsrfToken());
 
-  fetch(`/en/accounts/learning-manager/topic/${topicId}/save/`, {
+  fetch(`${LM_BASE}topic/${topicId}/save/`, {
     method: 'POST',
     body: data,
     headers: { 'X-CSRFToken': getCsrfToken() }
@@ -843,11 +945,13 @@ function loadTopicEditor(topicId) {
     }
     const moduleBody = row.closest('.collapse');
     if (moduleBody && !moduleBody.classList.contains('show')) {
-      bootstrap.Collapse.getOrCreateInstance(moduleBody).show();
+      bootstrap.Collapse.getOrCreateInstance(moduleBody, { toggle: false }).show();
     }
+    setTimeout(() => row.scrollIntoView({ block: 'nearest' }), 250);
   }
+  setTopicHash(topicId);
   setEditorLoading();
-  fetch(`/en/accounts/learning-manager/topic/${topicId}/`)
+  fetch(`${LM_BASE}topic/${topicId}/`)
     .then(r => r.json())
     .then(d => {
       if (d.ok) {
@@ -865,13 +969,16 @@ function loadNewTopicEditor(domainId) {
   if (isTopicFormDirty) {
     saveCurrentTopicSilent();
   }
+  document.querySelectorAll('.lm-topic-item').forEach(el => el.classList.remove('lm-active-topic'));
+  setTopicHash(null);
   setEditorLoading();
-  fetch(`/en/accounts/learning-manager/topic/new/?domain=${domainId}`)
+  fetch(`${LM_BASE}topic/new/?domain=${domainId}`)
     .then(r => r.json())
     .then(d => {
       if (d.ok) {
         document.getElementById('lm-editor').innerHTML = d.html;
         isTopicFormDirty = false;
+        document.querySelector('#topic-editor-form [name="name"]')?.focus();
       } else {
         showToast(d.error || 'Failed.', 'err');
       }
@@ -892,8 +999,9 @@ function triggerAutoSave(immediate = false, reloadEditor = false) {
 
   const data = new FormData(form);
   data.append('csrfmiddlewaretoken', getCsrfToken());
+  setAutoSaveStatus('saving');
 
-  fetch(`/en/accounts/learning-manager/topic/${topicId}/save/`, {
+  fetch(`${LM_BASE}topic/${topicId}/save/`, {
     method: 'POST',
     body: data,
     headers: { 'X-CSRFToken': getCsrfToken() }
@@ -922,6 +1030,9 @@ function triggerAutoSave(immediate = false, reloadEditor = false) {
       const msg = err.message || 'Save failed';
       setAutoSaveStatus('error', msg);
       showToast(msg, 'err');
+    })
+    .finally(() => {
+      document.querySelectorAll('#topic-editor-form .lm-uploading').forEach(el => el.classList.remove('lm-uploading'));
     });
 }
 
@@ -931,13 +1042,18 @@ function handleAutoUpload(inputEl, event) {
   }
   if (!inputEl || !inputEl.files || inputEl.files.length === 0) return;
 
-  if (inputEl.previousElementSibling) {
-    if (inputEl.files.length === 1) {
-      inputEl.previousElementSibling.textContent = inputEl.files[0].name;
-    } else {
-      inputEl.previousElementSibling.textContent = `${inputEl.files.length} files selected`;
-    }
+  const label = inputEl.previousElementSibling;
+  const fileText = inputEl.files.length === 1 ? inputEl.files[0].name : `${inputEl.files.length} files selected`;
+
+  // New topic: keep the files on the input so they are sent with "Create Topic"
+  const form = document.getElementById('topic-editor-form');
+  if (!form?.querySelector('[name="topic_id"]')) {
+    if (label) label.textContent = `${fileText} — uploads on Create`;
+    return;
   }
+
+  if (label) label.textContent = `Uploading ${fileText}…`;
+  inputEl.closest('.lm-file-btn')?.classList.add('lm-uploading');
 
   // Trigger immediate upload and reload editor to display the new material item
   triggerAutoSave(true, true);
@@ -946,6 +1062,63 @@ function handleAutoUpload(inputEl, event) {
     inputEl.value = '';
   }, 50);
 }
+
+/* ── Remove an uploaded file (video / question / primary e-book) after confirmation ── */
+function removeTopicAttachment(fieldName, message) {
+  lmConfirm(message, 'Remove', () => {
+    const form = document.getElementById('topic-editor-form');
+    if (!form) return;
+    const flag = document.createElement('input');
+    flag.type = 'hidden'; flag.name = fieldName; flag.value = 'true';
+    form.appendChild(flag);
+    triggerAutoSave(true, true);
+  });
+}
+
+/* ── Drag files from the desktop onto an upload zone ─────────────────────── */
+document.addEventListener('dragover', function(e) {
+  if (!e.dataTransfer.types.includes('Files')) return;
+  e.preventDefault();  // stops the browser from opening a file dropped outside a zone
+  const zone = e.target.closest?.('#topic-editor-form .lm-file-btn');
+  e.dataTransfer.dropEffect = zone ? 'copy' : 'none';
+  if (!zone) return;
+  zone.classList.add('lm-drop-active');
+});
+document.addEventListener('dragleave', function(e) {
+  const zone = e.target.closest?.('.lm-file-btn');
+  if (zone && !zone.contains(e.relatedTarget)) zone.classList.remove('lm-drop-active');
+});
+document.addEventListener('drop', function(e) {
+  if (!e.dataTransfer.files.length) return;
+  e.preventDefault();
+  const zone = e.target.closest?.('#topic-editor-form .lm-file-btn');
+  if (!zone) return;
+  zone.classList.remove('lm-drop-active');
+  const input = zone.querySelector('input[type=file]');
+  if (!input) return;
+  const dt = new DataTransfer();
+  const files = input.multiple ? [...e.dataTransfer.files] : [e.dataTransfer.files[0]];
+  files.forEach(f => dt.items.add(f));
+  input.files = dt.files;
+  handleAutoUpload(input);
+});
+
+// Warn before leaving the page with unsaved topic changes
+window.addEventListener('beforeunload', function(e) {
+  if (isTopicFormDirty) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+// "/" focuses the tree search (unless already typing somewhere)
+document.addEventListener('keydown', function(e) {
+  if (e.key !== '/' || e.ctrlKey || e.metaKey) return;
+  const tag = document.activeElement?.tagName;
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag) || document.activeElement?.isContentEditable) return;
+  e.preventDefault();
+  document.getElementById('lm-search')?.focus();
+});
 
 // Auto-save when user leaves topic editor form
 document.addEventListener('focusout', function(e) {
@@ -982,8 +1155,8 @@ function submitTopicForm(event) {
   const isNew   = !topicId;
   data.append('csrfmiddlewaretoken', getCsrfToken());
   const url     = isNew
-    ? '/en/accounts/learning-manager/topic/create/'
-    : `/en/accounts/learning-manager/topic/${topicId}/save/`;
+    ? `${LM_BASE}topic/create/`
+    : `${LM_BASE}topic/${topicId}/save/`;
 
   fetch(url, { method: 'POST', body: data, headers: { 'X-CSRFToken': getCsrfToken() } })
     .then(parseApiResponse)
@@ -1013,10 +1186,13 @@ function submitTopicForm(event) {
 
 /* ── Delete single ebook file from topic ──────────────────────────────────── */
 function deleteEbookFile(fileId, domId) {
-  if (!confirm('Are you sure you want to delete this E-Book document?')) return;
+  lmConfirm('Delete this study material file?', 'Delete', () => doDeleteEbookFile(fileId, domId));
+}
+
+function doDeleteEbookFile(fileId, domId) {
   const fd = new FormData();
   fd.append('csrfmiddlewaretoken', getCsrfToken());
-  fetch(`/en/accounts/learning-manager/topic/ebook/${fileId}/delete/`, {
+  fetch(`${LM_BASE}topic/ebook/${fileId}/delete/`, {
     method: 'POST',
     body: fd,
     headers: { 'X-CSRFToken': getCsrfToken() }
@@ -1037,44 +1213,66 @@ function deleteEbookFile(fileId, domId) {
 }
 
 /* ── Delete confirmation ─────────────────────────────────────────────────── */
-function confirmDelete(type, id, name) {
-  const modal      = new bootstrap.Modal(document.getElementById('deleteModal'));
-  const warnings   = { module: ' This will also delete ALL domains & topics inside it.', domain: ' This will also delete ALL topics inside it.', topic: '' };
-  document.getElementById('delete-confirm-msg').innerHTML =
-    `Delete <strong>${name}</strong>?${warnings[type]}`;
-  modal.show();
+function escapeHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+/* Shows the shared confirm modal; `message` is plain text unless `isHtml` is set */
+function lmConfirm(message, actionLabel, onConfirm, isHtml = false) {
+  const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteModal'));
+  const msgEl = document.getElementById('delete-confirm-msg');
+  if (isHtml) msgEl.innerHTML = message; else msgEl.textContent = message;
 
   const btn   = document.getElementById('delete-confirm-btn');
-  const fresh = btn.cloneNode(true);
+  const fresh = btn.cloneNode(false);
+  fresh.innerHTML = `<i class="fas fa-trash me-1"></i>${escapeHtml(actionLabel)}`;
   btn.parentNode.replaceChild(fresh, btn);
-  fresh.addEventListener('click', () => { modal.hide(); doDelete(type, id); });
+  fresh.addEventListener('click', () => { modal.hide(); onConfirm(); });
+  modal.show();
+}
+
+function confirmDelete(type, id, name) {
+  const block = type === 'module' ? document.getElementById(`module-card-${id}`)
+              : type === 'domain' ? document.querySelector(`.lm-domain-block[data-domain-id="${id}"]`) : null;
+  const nDomains = block ? block.querySelectorAll('.lm-domain-block').length : 0;
+  const nTopics  = block ? block.querySelectorAll('.lm-topic-item').length : 0;
+  const plural   = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+  const warnings = {
+    module: ` This will also delete <strong>${plural(nDomains, 'domain')}</strong> and <strong>${plural(nTopics, 'topic')}</strong> inside it.`,
+    domain: ` This will also delete <strong>${plural(nTopics, 'topic')}</strong> inside it.`,
+    topic:  '',
+  };
+  lmConfirm(`Delete <strong>${escapeHtml(name)}</strong>?${warnings[type]} This cannot be undone.`,
+            'Delete', () => doDelete(type, id), true);
 }
 
 function doDelete(type, id) {
   const fd = new FormData();
   fd.append('csrfmiddlewaretoken', getCsrfToken());
-  fetch(`/en/accounts/learning-manager/${type}/${id}/delete/`, { method:'POST', body: fd, headers:{'X-CSRFToken': getCsrfToken()} })
+  fetch(`${LM_BASE}${type}/${id}/delete/`, { method:'POST', body: fd, headers:{'X-CSRFToken': getCsrfToken()} })
     .then(r => r.json())
     .then(res => {
       if (res.ok) {
         showToast(`${type.charAt(0).toUpperCase()+type.slice(1)} deleted.`);
-        if (type==='module') {
-          document.getElementById(`module-card-${id}`)?.remove();
-        } else if (type==='domain') {
-          const domainBlock = document.querySelector(`.lm-domain-block[data-domain-id="${id}"]`);
-          const moduleId = res.module_id || domainBlock?.getAttribute('data-module-id');
-          domainBlock?.remove();
-          if (moduleId) {
-            const countBadge = document.querySelector(`#module-card-${moduleId} .lm-count-badge`);
-            if (countBadge && res.domain_count !== undefined) {
-              countBadge.textContent = `${res.domain_count}D`;
-            }
-          }
+        // If the open topic is being removed (directly or via its domain/module), clear the editor
+        const openId = document.querySelector('#topic-editor-form [name="topic_id"]')?.value;
+        const removedEl = type==='module' ? document.getElementById(`module-card-${id}`)
+                        : type==='domain' ? document.querySelector(`.lm-domain-block[data-domain-id="${id}"]`)
+                        : document.querySelector(`.lm-topic-item[data-topic-id="${id}"]`);
+        const editorAffected = openId && (type==='topic' ? String(id) === openId
+                                          : !!removedEl?.querySelector(`.lm-topic-item[data-topic-id="${openId}"]`));
+        removedEl?.remove();
+        if (type==='domain') {
           document.querySelector(`#topic-editor-form select[name="domain_id"] option[value="${id}"]`)?.remove();
-        } else if (type==='topic') {
-          document.querySelector(`.lm-topic-item[data-topic-id="${id}"]`)?.remove();
-          document.getElementById('lm-editor').innerHTML = '<div class="lm-editor-placeholder"><div class="lm-placeholder-icon"><i class="fas fa-trash-alt"></i></div><h6 class="mt-3 text-muted">Topic deleted.</h6></div>';
         }
+        if (editorAffected) {
+          isTopicFormDirty = false;
+          setTopicHash(null);
+          document.getElementById('lm-editor').innerHTML = '<div class="lm-editor-placeholder"><div class="lm-placeholder-icon"><i class="fas fa-trash-alt"></i></div><h6 class="mt-3 text-muted">Deleted. Select another topic from the tree.</h6></div>';
+        }
+        refreshTreeCounts();
       } else showToast(res.error || 'Delete failed.', 'err');
     })
     .catch(() => showToast('Network error.', 'err'));
@@ -1100,13 +1298,16 @@ function startInlineEdit(type, id, btnEl) {
   input.type  = 'text'; input.value = original; input.className = 'lm-inline-input';
   input.onclick = e => e.stopPropagation();
 
+  let finished = false;  // guards against the blur handler re-saving after Enter / Escape
   const save = () => {
+    if (finished) return;
+    finished = true;
     const newName = input.value.trim();
     if (!newName || newName === original) { nameEl.textContent = original; return; }
     const fd = new FormData();
     fd.append('name', newName);
     fd.append('csrfmiddlewaretoken', getCsrfToken());
-    fetch(`/en/accounts/learning-manager/domain/${id}/save/`, { method:'POST', body:fd, headers:{'X-CSRFToken': getCsrfToken()} })
+    fetch(`${LM_BASE}domain/${id}/save/`, { method:'POST', body:fd, headers:{'X-CSRFToken': getCsrfToken()} })
       .then(r => r.json())
       .then(res => {
         nameEl.textContent = res.ok ? res.name : original;
@@ -1116,8 +1317,8 @@ function startInlineEdit(type, id, btnEl) {
   };
 
   input.addEventListener('keydown', e => {
-    if (e.key==='Enter')  { e.preventDefault(); nameEl.textContent = input.value; save(); }
-    if (e.key==='Escape') nameEl.textContent = original;
+    if (e.key==='Enter')  { e.preventDefault(); save(); if (nameEl.contains(input)) nameEl.textContent = input.value.trim() || original; }
+    if (e.key==='Escape') { e.preventDefault(); finished = true; nameEl.textContent = original; }
   });
   input.addEventListener('blur', () => setTimeout(() => { if(document.activeElement!==input) save(); }, 150));
 
@@ -1168,7 +1369,7 @@ function addDomain(moduleId) {
     fd.append('module_id', moduleId);
     fd.append('name', name);
     fd.append('csrfmiddlewaretoken', getCsrfToken());
-    fetch('/en/accounts/learning-manager/domain/add/', { method:'POST', body:fd, headers:{'X-CSRFToken': getCsrfToken()} })
+    fetch(`${LM_BASE}domain/add/`, { method:'POST', body:fd, headers:{'X-CSRFToken': getCsrfToken()} })
       .then(r => r.json())
       .then(res => {
         if (res.ok) {
@@ -1179,10 +1380,7 @@ function addDomain(moduleId) {
           } else {
             container.insertAdjacentHTML('beforeend', res.html);
           }
-          const countBadge = document.querySelector(`#module-card-${moduleId} .lm-count-badge`);
-          if (countBadge && res.domain_count !== undefined) {
-            countBadge.textContent = `${res.domain_count}D`;
-          }
+          refreshTreeCounts();
           const domainSelect = document.querySelector('#topic-editor-form select[name="domain_id"]');
           if (domainSelect) {
             const opt = document.createElement('option');
@@ -1216,9 +1414,16 @@ function addDomain(moduleId) {
 function openModuleAddModal() {
   document.getElementById('moduleModalTitleText').textContent = 'Add Module';
   ['module-form-id','module-form-name','module-form-number','module-form-desc'].forEach(id => document.getElementById(id).value = '');
+  // Suggest the next free order number
+  const numbers = [...document.querySelectorAll('.lm-module-card')].map(c => parseInt(c.dataset.moduleNumber, 10) || 0);
+  document.getElementById('module-form-number').value = (numbers.length ? Math.max(...numbers) : 0) + 1;
   document.getElementById('module-form-active').checked = true;
-  new bootstrap.Modal(document.getElementById('moduleModal')).show();
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('moduleModal')).show();
 }
+
+document.getElementById('moduleModal').addEventListener('shown.bs.modal', () => {
+  document.getElementById('module-form-name').focus();
+});
 
 function openModuleEditModal(id, name, number, desc, isActive) {
   document.getElementById('moduleModalTitleText').textContent = 'Edit Module';
@@ -1227,7 +1432,7 @@ function openModuleEditModal(id, name, number, desc, isActive) {
   document.getElementById('module-form-number').value = number;
   document.getElementById('module-form-desc').value   = desc;
   document.getElementById('module-form-active').checked = isActive;
-  new bootstrap.Modal(document.getElementById('moduleModal')).show();
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('moduleModal')).show();
 }
 
 function submitModuleForm(event) {
@@ -1237,7 +1442,7 @@ function submitModuleForm(event) {
   const isNew    = !moduleId;
   data.set('is_active', document.getElementById('module-form-active').checked ? 'true' : 'false');
   data.append('csrfmiddlewaretoken', getCsrfToken());
-  const url = isNew ? '/en/accounts/learning-manager/module/add/' : `/en/accounts/learning-manager/module/${moduleId}/save/`;
+  const url = isNew ? `${LM_BASE}module/add/` : `${LM_BASE}module/${moduleId}/save/`;
 
   fetch(url, { method:'POST', body:data, headers:{'X-CSRFToken': getCsrfToken()} })
     .then(r => r.json())
@@ -1253,35 +1458,137 @@ function submitModuleForm(event) {
     .catch(() => showToast('Network error.', 'err'));
 }
 
-/* ── Search ──────────────────────────────────────────────────────────────── */
-function lmSearch(query) {
-  const q = query.toLowerCase().trim();
-  document.querySelectorAll('.lm-topic-item').forEach(el => {
-    const n = el.querySelector('.lm-topic-name')?.textContent.toLowerCase() || '';
-    el.classList.toggle('lm-hidden', q && !n.includes(q));
+/* ── Tree filter: search text + "missing content" toggle ────────────────── */
+let lmMissingOnly = false;
+
+function setDomainOpen(block, open) {
+  const list = block.querySelector('.lm-topics-list');
+  const chev = block.querySelector('.lm-domain-header .lm-chevron');
+  if (list) list.style.display = open ? '' : 'none';
+  if (chev) chev.classList.toggle('rotated', !open);
+}
+
+function setModuleOpen(card, open) {
+  const bodyEl = card.querySelector('.collapse');
+  if (!bodyEl || bodyEl.classList.contains('show') === open) return;
+  const inst = bootstrap.Collapse.getOrCreateInstance(bodyEl, { toggle: false });
+  open ? inst.show() : inst.hide();
+}
+
+function applyTreeFilter() {
+  const searchEl = document.getElementById('lm-search');
+  const q = (searchEl?.value || '').toLowerCase().trim();
+  const active = !!q || lmMissingOnly;
+  document.getElementById('lm-search-clear')?.classList.toggle('lm-hidden', !q);
+
+  let anyVisible = false;
+  document.querySelectorAll('.lm-module-card').forEach(card => {
+    const mMatch = !q || (card.querySelector('.lm-module-name')?.textContent.toLowerCase() || '').includes(q);
+    let moduleHasVisible = false;
+
+    card.querySelectorAll('.lm-domain-block').forEach(block => {
+      const dMatch = mMatch || (block.querySelector('.lm-domain-name')?.textContent.toLowerCase() || '').includes(q);
+      let domainHasVisible = false;
+
+      block.querySelectorAll('.lm-topic-item').forEach(t => {
+        const tMatch  = dMatch || (t.querySelector('.lm-topic-name')?.textContent.toLowerCase() || '').includes(q);
+        const missing = t.dataset.complete !== '1';
+        // Keep the topic that is open in the editor visible even if it no longer matches
+        const visible = t.classList.contains('lm-active-topic') || (tMatch && (!lmMissingOnly || missing));
+        t.classList.toggle('lm-hidden', !visible);
+        if (visible) domainHasVisible = true;
+      });
+
+      const domainVisible = domainHasVisible || (!lmMissingOnly && dMatch);
+      block.classList.toggle('lm-hidden', !domainVisible);
+      if (active && domainHasVisible) setDomainOpen(block, true);
+      if (domainVisible) moduleHasVisible = true;
+    });
+
+    const moduleVisible = moduleHasVisible || (!lmMissingOnly && mMatch);
+    card.classList.toggle('lm-hidden', !moduleVisible);
+    if (active && moduleHasVisible) setModuleOpen(card, true);
+    if (moduleVisible) anyVisible = true;
   });
-  document.querySelectorAll('.lm-domain-block').forEach(b => {
-    const n  = b.querySelector('.lm-domain-name')?.textContent.toLowerCase() || '';
-    const ok = [...b.querySelectorAll('.lm-topic-item')].some(t => !t.classList.contains('lm-hidden'));
-    b.classList.toggle('lm-hidden', q && !n.includes(q) && !ok);
-    if (q && ok) {
-      const list = b.querySelector('.lm-topics-list');
-      const chev = b.querySelector('.lm-chevron');
-      if (list) list.style.display = '';
-      if (chev) chev.classList.remove('rotated');
-    }
-  });
-  document.querySelectorAll('.lm-module-card').forEach(c => {
-    const n  = c.querySelector('.lm-module-name')?.textContent.toLowerCase() || '';
-    const ok = [...c.querySelectorAll('.lm-domain-block')].some(d => !d.classList.contains('lm-hidden'));
-    c.classList.toggle('lm-hidden', q && !n.includes(q) && !ok);
-    if (q && ok) {
-      const bodyEl = c.querySelector('.collapse');
-      if (bodyEl && !bodyEl.classList.contains('show')) {
-        bootstrap.Collapse.getOrCreateInstance(bodyEl).show();
+
+  const noRes = document.getElementById('lm-no-results');
+  if (noRes) {
+    const hasModules = !!document.querySelector('.lm-module-card');
+    noRes.classList.toggle('lm-hidden', !active || anyVisible || !hasModules);
+    document.getElementById('lm-no-results-text').textContent =
+      lmMissingOnly && !q ? 'Every topic has an e-book and a video. 🎉' : 'Nothing matches your search.';
+  }
+}
+
+// Kept for any old callers
+function lmSearch() { applyTreeFilter(); }
+
+function clearSearch() {
+  const el = document.getElementById('lm-search');
+  if (el) el.value = '';
+  applyTreeFilter();
+}
+
+function toggleMissingFilter(btn) {
+  lmMissingOnly = !lmMissingOnly;
+  btn.setAttribute('aria-pressed', lmMissingOnly ? 'true' : 'false');
+  applyTreeFilter();
+}
+
+function resetTreeFilters() {
+  lmMissingOnly = false;
+  document.getElementById('lm-filter-missing')?.setAttribute('aria-pressed', 'false');
+  clearSearch();
+}
+
+function setTreeExpanded(open) {
+  document.querySelectorAll('.lm-module-card').forEach(card => setModuleOpen(card, open));
+  document.querySelectorAll('.lm-domain-block').forEach(block => setDomainOpen(block, open));
+}
+
+/* ── Domain / topic counts and completeness ─────────────────────────────── */
+function refreshTreeCounts() {
+  let allTopics = 0, allDone = 0;
+  document.querySelectorAll('.lm-module-card').forEach(card => {
+    const domains = card.querySelectorAll('.lm-domain-block');
+    let mTopics = 0, mDone = 0;
+    domains.forEach(block => {
+      const total = block.querySelectorAll('.lm-topic-item').length;
+      const done  = block.querySelectorAll('.lm-topic-item[data-complete="1"]').length;
+      const badge = block.querySelector('.lm-domain-count');
+      if (badge) {
+        badge.textContent = `${done}/${total}`;
+        badge.classList.toggle('done', total > 0 && done === total);
       }
+      mTopics += total; mDone += done;
+    });
+    const countEl = card.querySelector('.lm-count-badge');
+    if (countEl) {
+      countEl.innerHTML =
+        `<span title="Domains"><i class="fas fa-folder"></i>${domains.length}</span>` +
+        `<span title="Topics"><i class="fas fa-file-lines"></i>${mTopics}</span>`;
     }
+    const bar = card.querySelector('.lm-module-progress');
+    if (bar) {
+      const pct = mTopics ? Math.round(mDone / mTopics * 100) : 0;
+      bar.firstElementChild.style.width = pct + '%';
+      bar.title = `${mDone} of ${mTopics} topics have an e-book and a video (${pct}%)`;
+    }
+    allTopics += mTopics; allDone += mDone;
   });
+
+  const summary = document.getElementById('lm-tree-summary');
+  if (summary) {
+    summary.innerHTML = `<strong>${allTopics}</strong> topics · <strong>${allDone}</strong> complete`;
+    summary.title = `${allTopics - allDone} topics are missing an e-book or video`;
+  }
+  if (lmMissingOnly || document.getElementById('lm-search')?.value.trim()) applyTreeFilter();
+}
+
+/* ── Deep link: #topic-<id> reopens the same topic after a reload ───────── */
+function setTopicHash(topicId) {
+  const url = topicId ? `#topic-${topicId}` : location.pathname + location.search;
+  history.replaceState(null, '', url);
 }
 
 /* ── Resizable sidebar ───────────────────────────────────────────────────── */
@@ -1405,7 +1712,7 @@ function saveModuleOrder() {
 
   if (order.length === 0) return;
 
-  fetch('/en/accounts/learning-manager/module/reorder/', {
+  fetch(`${LM_BASE}module/reorder/`, {
     method: 'POST',
     body: JSON.stringify({ order: order }),
     headers: {
@@ -1545,16 +1852,9 @@ function saveDomainOrder(targetModuleId, prevModuleId) {
     if (id) order.push(id);
   });
 
-  const targetBadge = document.querySelector(`#module-card-${targetModuleId} .lm-count-badge`);
-  if (targetBadge) targetBadge.textContent = `${domainBlocks.length}D`;
-  if (prevModuleId && prevModuleId !== targetModuleId) {
-    const prevContainer = document.getElementById(`module-domains-${prevModuleId}`);
-    const prevCount = prevContainer ? prevContainer.querySelectorAll('.lm-domain-block').length : 0;
-    const prevBadge = document.querySelector(`#module-card-${prevModuleId} .lm-count-badge`);
-    if (prevBadge) prevBadge.textContent = `${prevCount}D`;
-  }
+  refreshTreeCounts();
 
-  fetch('/en/accounts/learning-manager/domain/reorder/', {
+  fetch(`${LM_BASE}domain/reorder/`, {
     method: 'POST',
     body: JSON.stringify({ order: order, module_id: targetModuleId }),
     headers: {
@@ -1693,8 +1993,9 @@ function saveTopicOrder(targetDomainId, prevDomainId) {
     const id = t.getAttribute('data-topic-id');
     if (id) order.push(id);
   });
+  refreshTreeCounts();
 
-  fetch('/en/accounts/learning-manager/topic/reorder/', {
+  fetch(`${LM_BASE}topic/reorder/`, {
     method: 'POST',
     body: JSON.stringify({ order: order, domain_id: targetDomainId }),
     headers: {
@@ -1713,16 +2014,21 @@ function saveTopicOrder(targetDomainId, prevDomainId) {
     .catch(() => showToast('Network error while saving topic order.', 'err'));
 }
 
-/* Master initializer */
+/* Master initializer — runs after every tree change, so counts are refreshed here too */
 function initAllDragAndDrop() {
   initModuleDragAndDrop();
   initDomainDragAndDrop();
   initTopicDragAndDrop();
+  refreshTreeCounts();
 }
 
-// Initialize drag and drop on page load
+// Initialize drag and drop on page load, then reopen a deep-linked topic
 document.addEventListener('DOMContentLoaded', function() {
   initAllDragAndDrop();
+  const m = location.hash.match(/^#topic-(\d+)$/);
+  if (m && document.querySelector(`.lm-topic-item[data-topic-id="${m[1]}"]`)) {
+    loadTopicEditor(m[1]);
+  }
 });
 </script>
 

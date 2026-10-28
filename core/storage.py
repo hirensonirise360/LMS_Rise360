@@ -31,11 +31,20 @@ class SupabaseMediaStorage(Storage):
 
     def __init__(self):
         from supabase import create_client
+        from django.core.exceptions import ImproperlyConfigured
+
         self.bucket = getattr(settings, "SUPABASE_MEDIA_BUCKET", "media-files")
-        self.client = create_client(
-            settings.SUPABASE_URL,
-            settings.SUPABASE_SERVICE_KEY,
-        )
+        url = getattr(settings, "SUPABASE_URL", "")
+        key = getattr(settings, "SUPABASE_SERVICE_KEY", "")
+
+        if not url or not key:
+            raise ImproperlyConfigured(
+                "Supabase Storage is not configured! In live production (Vercel serverless), "
+                "the local filesystem is read-only. You must set SUPABASE_URL and SUPABASE_SERVICE_KEY "
+                "in your Vercel Environment Variables to upload files."
+            )
+
+        self.client = create_client(url, key)
         self.storage = self.client.storage.from_(self.bucket)
 
     # ------------------------------------------------------------------

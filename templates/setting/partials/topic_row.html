@@ -1,10 +1,14 @@
 {% load i18n %}
+{% with has_ebook=topic.has_ebook has_video=topic.video_file|yesno:"1,"|default:topic.video_external_url has_question=topic.question_file|yesno:"1,"|default:topic.supabase_question_path %}
 <li class="lm-topic-item d-flex align-items-center justify-content-between gap-1 py-1 px-2 rounded"
     data-topic-id="{{ topic.pk }}"
     data-domain-id="{{ topic.domain_id }}"
+    data-complete="{% if has_ebook and has_video %}1{% else %}0{% endif %}"
     role="button"
+    tabindex="0"
     draggable="true"
-    onclick="loadTopicEditor({{ topic.pk }})">
+    onclick="loadTopicEditor({{ topic.pk }})"
+    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();loadTopicEditor({{ topic.pk }});}">
 
   <span class="lm-drag-handle text-muted me-1" title="{% trans 'Drag to reorder' %}" onclick="event.stopPropagation()">
     <i class="fas fa-grip-vertical"></i>
@@ -19,19 +23,19 @@
 
   {# Media indicators #}
   <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-1">
-    {% if topic.has_ebook or topic.pdf_file or topic.supabase_pdf_path or topic.ebook_files.exists or topic.resources.exists %}
+    {% if has_ebook %}
       <i class="fas fa-file-pdf text-danger" style="font-size: 0.75rem;" title="{% trans 'E-Book / Study Material Available' %}"></i>
     {% else %}
       <i class="fas fa-file-pdf text-muted opacity-25" style="font-size: 0.75rem;" title="{% trans 'No E-Book' %}"></i>
     {% endif %}
 
-    {% if topic.video_file or topic.video_external_url %}
+    {% if has_video %}
       <i class="fas fa-video text-primary" style="font-size: 0.75rem;" title="{% trans 'Video Available' %}"></i>
     {% else %}
       <i class="fas fa-video text-muted opacity-25" style="font-size: 0.75rem;" title="{% trans 'No Video' %}"></i>
     {% endif %}
 
-    {% if topic.question_file or topic.supabase_question_path %}
+    {% if has_question %}
       <i class="fas fa-file-alt text-success" style="font-size: 0.75rem;" title="{% trans 'Question File Available' %}"></i>
     {% else %}
       <i class="fas fa-file-alt text-muted opacity-25" style="font-size: 0.75rem;" title="{% trans 'No Question File' %}"></i>
@@ -39,3 +43,4 @@
   </div>
 
 </li>
+{% endwith %}

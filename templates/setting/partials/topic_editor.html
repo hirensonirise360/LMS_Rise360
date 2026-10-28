@@ -85,7 +85,7 @@
           {% trans "Order #" %}
         </label>
         <input type="number" name="order" class="form-control form-control-sm"
-               min="0" value="{% if topic %}{{ topic.order }}{% else %}0{% endif %}">
+               min="0" value="{% if topic %}{{ topic.order }}{% else %}{{ next_order|default:1 }}{% endif %}">
       </div>
     </div>
   </div>
@@ -120,7 +120,7 @@
 
         <label class="lm-file-btn py-1 px-2 mb-1" for="pdf_file_input">
           <i class="fas fa-file-upload text-primary" style="font-size:0.75rem;"></i>
-          <span id="pdf_file_label" class="text-truncate" style="font-size:0.72rem;">{% trans "Upload PDF, PPT, Excel, Word…" %}</span>
+          <span id="pdf_file_label" class="text-truncate" style="font-size:0.72rem;">{% trans "Click or drop PDF, PPT, Excel, Word…" %}</span>
           <input type="file" id="pdf_file_input" name="pdf_files" multiple accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.csv,.txt,.rtf,.odt,.ods,.odp,*"
                  onchange="handleAutoUpload(this, event)">
         </label>
@@ -147,9 +147,10 @@
                       <i class="fas fa-trash-alt" style="font-size:0.6rem;"></i>
                     </button>
                   {% else %}
-                    <label class="text-danger d-flex align-items-center gap-1 mb-0 ms-1" style="cursor:pointer; font-size:0.65rem;" title="Remove primary PDF">
-                      <input type="checkbox" name="clear_pdf" value="true" class="form-check-input mt-0" style="width:11px;height:11px;" onchange="triggerAutoSave(true, true)"> {% trans "Del" %}
-                    </label>
+                    <button type="button" class="btn btn-xs btn-outline-danger p-0 px-1" title="{% trans 'Remove primary e-book' %}"
+                            onclick="removeTopicAttachment('clear_pdf', '{% trans "Remove the primary e-book? All other study material files on this topic will be removed too." %}')">
+                      <i class="fas fa-trash-alt" style="font-size:0.6rem;"></i>
+                    </button>
                   {% endif %}
                 </div>
               {% endfor %}
@@ -207,7 +208,7 @@
 
         <label class="lm-file-btn py-1 px-2 mb-1" for="video_file_input">
           <i class="fas fa-film text-warning" style="font-size:0.75rem;"></i>
-          <span class="text-truncate" style="font-size:0.72rem;">{% trans "Choose Video File (MP4, WEBM)…" %}</span>
+          <span class="text-truncate" style="font-size:0.72rem;">{% trans "Click or drop video (MP4, WEBM)…" %}</span>
           <input type="file" id="video_file_input" name="video_file" accept="video/*"
                  onchange="handleAutoUpload(this, event)">
         </label>
@@ -216,9 +217,10 @@
           <div class="mt-1 d-flex align-items-center gap-1 p-1 rounded bg-white border" style="font-size:0.68rem;">
             <i class="fas fa-film text-warning" style="font-size:0.7rem;"></i>
             <span class="text-truncate flex-grow-1" title="{{ topic.video_file.name }}">{{ topic.video_file.name }}</span>
-            <label class="text-danger d-flex align-items-center gap-1 mb-0 ms-auto" style="cursor:pointer; font-size:0.65rem;">
-              <input type="checkbox" name="clear_video" value="true" class="form-check-input mt-0" style="width:11px;height:11px;" onchange="triggerAutoSave(true, true)"> {% trans "Del" %}
-            </label>
+            <button type="button" class="btn btn-xs btn-outline-danger p-0 px-1" title="{% trans 'Remove video file' %}"
+                    onclick="removeTopicAttachment('clear_video', '{% trans "Remove the uploaded video file from this topic?" %}')">
+              <i class="fas fa-trash-alt" style="font-size:0.6rem;"></i>
+            </button>
           </div>
         {% endif %}
       </div>
@@ -251,7 +253,7 @@
 
         <label class="lm-file-btn py-1 px-2 mb-1" for="question_file_input">
           <i class="fas fa-file-upload text-success" style="font-size:0.75rem;"></i>
-          <span class="text-truncate" style="font-size:0.72rem;">{% trans "Choose Question File (Excel, Doc)…" %}</span>
+          <span class="text-truncate" style="font-size:0.72rem;">{% trans "Click or drop question file (Excel, Doc)…" %}</span>
           <input type="file" id="question_file_input" name="question_file"
                  accept=".xlsx,.xls,.csv,.doc,.docx,.txt,.pdf,.rtf,.json,.zip,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/plain,application/pdf"
                  onchange="handleAutoUpload(this, event)">
@@ -266,9 +268,10 @@
             <a href="{{ topic.question_file.url }}" download class="btn btn-xs btn-outline-secondary p-0 px-1" title="{% trans 'Download' %}">
               <i class="fas fa-download" style="font-size:0.6rem;"></i>
             </a>
-            <label class="text-danger d-flex align-items-center gap-1 mb-0 ms-1" style="cursor:pointer; font-size:0.65rem;">
-              <input type="checkbox" name="clear_question_file" value="true" class="form-check-input mt-0" style="width:11px;height:11px;" onchange="triggerAutoSave(true, true)"> {% trans "Del" %}
-            </label>
+            <button type="button" class="btn btn-xs btn-outline-danger p-0 px-1" title="{% trans 'Remove question file' %}"
+                    onclick="removeTopicAttachment('clear_question_file', '{% trans "Remove the question file from this topic?" %}')">
+              <i class="fas fa-trash-alt" style="font-size:0.6rem;"></i>
+            </button>
           </div>
         {% endif %}
       </div>
