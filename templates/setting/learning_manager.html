@@ -657,6 +657,15 @@ function getCsrfToken() {
   return match ? match[1] : '';
 }
 
+async function parseApiResponse(r) {
+  const data = await r.json().catch(() => null);
+  if (!r.ok) {
+    const errorMsg = (data && data.error) ? data.error : (r.status === 403 ? 'Access Denied: Staff or Administrator permissions required.' : (r.status === 413 ? 'File too large to upload.' : `Server error (${r.status})`));
+    throw new Error(errorMsg);
+  }
+  return data || {};
+}
+
 /* ── Toast ───────────────────────────────────────────────────────────────── */
 function showToast(msg, type='ok') {
   const t = document.getElementById('lm-toast');
@@ -731,7 +740,7 @@ function saveCurrentTopicSilent() {
     body: data,
     headers: { 'X-CSRFToken': getCsrfToken() }
   })
-    .then(r => r.json())
+    .then(parseApiResponse)
     .then(res => {
       if (res.ok) {
         setAutoSaveStatus('saved');
@@ -748,7 +757,7 @@ function saveCurrentTopicSilent() {
         setAutoSaveStatus('error', res.error || 'Save failed');
       }
     })
-    .catch(() => setAutoSaveStatus('error', 'Network error'));
+    .catch(err => setAutoSaveStatus('error', err.message || 'Save failed'));
 }
 
 /* ── Manual Save Button Click ─────────────────────────────────────────── */
@@ -782,7 +791,7 @@ function saveCurrentTopicManual(btn) {
     body: data,
     headers: { 'X-CSRFToken': getCsrfToken() }
   })
-    .then(r => r.json())
+    .then(parseApiResponse)
     .then(res => {
       if (btn) {
         btn.disabled = false;
@@ -803,13 +812,14 @@ function saveCurrentTopicManual(btn) {
         showToast(res.error || 'Save failed.', 'err');
       }
     })
-    .catch(() => {
+    .catch(err => {
       if (btn) {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-save" style="font-size:0.7rem;"></i><span style="font-size:0.72rem;font-weight:600;">Save</span>';
       }
-      setAutoSaveStatus('error', 'Network error');
-      showToast('Network error.', 'err');
+      const msg = err.message || 'Save failed';
+      setAutoSaveStatus('error', msg);
+      showToast(msg, 'err');
     });
 }
 
@@ -888,7 +898,7 @@ function triggerAutoSave(immediate = false, reloadEditor = false) {
     body: data,
     headers: { 'X-CSRFToken': getCsrfToken() }
   })
-    .then(r => r.json())
+    .then(parseApiResponse)
     .then(res => {
       if (res.ok) {
         setAutoSaveStatus('saved');
@@ -903,11 +913,16 @@ function triggerAutoSave(immediate = false, reloadEditor = false) {
           loadTopicEditor(res.id);
         }
       } else {
-        setAutoSaveStatus('error', res.error || 'Save failed');
-        showToast(res.error || 'Save failed.', 'err');
+        const errMsg = res.error || 'Save failed';
+        setAutoSaveStatus('error', errMsg);
+        showToast(errMsg, 'err');
       }
     })
-    .catch(() => setAutoSaveStatus('error', 'Network error'));
+    .catch(err => {
+      const msg = err.message || 'Save failed';
+      setAutoSaveStatus('error', msg);
+      showToast(msg, 'err');
+    });
 }
 
 function handleAutoUpload(inputEl, event) {
@@ -971,7 +986,7 @@ function submitTopicForm(event) {
     : `/en/accounts/learning-manager/topic/${topicId}/save/`;
 
   fetch(url, { method: 'POST', body: data, headers: { 'X-CSRFToken': getCsrfToken() } })
-    .then(r => r.json())
+    .then(parseApiResponse)
     .then(res => {
       if (btn) { btn.disabled = false; btn.innerHTML = isNew ? '<i class="fas fa-plus-circle me-1"></i>Create Topic' : '<i class="fas fa-save me-1"></i>Save Topic'; }
       if (res.ok) {
@@ -990,9 +1005,9 @@ function submitTopicForm(event) {
         showToast(res.error || 'Save failed.', 'err');
       }
     })
-    .catch(() => {
+    .catch(err => {
       if (btn) { btn.disabled = false; btn.innerHTML = isNew ? '<i class="fas fa-plus-circle me-1"></i>Create Topic' : '<i class="fas fa-save me-1"></i>Save Topic'; }
-      showToast('Network error.', 'err');
+      showToast(err.message || 'Save failed.', 'err');
     });
 }
 

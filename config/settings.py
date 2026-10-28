@@ -42,11 +42,16 @@ ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = [
     "https://*.up.railway.app",
     "https://*.railway.app",
+    "https://*.onrender.com",
     "https://ueainstitute.onrender.com",
     "https://*.vercel.app",
     "https://rise360-five.vercel.app",
     "https://www.rise360institute.com",
     "https://rise360institute.com",
+    "https://*.rise360institute.com",
+    "https://www.rise360.global",
+    "https://rise360.global",
+    "https://*.rise360.global",
 ]
 
 # Tell Django it's secure behind Railway/Render proxy

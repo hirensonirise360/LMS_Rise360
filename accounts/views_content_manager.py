@@ -21,8 +21,20 @@ from ea_exam.models import EAPart, EADomain, EATopic, EATopicEbookFile
 # ─── Permission helper ────────────────────────────────────────────────────────
 
 def _require_staff(request):
-    """Return HttpResponseForbidden if user is not staff/superuser, else None."""
-    if not (request.user.is_active and (request.user.is_staff or request.user.is_superuser)):
+    """Return HttpResponseForbidden / JsonResponse if user is not authorized, else None."""
+    is_authorized = request.user.is_active and (
+        request.user.is_staff 
+        or request.user.is_superuser 
+        or getattr(request.user, 'is_lecturer', False)
+        or getattr(request.user, 'is_dep_head', False)
+    )
+    if not is_authorized:
+        if (
+            request.headers.get("x-requested-with") == "XMLHttpRequest"
+            or request.content_type == "application/json"
+            or request.method == "POST"
+        ):
+            return JsonResponse({"ok": False, "error": "Access Denied: Staff or Administrator permissions required."}, status=403)
         return HttpResponseForbidden("Staff access required.")
     return None
 
@@ -377,7 +389,12 @@ def topic_save(request, pk):
     uploaded_pdf_files = request.FILES.getlist("pdf_files") or request.FILES.getlist("pdf_file")
     for f in uploaded_pdf_files:
         if not EATopicEbookFile.objects.filter(topic=topic, title=f.name).exists():
-            EATopicEbookFile.objects.create(topic=topic, pdf_file=f, title=f.name)
+            try:
+                EATopicEbookFile.objects.create(topic=topic, pdf_file=f, title=f.name)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error(f"Error uploading material '{f.name}': {e}")
+                return JsonResponse({"ok": False, "error": f"Failed to upload '{f.name}': {e}"}, status=500)
 
     # Handle deleted ebook file IDs
     delete_ebook_ids = request.POST.getlist("delete_ebook_ids")
@@ -389,17 +406,22 @@ def topic_save(request, pk):
         topic.supabase_pdf_path = ""
         topic.ebook_files.all().delete()
 
-    if "video_file" in request.FILES:
-        topic.video_file = request.FILES["video_file"]
-    elif request.POST.get("clear_video") == "true":
-        topic.video_file = None
+    try:
+        if "video_file" in request.FILES:
+            topic.video_file = request.FILES["video_file"]
+        elif request.POST.get("clear_video") == "true":
+            topic.video_file = None
 
-    if "question_file" in request.FILES:
-        topic.question_file = request.FILES["question_file"]
-    elif request.POST.get("clear_question_file") == "true":
-        topic.question_file = None
+        if "question_file" in request.FILES:
+            topic.question_file = request.FILES["question_file"]
+        elif request.POST.get("clear_question_file") == "true":
+            topic.question_file = None
 
-    topic.save()
+        topic.save()
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Error saving topic files: {e}")
+        return JsonResponse({"ok": False, "error": f"Storage error: {e}"}, status=500)
 
     # Re-render topic row for tree update
     row_html = render(request, "setting/partials/topic_row.html", {"topic": topic}).content.decode()

@@ -50,6 +50,7 @@ class SupabaseMediaStorage(Storage):
 
     def _save(self, name, content):
         """Upload a file to Supabase Storage and return the stored name."""
+        name = name.replace("\\", "/").lstrip("/")
         content.seek(0)
         file_data = content.read()
 
@@ -57,11 +58,24 @@ class SupabaseMediaStorage(Storage):
         if not mime_type:
             mime_type = "application/octet-stream"
 
-        self.storage.upload(
-            path=name,
-            file=file_data,
-            file_options={"content-type": mime_type, "upsert": "true"},
-        )
+        try:
+            self.storage.upload(
+                path=name,
+                file=file_data,
+                file_options={"content-type": mime_type, "upsert": "true"},
+            )
+        except Exception as e:
+            try:
+                self.client.storage.create_bucket(self.bucket, {"public": True})
+                self.storage.upload(
+                    path=name,
+                    file=file_data,
+                    file_options={"content-type": mime_type, "upsert": "true"},
+                )
+            except Exception as e2:
+                import logging
+                logging.getLogger(__name__).error(f"SupabaseMediaStorage upload error for {name}: {e2}")
+                raise e
         return name
 
     # ------------------------------------------------------------------
